@@ -27,8 +27,8 @@ class EchoSound:
             self.current_spl = (self.initial_spl - distance_effect - 
                               (Constants.AIR_ABSORPTION * self.current_radius))
         
-        if current_time >= self.creation_time + Constants.CALL_DURATION:
-            self.active = False
+        # if current_time >= self.creation_time + Constants.CALL_DURATION:
+        #     self.active = False
     
     def contains_point(self, point):
         """Check if point is within the sound disk"""
