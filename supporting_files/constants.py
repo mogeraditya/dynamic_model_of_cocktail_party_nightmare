@@ -1,0 +1,19 @@
+class Constants:
+    ARENA_WIDTH = 7.0        # meters (x-axis)
+    ARENA_HEIGHT = 5.0       # meters (y-axis)
+    SOUND_SPEED = 343.0      # meters per second
+    BAT_SPEED = 5.0          # meters per second
+    SIM_DURATION = 5.0       # seconds
+    TIME_STEP = 0.001        # seconds (1 millisecond)
+    CALL_DURATION = 0.005    # seconds (5 milliseconds)
+    CALL_RATE = 10           # calls per second
+    OBSTACLE_COUNT = 0
+    OBSTACLE_RADIUS = 0.1    # meters
+    EMITTED_SPL = 100        # dB SPL
+    MIN_DETECTABLE_SPL = 20  # dB SPL
+    NUM_BATS = 20             # Number of bats
+    AIR_ABSORPTION = 1     # dB/m
+    REFLECTION_LOSS = 3.0    # dB loss per reflection
+    SOUND_RADIUS = SOUND_SPEED * CALL_DURATION  # Thickness of sound disk
+    MAX_REFLECTIONS = 100      # Maximum number of reflections allowed
+    PROPENSITY_TO_CHANGE_DIRECTION= 0.01 #Pick a number between 0 and 1
