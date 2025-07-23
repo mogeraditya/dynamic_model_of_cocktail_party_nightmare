@@ -28,8 +28,8 @@ class DirectSound:
         # if current_time >= self.creation_time + Constants.CALL_DURATION:
         #     self.active = False
         
-        # if self.check_if_sound_outside_arena():
-        #     self.active = False
+        if self.check_if_sound_outside_arena():
+            self.active = False
     
     def contains_point(self, point):
         """Check if point is within the sound disk"""
@@ -61,13 +61,13 @@ class DirectSound:
                 f"spl={self.current_spl:.1f}dB, emitter={self.emitter_id})")
     
     # TODO : fix the function that checks if sound is out of the arena in order to kill it later
-    # def check_if_sound_outside_arena(self):
-    #     points_the_define_arena= [(0.0,0.0), (0.0, Constants.ARENA_HEIGHT), (Constants.ARENA_WIDTH, 0.0), (Constants.ARENA_WIDTH, Constants.ARENA_HEIGHT)]
-    #     counter= 0
-    #     for point in points_the_define_arena:
-    #         distance = self.origin.distance_to(point)
-    #         if distance <= self.current_radius:
-    #             counter+=1
-    #     if counter==4:
-    #         return False
+    def check_if_sound_outside_arena(self):
+        points_the_define_arena= [Vector(0.0,0.0), Vector(0.0, Constants.ARENA_HEIGHT), Vector(Constants.ARENA_WIDTH, 0.0), Vector(Constants.ARENA_WIDTH, Constants.ARENA_HEIGHT)]
+        counter= 0
+        for point in points_the_define_arena:
+            distance = self.origin.distance_to(point)
+            if distance <= self.current_radius:
+                counter+=1
+        if counter==4:
+            return False
         

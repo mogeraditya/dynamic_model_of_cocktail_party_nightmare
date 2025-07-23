@@ -344,12 +344,12 @@ class Simulation:
         
         ani = animation.FuncAnimation(
             self.fig, animate, frames=len(self.history),
-            init_func=init, blit=False, interval=50
+            init_func=init, blit=False, interval=500
         )
         
         # plt.legend()
         # FFwriter = animation.FFMpegWriter(fps=30, extra_args=['-vcodec', 'libx264'])
-        ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}.gif")
+        # ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}.gif")
         plt.show()
 
 if __name__ == "__main__":
