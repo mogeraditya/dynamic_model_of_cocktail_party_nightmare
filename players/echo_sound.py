@@ -29,6 +29,8 @@ class EchoSound:
         
         # if current_time >= self.creation_time + Constants.CALL_DURATION:
         #     self.active = False
+        if self.check_if_sound_outside_arena_simpler():
+            self.active = False
     
     def contains_point(self, point):
         """Check if point is within the sound disk"""
@@ -60,3 +62,10 @@ class EchoSound:
         return (f"EchoSound(origin={self.origin}, radius={self.current_radius:.2f}, "
                 f"spl={self.current_spl:.1f}dB, reflections={self.reflection_count}, "
                 f"emitter={self.emitter_id}, parent={self.parent_id})")
+    
+    def check_if_sound_outside_arena_simpler(self):
+        if (self.current_radius)>max(Constants.ARENA_HEIGHT, Constants.ARENA_WIDTH):
+
+            return True
+        else:
+            return False

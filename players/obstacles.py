@@ -3,7 +3,12 @@ import random
 from supporting_files.constants import Constants
 
 class Obstacle:
+    _id_counter = 0
+
     def __init__(self):
+        self.id = Obstacle._id_counter
+        Obstacle._id_counter += 1
+
         self.position = Vector(
             random.uniform(Constants.OBSTACLE_RADIUS, Constants.ARENA_WIDTH - Constants.OBSTACLE_RADIUS),
             random.uniform(Constants.OBSTACLE_RADIUS, Constants.ARENA_HEIGHT - Constants.OBSTACLE_RADIUS)

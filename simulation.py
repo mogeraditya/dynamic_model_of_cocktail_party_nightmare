@@ -1,7 +1,7 @@
 import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.patches import Circle, Rectangle, Wedge
+from matplotlib.patches import Circle, Rectangle, Wedge, Patch
 from supporting_files.constants import Constants
 from players.bat import Bat
 from players.obstacles import Obstacle
@@ -23,7 +23,7 @@ class Simulation:
         self.time_elapsed = 0.0
         self.history = []
         self.setup_visualization()
-        
+        self.handles= []
         self.output_dir = "simulation_results"
         os.makedirs(self.output_dir, exist_ok=True)
     
@@ -41,7 +41,7 @@ class Simulation:
         self.obstacle_patches = []
         for obstacle in self.obstacles:
             obs_circle = Circle((obstacle.position.x, obstacle.position.y),
-                              obstacle.radius, color='red', alpha=0.5)
+                              obstacle.radius, color='red', alpha=0.5) #, label=f"Obstacle {obstacle.id}")
             self.ax.add_patch(obs_circle)
             self.obstacle_patches.append(obs_circle)
         
@@ -55,6 +55,8 @@ class Simulation:
                                   color=colors[i % len(colors)],
                                   label=f'Bat {bat.id}')
             self.bat_markers.append(marker)
+    
+        
     
     def run(self):
         num_steps = int(Constants.SIM_DURATION / Constants.TIME_STEP)
@@ -152,24 +154,33 @@ class Simulation:
             reflection_point_arr, normal_arr, obstacle_id_arr = [], [], []
             
             # Check arena boundaries
-            # sound_edge = sound.origin + Vector2D(sound.current_radius, 0)
+            # sound_edge = sound.origin - Vector(sound.current_radius, 0)
             # if sound_edge.x <= 0:
-            #     reflection_point = Vector2D(0, sound.origin.y)
-            #     normal = Vector2D(1, 0)
+            #     reflection_point = Vector(0, sound.origin.y)
+            #     normal = Vector(1, 0)
             #     obstacle_id = "left_wall"
-            # elif sound_edge.x >= Constants.ARENA_WIDTH:
-            #     reflection_point = Vector2D(Constants.ARENA_WIDTH, sound.origin.y)
-            #     normal = Vector2D(-1, 0)
+            #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
+
+            # sound_edge = sound.origin + Vector(sound.current_radius, 0)
+            # if sound_edge.x >= Constants.ARENA_WIDTH:
+            #     reflection_point = Vector(Constants.ARENA_WIDTH, sound.origin.y)
+            #     normal = Vector(-1, 0)
             #     obstacle_id = "right_wall"
+            #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
             
+            # sound_edge = sound.origin - Vector(0, sound.current_radius)
             # if sound_edge.y <= 0:
-            #     reflection_point = Vector2D(sound.origin.x, 0)
-            #     normal = Vector2D(0, 1)
+            #     reflection_point = Vector(sound.origin.x, 0)
+            #     normal = Vector(0, 1)
             #     obstacle_id = "bottom_wall"
-            # elif sound_edge.y >= Constants.ARENA_HEIGHT:
-            #     reflection_point = Vector2D(sound.origin.x, Constants.ARENA_HEIGHT)
-            #     normal = Vector2D(0, -1)
+            #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
+
+            # sound_edge = sound.origin + Vector(0, sound.current_radius)
+            # if sound_edge.y >= Constants.ARENA_HEIGHT:
+            #     reflection_point = Vector(sound.origin.x, Constants.ARENA_HEIGHT)
+            #     normal = Vector(0, -1)
             #     obstacle_id = "top_wall"
+            #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
             
             # Check obstacles
             for obstacle in self.obstacles:
@@ -217,7 +228,8 @@ class Simulation:
             'radius': sound.current_radius,
             'spl': sound.current_spl,
             'emitter_id': sound.emitter_id,
-            'type': 'direct' if isinstance(sound, DirectSound) else 'echo'
+            'type': 'direct' if isinstance(sound, DirectSound) else 'echo',
+            'status': sound.active
         }
         
         if isinstance(sound, EchoSound):
@@ -301,25 +313,31 @@ class Simulation:
             colors = plt.cm.tab10.colors
             for sound in frame['sound_objects']:
                 # print(sound)
-                # if not sound.active:
-                #     continue
+                if not sound['status']:
+                    continue
 
                 emitter_color = colors[sound['emitter_id'] % len(colors)]
                 alpha = 0.5 - (0.1 * sound.get('reflection_count', 0))
                 
                 inner = max(0, sound['radius'] - Constants.SOUND_RADIUS)
                 outer = sound['radius']
-                
-                if inner < outer:
+
+                if inner < outer :
                     if sound['type'] == 'direct':
                         linestyle = '-'
+                        hatching_of_disk= '++'
                     else:
                         linestyle = '--'
-                    
+                        alpha=0.5*alpha
+                        hatching_of_disk= '..'
+                    if inner==0:
+                        width_of_disk = sound['radius']
+                    else:
+                        width_of_disk = Constants.SOUND_RADIUS
                     wedge = Wedge(sound['origin'], outer, 0, 360, 
-                                width=Constants.SOUND_RADIUS,
+                                width=width_of_disk,
                                 fill=False, color=emitter_color,
-                                alpha=alpha, linestyle=linestyle)
+                                alpha=alpha, linestyle=linestyle, hatch=hatching_of_disk)
                     self.ax.add_patch(wedge)
                     self.sound_artists.append(wedge)
             
@@ -344,12 +362,22 @@ class Simulation:
         
         ani = animation.FuncAnimation(
             self.fig, animate, frames=len(self.history),
-            init_func=init, blit=False, interval=500
+            init_func=init, blit=False, interval=Constants.FRAME_RATE
         )
-        
+
+        self.handles, labels = self.ax.get_legend_handles_labels()
+
+        Obstacle_patch= Patch(color='red', alpha=0.5, label='Obstacle')
+        DirectSound_patch = Patch(hatch="++", label='DirectSound')
+        EchoSound_patch = Patch(hatch="..", label='EchoSound')
+
+        self.handles.append(DirectSound_patch); self.handles.append(EchoSound_patch); self.handles.append(Obstacle_patch)
+        # DirectSound_patch = Patch(hatch="++", label='DirectSound')
         # plt.legend()
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=self.handles)
+
         # FFwriter = animation.FFMpegWriter(fps=30, extra_args=['-vcodec', 'libx264'])
-        # ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}.gif")
+        # ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.gif")
         plt.show()
 
 if __name__ == "__main__":

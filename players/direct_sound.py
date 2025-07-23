@@ -28,7 +28,7 @@ class DirectSound:
         # if current_time >= self.creation_time + Constants.CALL_DURATION:
         #     self.active = False
         
-        if self.check_if_sound_outside_arena():
+        if self.check_if_sound_outside_arena_simpler():
             self.active = False
     
     def contains_point(self, point):
@@ -71,3 +71,9 @@ class DirectSound:
         if counter==4:
             return False
         
+    def check_if_sound_outside_arena_simpler(self):
+        if (self.current_radius)>max(Constants.ARENA_HEIGHT, Constants.ARENA_WIDTH):
+
+            return True
+        else:
+            return False
