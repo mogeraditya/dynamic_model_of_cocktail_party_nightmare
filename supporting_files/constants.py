@@ -3,7 +3,7 @@ class Constants:
     ARENA_HEIGHT = 5.0       # meters (y-axis)
     SOUND_SPEED = 343.0      # meters per second
     BAT_SPEED = 5.0          # meters per second
-    SIM_DURATION = 1.0       # seconds
+    SIM_DURATION = .2       # seconds
     TIME_STEP = 0.001        # seconds (1 millisecond)
     CALL_DURATION = 0.005    # seconds (5 milliseconds)
     CALL_RATE = 10           # calls per second
