@@ -309,7 +309,7 @@ class Simulation:
                 artist.remove()
             self.sound_artists.clear()
             self.detection_artists.clear()
-            
+            plt.title(f'time step: {i}')
             colors = plt.cm.tab10.colors
             for sound in frame['sound_objects']:
                 # print(sound)
