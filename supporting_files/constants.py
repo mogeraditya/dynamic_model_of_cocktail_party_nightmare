@@ -7,11 +7,11 @@ class Constants:
     TIME_STEP = 0.001        # seconds (1 millisecond)
     CALL_DURATION = 0.005    # seconds (5 milliseconds)
     CALL_RATE = 10           # calls per second
-    OBSTACLE_COUNT = 0
+    OBSTACLE_COUNT = 3
     OBSTACLE_RADIUS = 0.1    # meters
     EMITTED_SPL = 100        # dB SPL
     MIN_DETECTABLE_SPL = 20  # dB SPL
-    NUM_BATS = 30             # Number of bats
+    NUM_BATS = 3             # Number of bats
     AIR_ABSORPTION = 1     # dB/m
     REFLECTION_LOSS = 0.5    # dB loss per reflection
     SOUND_RADIUS = SOUND_SPEED * CALL_DURATION  # Thickness of sound disk
