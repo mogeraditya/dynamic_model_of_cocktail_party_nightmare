@@ -222,7 +222,8 @@ class Simulation:
         self.sound_objects.extend(new_echoes)
     
     def _serialize_sound(self, sound):
-        # print(sound)
+        if not isinstance(sound, EchoSound):
+            print(sound)
         data = {
             'origin': (sound.origin.x, sound.origin.y),
             'radius': sound.current_radius,
@@ -377,7 +378,7 @@ class Simulation:
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=self.handles)
 
         # FFwriter = animation.FFMpegWriter(fps=30, extra_args=['-vcodec', 'libx264'])
-        ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.gif")
+        # ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.gif")
         plt.show()
 
 if __name__ == "__main__":

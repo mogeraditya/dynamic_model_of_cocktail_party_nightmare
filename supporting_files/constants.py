@@ -9,13 +9,13 @@ class Constants:
     CALL_RATE = 10           # calls per second
     OBSTACLE_COUNT = 3
     OBSTACLE_RADIUS = 0.1    # meters
-    EMITTED_SPL = 100        # dB SPL
+    EMITTED_SPL = 140        # dB SPL
     MIN_DETECTABLE_SPL = 20  # dB SPL
-    NUM_BATS = 3             # Number of bats
+    NUM_BATS = 1             # Number of bats
     AIR_ABSORPTION = 1     # dB/m
     REFLECTION_LOSS = 0.5    # dB loss per reflection
     SOUND_RADIUS = SOUND_SPEED * CALL_DURATION  # Thickness of sound disk
     MAX_REFLECTIONS = 100      # Maximum number of reflections allowed
     PROPENSITY_TO_CHANGE_DIRECTION= 0.001 #Pick a number between 0 and 1
 
-    FRAME_RATE=5 #frame rate for animation
+    FRAME_RATE=500 #frame rate for animation

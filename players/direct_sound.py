@@ -10,19 +10,21 @@ class DirectSound:
         self.emitter_id = emitter_id
         self.initial_spl = Constants.EMITTED_SPL
         self.current_spl = self.initial_spl
-        self.current_radius = 0
+        self.current_radius = 0.01
         self.max_radius = Constants.SOUND_SPEED * Constants.CALL_DURATION # Keep track of vada size
         self.active = True
         self.has_reflected = False  # Direct sounds can only reflect once/ i.e. per collision only one echo ngl
         self.reflected_obstacles = set() # Track obstacles that iit reflected off of in order to cap this in the future
         
     def update(self, current_time):
-        elapsed = current_time - self.creation_time
+        elapsed = current_time - self.creation_time 
         self.current_radius = Constants.SOUND_SPEED * elapsed
         
         # Calculate SPL with distance and air absorption
+
         if self.current_radius > 0:
-            distance_effect = 20 * math.log10(self.current_radius)
+            distance_effect = 20 * math.log10(self.current_radius/0.1)
+            # print(distance_effect); print((Constants.AIR_ABSORPTION * self.current_radius)); print(self.initial_spl)
             self.current_spl = self.initial_spl - distance_effect - (Constants.AIR_ABSORPTION * self.current_radius)
         
         # if current_time >= self.creation_time + Constants.CALL_DURATION:
