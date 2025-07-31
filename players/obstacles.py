@@ -1,6 +1,6 @@
 from supporting_files.vectors import Vector
 import random
-from supporting_files.constants import Constants
+import supporting_files.constants as Constants
 
 class Obstacle:
     _id_counter = 0

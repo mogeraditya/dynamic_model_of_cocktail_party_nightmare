@@ -1,6 +1,6 @@
 from supporting_files.vectors import Vector2D
 import math
-from supporting_files.constants import Constants
+import supporting_files.constants as Constants
 
 class Physics:
 

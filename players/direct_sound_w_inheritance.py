@@ -1,17 +1,16 @@
 from supporting_files.vectors import Vector
 import supporting_files.constants as Constants
 import math
-from players.echo_sound import EchoSound
+from players.echo_sound_w_inheritance import EchoSound
 
-class DirectSound:
+class DirectSound(EchoSound):
     def __init__(self, origin, creation_time, emitter_id):
-        self.origin = origin
-        self.creation_time = creation_time
-        self.emitter_id = emitter_id
+        super().__init__(origin, creation_time, emitter_id)
+
         self.initial_spl = Constants.EMITTED_SPL
         self.current_spl = self.initial_spl
         self.current_radius = 0.01
-        self.max_radius = Constants.SOUND_SPEED * Constants.CALL_DURATION # Keep track of vada size
+        self.max_radius = Constants.SOUND_DISK_WIDTH # Keep track of vada size
         self.active = True
         self.has_reflected = False  # Direct sounds can only reflect once/ i.e. per collision only one echo ngl
         self.reflected_obstacles = set() # Track obstacles that iit reflected off of in order to cap this in the future
@@ -78,3 +77,15 @@ class DirectSound:
             return True
         else:
             return False
+
+import random        
+position= Vector(
+            random.uniform(1, Constants.ARENA_WIDTH - 1),
+            random.uniform(1, Constants.ARENA_HEIGHT - 1)
+        )
+sound = DirectSound(
+                origin=position,
+                creation_time=0,
+                emitter_id=0
+            )
+print(sound)

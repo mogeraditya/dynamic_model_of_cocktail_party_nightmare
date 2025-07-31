@@ -1,21 +1,21 @@
-class Constants:
-    ARENA_WIDTH = 7.0        # meters (x-axis)
-    ARENA_HEIGHT = 5.0       # meters (y-axis)
-    SOUND_SPEED = 343.0      # meters per second
-    BAT_SPEED = 15.0          # meters per second
-    SIM_DURATION = 10.0       # seconds
-    TIME_STEP = 0.001        # seconds (1 millisecond)
-    CALL_DURATION = 0.005    # seconds (5 milliseconds)
-    CALL_RATE = 10           # calls per second
-    OBSTACLE_COUNT = 3
-    OBSTACLE_RADIUS = 0.1    # meters
-    EMITTED_SPL = 140        # dB SPL
-    MIN_DETECTABLE_SPL = 20  # dB SPL
-    NUM_BATS = 1             # Number of bats
-    AIR_ABSORPTION = 1     # dB/m
-    REFLECTION_LOSS = 0.5    # dB loss per reflection
-    SOUND_RADIUS = SOUND_SPEED * CALL_DURATION  # Thickness of sound disk
-    MAX_REFLECTIONS = 100      # Maximum number of reflections allowed
-    PROPENSITY_TO_CHANGE_DIRECTION= 0.001 #Pick a number between 0 and 1
 
-    FRAME_RATE=500 #frame rate for animation
+ARENA_WIDTH = 7.0        # meters (x-axis)
+ARENA_HEIGHT = 5.0       # meters (y-axis)
+SOUND_SPEED = 343.0      # meters per second
+BAT_SPEED = 15.0          # meters per second
+SIM_DURATION = 10.0       # seconds
+TIME_STEP = 0.001        # seconds (1 millisecond)
+CALL_DURATION = 0.005    # seconds (5 milliseconds)
+CALL_RATE = 10           # calls per second
+OBSTACLE_COUNT = 2
+OBSTACLE_RADIUS = 0.1    # meters
+EMITTED_SPL = 140        # dB SPL
+MIN_DETECTABLE_SPL = 20  # dB SPL
+NUM_BATS = 1             # Number of bats
+AIR_ABSORPTION = 1     # dB/m
+REFLECTION_LOSS = 0.5    # dB loss per reflection
+SOUND_DISK_WIDTH = SOUND_SPEED * CALL_DURATION  # Thickness of sound disk
+MAX_REFLECTIONS = 100      # Maximum number of reflections allowed
+PROPENSITY_TO_CHANGE_DIRECTION= 0.001 #Pick a number between 0 and 1
+
+FRAME_RATE=50 #frame rate for animation

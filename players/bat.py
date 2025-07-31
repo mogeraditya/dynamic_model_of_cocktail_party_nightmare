@@ -1,7 +1,7 @@
 from supporting_files.vectors import Vector
 import random
 import math
-from supporting_files.constants import Constants
+import supporting_files.constants as Constants
 from players.direct_sound import DirectSound
 import os
 import numpy as np

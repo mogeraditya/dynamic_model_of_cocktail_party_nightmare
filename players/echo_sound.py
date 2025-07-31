@@ -1,15 +1,17 @@
 from supporting_files.vectors import Vector
-from supporting_files.constants import Constants
+import supporting_files.constants as Constants
 import math
 
+# TODO: EchoSound is inherited from DirectSound
+
 class EchoSound:
-    def __init__(self, origin, creation_time, emitter_id, initial_spl, parent_id, reflection_count):
+    def __init__(self, origin, creation_time, emitter_id, initial_spl, parent_creation_time, reflection_count):
         self.origin = origin
         self.creation_time = creation_time
         self.emitter_id = emitter_id
         self.initial_spl = initial_spl
         self.current_spl = initial_spl
-        self.parent_id = parent_id  # ID of sound that created this echo
+        self.parent_creation_time = parent_creation_time  # ID of sound that created this echo
         self.reflection_count = reflection_count
         self.current_radius = 0
         self.max_radius = Constants.SOUND_SPEED * Constants.CALL_DURATION
@@ -35,7 +37,7 @@ class EchoSound:
     def contains_point(self, point):
         """Check if point is within the sound disk"""
         distance = self.origin.distance_to(point)
-        return distance <= self.current_radius and distance >= max(0, self.current_radius - Constants.SOUND_RADIUS)
+        return distance <= self.current_radius and distance >= max(0, self.current_radius - Constants.SOUND_DISK_WIDTH)
     
     def create_echo(self, point, current_time, normal):
         if (self.has_reflected or 
@@ -52,7 +54,7 @@ class EchoSound:
             creation_time=current_time,
             emitter_id=self.emitter_id,
             initial_spl=reflected_spl,
-            parent_id=id(self),
+            parent_creation_time=id(self),
             reflection_count=self.reflection_count + 1
         )
         echo.reflected_obstacles.update(self.reflected_obstacles)
@@ -61,7 +63,7 @@ class EchoSound:
     def __repr__(self):
         return (f"EchoSound(origin={self.origin}, radius={self.current_radius:.2f}, "
                 f"spl={self.current_spl:.1f}dB, reflections={self.reflection_count}, "
-                f"emitter={self.emitter_id}, parent={self.parent_id})")
+                f"emitter={self.emitter_id}, parent={self.parent_creation_time})")
     
     def check_if_sound_outside_arena_simpler(self):
         if (self.current_radius)>max(Constants.ARENA_HEIGHT, Constants.ARENA_WIDTH):

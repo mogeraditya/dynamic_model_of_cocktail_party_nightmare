@@ -1,9 +1,8 @@
-# place holder file that runs simulation for multiple different parameters
 import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.patches import Circle, Rectangle, Wedge, Patch
-import supporting_files.constants as Constants
+from supporting_files.constants import Constants
 from players.bat import Bat
 from players.obstacles import Obstacle
 from players.direct_sound import DirectSound
@@ -16,7 +15,7 @@ from supporting_files.vectors import Vector
 
 plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
 
-class Simulation:
+class Arena:
     '''one instance of the simulation;
     this objects goal is to run the simulation for one 
     instance of the set of parameters chosen
@@ -245,7 +244,7 @@ class Simulation:
         
         if isinstance(sound, EchoSound):
             data.update({
-                'parent_creation_time': sound.parent_creation_time,
+                'parent_id': sound.parent_id,
                 'reflection_count': sound.reflection_count
             })
         
@@ -389,8 +388,8 @@ class Simulation:
         # plt.legend()
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=self.handles)
 
-        FFwriter = animation.FFMpegWriter(fps= 100)
-        ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.mp4", writer=FFwriter)
+        # FFwriter = animation.FFMpegWriter(fps=30, extra_args=['-vcodec', 'libx264'])
+        # ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.gif")
         plt.show()
 
 if __name__ == "__main__":
