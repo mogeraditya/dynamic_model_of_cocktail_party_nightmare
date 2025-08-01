@@ -6,7 +6,7 @@ from matplotlib.patches import Circle, Rectangle, Wedge, Patch
 import supporting_files.constants as Constants
 from players.bat import Bat
 from players.obstacles import Obstacle
-from players.direct_sound import DirectSound
+from players.direct_sound_w_inheritance import DirectSound
 from players.echo_sound import EchoSound
 import pickle
 import os
@@ -153,7 +153,7 @@ class Simulation:
         
         # self.sound_objects.extend(new_echoes)
         for sound in self.sound_objects:
-            if not sound.active or isinstance(sound, EchoSound):#or sound.has_reflected :
+            if not sound.active or not isinstance(sound, DirectSound):#or sound.has_reflected :
                 continue
                 
             sound.update(current_time)
@@ -232,8 +232,8 @@ class Simulation:
         self.sound_objects.extend(new_echoes)
     
     def _serialize_sound(self, sound):
-        if not isinstance(sound, EchoSound):
-            print(sound)
+        # if not isinstance(sound, EchoSound):
+        #     print(sound); print(isinstance(sound, DirectSound))
         data = {
             'origin': (sound.origin.x, sound.origin.y),
             'radius': sound.current_radius,
@@ -242,8 +242,8 @@ class Simulation:
             'type': 'direct' if isinstance(sound, DirectSound) else 'echo',
             'status': sound.active
         }
-        
-        if isinstance(sound, EchoSound):
+        # print(data["type"])
+        if not isinstance(sound, DirectSound):
             data.update({
                 'parent_creation_time': sound.parent_creation_time,
                 'reflection_count': sound.reflection_count
@@ -354,22 +354,22 @@ class Simulation:
                     self.ax.add_patch(wedge)
                     self.sound_artists.append(wedge)
             
-            # for bat_idx, detections in enumerate(frame['bat_detections']):
-            #     for detection in detections:
-            #         if detection['type'] == 'direct':
-            #             color = 'green'
-            #         else:
-            #             color = colors[detection['emitter_id'] % len(colors)]
+            for bat_idx, detections in enumerate(frame['bat_detections']):
+                for detection in detections:
+                    if detection['type'] == 'direct':
+                        color = 'green'
+                    else:
+                        color = colors[detection['emitter_id'] % len(colors)]
                     
-            #         dx, dy = detection['position']
-            #         marker = Circle((dx, dy), 0.05, color=color, alpha=0.7)
-            #         self.ax.add_patch(marker)
-            #         self.detection_artists.append(marker)
+                    dx, dy = detection['position']
+                    marker = Circle((dx, dy), 0.05, color=color, alpha=0.7)
+                    self.ax.add_patch(marker)
+                    self.detection_artists.append(marker)
                     
-            #         bat_x, bat_y = frame['bat_positions'][bat_idx]
-            #         line, = self.ax.plot([bat_x, dx], [bat_y, dy],
-            #                            color=color, alpha=0.2)
-            #         self.detection_artists.append(line)
+                    bat_x, bat_y = frame['bat_positions'][bat_idx]
+                    line, = self.ax.plot([bat_x, dx], [bat_y, dy],
+                                       color=color, alpha=0.2)
+                    self.detection_artists.append(line)
             
             return self.bat_markers + self.sound_artists + self.detection_artists
         
@@ -389,7 +389,7 @@ class Simulation:
         # plt.legend()
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=self.handles)
 
-        FFwriter = animation.FFMpegWriter(fps= 100)
+        FFwriter = animation.FFMpegWriter(fps= Constants.FRAME_RATE)
         ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.mp4", writer=FFwriter)
         plt.show()
 

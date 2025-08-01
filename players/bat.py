@@ -2,7 +2,7 @@ from supporting_files.vectors import Vector
 import random
 import math
 import supporting_files.constants as Constants
-from players.direct_sound import DirectSound
+from players.direct_sound_w_inheritance import DirectSound
 import os
 import numpy as np
 
