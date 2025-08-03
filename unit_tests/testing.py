@@ -1,4 +1,11 @@
+# import sys
+# sys.path.append('..//')
+# # import simulation 
+# import os
+# os.chdir("..//")
+# print(os.getcwd())
 from supporting_files.vectors import Vector
+
 import supporting_files.constants as Constants
 import math
 from players.direct_sound_w_inheritance import DirectSound
