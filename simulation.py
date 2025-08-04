@@ -13,7 +13,8 @@ import os
 from datetime import datetime
 import numpy as np
 from supporting_files.vectors import Vector
-
+from supporting_files.misc_files import load_parameters
+import csv
 plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
 
 class Simulation:
@@ -22,8 +23,9 @@ class Simulation:
     instance of the set of parameters chosen
 
     '''
-    def __init__(self):
-        self.bats = [Bat() for _ in range(Constants.NUM_BATS)]
+    def __init__(self, parameter_file_dir):
+        parameters_dict= load_parameters(parameter_file_dir)
+        self.bats = [Bat(parameters_dict) for _ in range(Constants.NUM_BATS)]
         self.obstacles = [Obstacle() for _ in range(Constants.OBSTACLE_COUNT)]
         self.sound_objects = []  # Contains both DirectSound and EchoSound
         self.time_elapsed = 0.0
@@ -37,12 +39,12 @@ class Simulation:
 
     def setup_visualization(self):
         self.fig, self.ax = plt.subplots(figsize=(10, 7))
-        self.ax.set_xlim(0, Constants.ARENA_WIDTH)
-        self.ax.set_ylim(0, Constants.ARENA_HEIGHT)
+        self.ax.set_xlim(0, self.parameters_dict["ARENA_WIDTH"])
+        self.ax.set_ylim(0, self.parameters_dict["ARENA_HEIGHT"])
         self.ax.set_aspect('equal')
         self.ax.set_title('Bat Echolocation with Direct Calls and Echoes')
         
-        boundary = Rectangle((0, 0), Constants.ARENA_WIDTH, Constants.ARENA_HEIGHT,
+        boundary = Rectangle((0, 0), self.parameters_dict["ARENA_WIDTH"], self.parameters_dict["ARENA_HEIGHT"],
                            fill=False, linestyle='--', color='gray')
         self.ax.add_patch(boundary)
         
@@ -110,16 +112,16 @@ class Simulation:
         #         reflection_point = Vector2D(0, sound.origin.y)
         #         normal = Vector2D(1, 0)
         #         obstacle_id = "left_wall"
-        #     elif sound_edge.x >= Constants.ARENA_WIDTH:
-        #         reflection_point = Vector2D(Constants.ARENA_WIDTH, sound.origin.y)
+        #     elif sound_edge.x >= self.parameters_dict["ARENA_WIDTH"]:
+        #         reflection_point = Vector2D(self.parameters_dict["ARENA_WIDTH"], sound.origin.y)
         #         normal = Vector2D(-1, 0)
         #         obstacle_id = "right_wall"
         #     elif sound_edge.y <= 0:
         #         reflection_point = Vector2D(sound.origin.x, 0)
         #         normal = Vector2D(0, 1)
         #         obstacle_id = "bottom_wall"
-        #     elif sound_edge.y >= Constants.ARENA_HEIGHT:
-        #         reflection_point = Vector2D(sound.origin.x, Constants.ARENA_HEIGHT)
+        #     elif sound_edge.y >= self.parameters_dict["ARENA_HEIGHT"]:
+        #         reflection_point = Vector2D(sound.origin.x, self.parameters_dict["ARENA_HEIGHT"])
         #         normal = Vector2D(0, -1)
         #         obstacle_id = "top_wall"
             
@@ -172,8 +174,8 @@ class Simulation:
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
 
             # sound_edge = sound.origin + Vector(sound.current_radius, 0)
-            # if sound_edge.x >= Constants.ARENA_WIDTH:
-            #     reflection_point = Vector(Constants.ARENA_WIDTH, sound.origin.y)
+            # if sound_edge.x >= self.parameters_dict["ARENA_WIDTH"]:
+            #     reflection_point = Vector(self.parameters_dict["ARENA_WIDTH"], sound.origin.y)
             #     normal = Vector(-1, 0)
             #     obstacle_id = "right_wall"
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
@@ -186,8 +188,8 @@ class Simulation:
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
 
             # sound_edge = sound.origin + Vector(0, sound.current_radius)
-            # if sound_edge.y >= Constants.ARENA_HEIGHT:
-            #     reflection_point = Vector(sound.origin.x, Constants.ARENA_HEIGHT)
+            # if sound_edge.y >= self.parameters_dict["ARENA_HEIGHT"]:
+            #     reflection_point = Vector(sound.origin.x, self.parameters_dict["ARENA_HEIGHT"])
             #     normal = Vector(0, -1)
             #     obstacle_id = "top_wall"
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
@@ -256,8 +258,8 @@ class Simulation:
         
         # Create a proper dictionary of constants
         constants_dict = {
-            'ARENA_WIDTH': Constants.ARENA_WIDTH,
-            'ARENA_HEIGHT': Constants.ARENA_HEIGHT,
+            'ARENA_WIDTH': self.parameters_dict["ARENA_WIDTH"],
+            'ARENA_HEIGHT': self.parameters_dict["ARENA_HEIGHT"],
             'SOUND_SPEED': Constants.SOUND_SPEED,
             'BAT_SPEED': Constants.BAT_SPEED,
             'SIM_DURATION': Constants.SIM_DURATION,
@@ -302,8 +304,12 @@ class Simulation:
         with open(filepath, 'wb') as f:
             pickle.dump(simulation_data, f)
         
-        print(f"Saved simulation data to {filepath}")
-    
+        with open("mycsvfile.csv", "w", newline="") as f:
+            w = csv.DictWriter(f, constants_dict.keys())
+            w.writeheader()
+            w.writerow(constants_dict) 
+            print(f"Saved simulation data to {filepath}")
+        
     # TODO: make a different module for plotting; disconnect it from simulation
     #  
     def visualize(self):

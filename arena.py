@@ -36,12 +36,12 @@ class Arena:
 
     def setup_visualization(self):
         self.fig, self.ax = plt.subplots(figsize=(10, 7))
-        self.ax.set_xlim(0, Constants.ARENA_WIDTH)
-        self.ax.set_ylim(0, Constants.ARENA_HEIGHT)
+        self.ax.set_xlim(0, self.parameters_dict["ARENA_WIDTH"])
+        self.ax.set_ylim(0, self.parameters_dict["ARENA_HEIGHT"])
         self.ax.set_aspect('equal')
         self.ax.set_title('Bat Echolocation with Direct Calls and Echoes')
         
-        boundary = Rectangle((0, 0), Constants.ARENA_WIDTH, Constants.ARENA_HEIGHT,
+        boundary = Rectangle((0, 0), self.parameters_dict["ARENA_WIDTH"], self.parameters_dict["ARENA_HEIGHT"],
                            fill=False, linestyle='--', color='gray')
         self.ax.add_patch(boundary)
         
@@ -109,16 +109,16 @@ class Arena:
         #         reflection_point = Vector2D(0, sound.origin.y)
         #         normal = Vector2D(1, 0)
         #         obstacle_id = "left_wall"
-        #     elif sound_edge.x >= Constants.ARENA_WIDTH:
-        #         reflection_point = Vector2D(Constants.ARENA_WIDTH, sound.origin.y)
+        #     elif sound_edge.x >= self.parameters_dict["ARENA_WIDTH"]:
+        #         reflection_point = Vector2D(self.parameters_dict["ARENA_WIDTH"], sound.origin.y)
         #         normal = Vector2D(-1, 0)
         #         obstacle_id = "right_wall"
         #     elif sound_edge.y <= 0:
         #         reflection_point = Vector2D(sound.origin.x, 0)
         #         normal = Vector2D(0, 1)
         #         obstacle_id = "bottom_wall"
-        #     elif sound_edge.y >= Constants.ARENA_HEIGHT:
-        #         reflection_point = Vector2D(sound.origin.x, Constants.ARENA_HEIGHT)
+        #     elif sound_edge.y >= self.parameters_dict["ARENA_HEIGHT"]:
+        #         reflection_point = Vector2D(sound.origin.x, self.parameters_dict["ARENA_HEIGHT"])
         #         normal = Vector2D(0, -1)
         #         obstacle_id = "top_wall"
             
@@ -171,8 +171,8 @@ class Arena:
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
 
             # sound_edge = sound.origin + Vector(sound.current_radius, 0)
-            # if sound_edge.x >= Constants.ARENA_WIDTH:
-            #     reflection_point = Vector(Constants.ARENA_WIDTH, sound.origin.y)
+            # if sound_edge.x >= self.parameters_dict["ARENA_WIDTH"]:
+            #     reflection_point = Vector(self.parameters_dict["ARENA_WIDTH"], sound.origin.y)
             #     normal = Vector(-1, 0)
             #     obstacle_id = "right_wall"
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
@@ -185,8 +185,8 @@ class Arena:
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
 
             # sound_edge = sound.origin + Vector(0, sound.current_radius)
-            # if sound_edge.y >= Constants.ARENA_HEIGHT:
-            #     reflection_point = Vector(sound.origin.x, Constants.ARENA_HEIGHT)
+            # if sound_edge.y >= self.parameters_dict["ARENA_HEIGHT"]:
+            #     reflection_point = Vector(sound.origin.x, self.parameters_dict["ARENA_HEIGHT"])
             #     normal = Vector(0, -1)
             #     obstacle_id = "top_wall"
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
@@ -255,8 +255,8 @@ class Arena:
         
         # Create a proper dictionary of constants
         constants_dict = {
-            'ARENA_WIDTH': Constants.ARENA_WIDTH,
-            'ARENA_HEIGHT': Constants.ARENA_HEIGHT,
+            'ARENA_WIDTH': self.parameters_dict["ARENA_WIDTH"],
+            'ARENA_HEIGHT': self.parameters_dict["ARENA_HEIGHT"],
             'SOUND_SPEED': Constants.SOUND_SPEED,
             'BAT_SPEED': Constants.BAT_SPEED,
             'SIM_DURATION': Constants.SIM_DURATION,

@@ -1,4 +1,3 @@
-
 ARENA_WIDTH = 7.0        # meters (x-axis)
 ARENA_HEIGHT = 5.0       # meters (y-axis)
 SOUND_SPEED = 343.0      # meters per second

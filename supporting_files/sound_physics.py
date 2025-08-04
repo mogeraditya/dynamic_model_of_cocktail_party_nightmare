@@ -25,19 +25,19 @@ class Physics:
             x, y = point.x, point.y
             if x <= 0:
                 return Vector2D(1, 0)
-            elif x >= Constants.ARENA_WIDTH:
+            elif x >= self.parameters_dict["ARENA_WIDTH"]:
                 return Vector2D(-1, 0)
             elif y <= 0:
                 return Vector2D(0, 1)
-            elif y >= Constants.ARENA_HEIGHT:
+            elif y >= self.parameters_dict["ARENA_HEIGHT"]:
                 return Vector2D(0, -1)
             return Vector2D(0, 0)  # Shouldn't happen
     
     @staticmethod
     def is_point_in_arena(point):
         """Check if a point is within arena boundaries"""
-        return (0 <= point.x <= Constants.ARENA_WIDTH and 
-                0 <= point.y <= Constants.ARENA_HEIGHT)
+        return (0 <= point.x <= self.parameters_dict["ARENA_WIDTH"] and 
+                0 <= point.y <= self.parameters_dict["ARENA_HEIGHT"])
     
     @staticmethod
     def is_sound_in_arena(sound):

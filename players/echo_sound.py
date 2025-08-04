@@ -66,7 +66,7 @@ class EchoSound:
                 f"emitter={self.emitter_id}, parent={self.parent_creation_time})")
     
     def check_if_sound_outside_arena_simpler(self):
-        if (self.current_radius)>max(Constants.ARENA_HEIGHT, Constants.ARENA_WIDTH):
+        if (self.current_radius)>max(self.parameters_dict["ARENA_HEIGHT"], self.parameters_dict["ARENA_WIDTH"]):
 
             return True
         else:

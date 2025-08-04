@@ -10,16 +10,21 @@ def make_dir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+load_parameters= 
+
+
+
 class Bat:
     _id_counter = 0
     
-    def __init__(self):
+    def __init__(self, parameters_df):
         self.id = Bat._id_counter
         Bat._id_counter += 1
         
+        self.parameters_dict= parameters_df
         self.position = Vector(
-            random.uniform(1, Constants.ARENA_WIDTH - 1),
-            random.uniform(1, Constants.ARENA_HEIGHT - 1)
+            random.uniform(1, self.self.parameters_dict["ARENA_WIDTH"] - 1),
+            random.uniform(1, self.self.parameters_dict["ARENA_HEIGHT"] - 1)
         )
         self.direction = Vector().random_direction() #randomize start direction
         self.speed = Constants.BAT_SPEED
@@ -42,9 +47,9 @@ class Bat:
         self.position += self.direction * self.speed * time_elapsed
         
         # Boundary checks with bounce
-        if self.position.x <= 0 or self.position.x >= Constants.ARENA_WIDTH:
+        if self.position.x <= 0 or self.position.x >= self.parameters_dict["ARENA_WIDTH"]:
             self.direction.x *= -1
-        if self.position.y <= 0 or self.position.y >= Constants.ARENA_HEIGHT:
+        if self.position.y <= 0 or self.position.y >= self.parameters_dict["ARENA_HEIGHT"]:
             self.direction.y *= -1
             
         # Random direction change occasionally

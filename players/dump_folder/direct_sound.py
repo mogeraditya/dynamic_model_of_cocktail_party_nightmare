@@ -64,7 +64,7 @@ class DirectSound:
     
     # TODO : fix the function that checks if sound is out of the arena in order to kill it later
     def check_if_sound_outside_arena(self):
-        points_the_define_arena= [Vector(0.0,0.0), Vector(0.0, Constants.ARENA_HEIGHT), Vector(Constants.ARENA_WIDTH, 0.0), Vector(Constants.ARENA_WIDTH, Constants.ARENA_HEIGHT)]
+        points_the_define_arena= [Vector(0.0,0.0), Vector(0.0, self.parameters_dict["ARENA_HEIGHT"]), Vector(self.parameters_dict["ARENA_WIDTH"], 0.0), Vector(self.parameters_dict["ARENA_WIDTH"], self.parameters_dict["ARENA_HEIGHT"])]
         counter= 0
         for point in points_the_define_arena:
             distance = self.origin.distance_to(point)
@@ -74,7 +74,7 @@ class DirectSound:
             return False
         
     def check_if_sound_outside_arena_simpler(self):
-        if (self.current_radius)>max(Constants.ARENA_HEIGHT, Constants.ARENA_WIDTH):
+        if (self.current_radius)>max(self.parameters_dict["ARENA_HEIGHT"], self.parameters_dict["ARENA_WIDTH"]):
             return True
         else:
             return False

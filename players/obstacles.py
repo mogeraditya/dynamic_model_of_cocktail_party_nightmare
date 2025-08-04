@@ -10,8 +10,8 @@ class Obstacle:
         Obstacle._id_counter += 1
 
         self.position = Vector(
-            random.uniform(Constants.OBSTACLE_RADIUS, Constants.ARENA_WIDTH - Constants.OBSTACLE_RADIUS),
-            random.uniform(Constants.OBSTACLE_RADIUS, Constants.ARENA_HEIGHT - Constants.OBSTACLE_RADIUS)
+            random.uniform(Constants.OBSTACLE_RADIUS, self.parameters_dict["ARENA_WIDTH"] - Constants.OBSTACLE_RADIUS),
+            random.uniform(Constants.OBSTACLE_RADIUS, self.parameters_dict["ARENA_HEIGHT"] - Constants.OBSTACLE_RADIUS)
         )
         self.radius = Constants.OBSTACLE_RADIUS
     # TODO: use this and implement avoidance on collision
