@@ -41,5 +41,5 @@ class Vector:
     def to_tuple(self):
         return (self.x, self.y)
     
-    def __repr__(self):
-        return f"Vector({self.x:.2f}, {self.y:.2f})"
+    # def __repr__(self):
+    #     return f'Vector({self.x:.2f}, {self.y:.2f})'

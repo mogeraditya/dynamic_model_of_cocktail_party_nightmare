@@ -389,8 +389,8 @@ class Simulation:
         # plt.legend()
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=self.handles)
 
-        FFwriter = animation.FFMpegWriter(fps= Constants.FRAME_RATE)
-        ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.mp4", writer=FFwriter)
+        # FFwriter = animation.FFMpegWriter(fps= Constants.FRAME_RATE)
+        # ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.mp4", writer=FFwriter)
         plt.show()
 
 if __name__ == "__main__":

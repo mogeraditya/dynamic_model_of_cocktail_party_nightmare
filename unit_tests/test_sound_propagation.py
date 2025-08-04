@@ -1,13 +1,7 @@
 import sys
 sys.path.insert(1, '.')
-# from __future__ import absolute_import
-# sys.path.append('..//')
-# # import simulation 
-import os
-# os.chdir("..//")
-origin=0; current_radius=0.3
-print(f'DirectSound(origin={origin}, radius={current_radius:.2f}, ')
-print(os.getcwd())
+
+import unittest
 from supporting_files.vectors import Vector
 import supporting_files.constants as Constants
 import math
