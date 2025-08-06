@@ -16,10 +16,11 @@ from players.echo_sound import EchoSound
 
 import random        
 position= Vector(
-            random.uniform(1, self.parameters_dict["ARENA_WIDTH"] - 1),
-            random.uniform(1, self.parameters_dict["ARENA_HEIGHT"] - 1)
+            random.uniform(1, self.parameters_df["ARENA_WIDTH"][0] - 1),
+            random.uniform(1, self.parameters_df["ARENA_HEIGHT"][0] - 1)
         )
 sound = DirectSound(
+                parameters_df= parameters_df,
                 origin=position,
                 creation_time=0,
                 emitter_id=0

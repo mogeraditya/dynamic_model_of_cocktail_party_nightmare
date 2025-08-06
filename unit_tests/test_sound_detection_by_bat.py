@@ -8,12 +8,13 @@ from players.bat import Bat
 import random
 from supporting_files.misc_files import *
         
-parameters_dict= load_parameters('\paramsets\mycsvfiles.csv')
+parameters_df= load_parameters('\paramsets\mycsvfiles.csv')
 position= Vector(
-            random.uniform(1, parameters_dict["ARENA_WIDTH"] - 1),
-            random.uniform(1, parameters_dict["ARENA_HEIGHT"] - 1)
+            random.uniform(1, parameters_df["ARENA_WIDTH"][0] - 1),
+            random.uniform(1, parameters_df["ARENA_HEIGHT"][0] - 1)
         )
 sound = DirectSound(
+                parameters_df=parameters_df,
                 origin=position,
                 creation_time=0,
                 emitter_id=0

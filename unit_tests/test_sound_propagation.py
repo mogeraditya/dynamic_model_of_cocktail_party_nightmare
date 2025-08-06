@@ -22,6 +22,7 @@ class TestingNoncentralAllocation(unittest.TestCase):
     def test_radius_after_time(self):
         #initialize the sound
         sound = DirectSound(
+                parameters_df= self.parameters_df,
                 origin= self.sound_start_point,
                 creation_time= self.creation_time,
                 emitter_id= self.emitter_id
@@ -34,6 +35,7 @@ class TestingNoncentralAllocation(unittest.TestCase):
         
     def test_sound_disk_width(self):
         sound = DirectSound(
+                parameters_df= self.parameters_df,
                 origin= self.sound_start_point,
                 creation_time= self.creation_time,
                 emitter_id= self.emitter_id

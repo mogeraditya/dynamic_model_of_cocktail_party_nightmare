@@ -3,7 +3,6 @@ import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.patches import Circle, Rectangle, Wedge, Patch
-import supporting_files.constants as Constants
 from players.bat import Bat
 from players.obstacles import Obstacle
 from players.direct_sound_w_inheritance import DirectSound
@@ -21,12 +20,14 @@ class Simulation:
     '''one instance of the simulation;
     this objects goal is to run the simulation for one 
     instance of the set of parameters chosen
-
-    '''
+   '''
     def __init__(self, parameter_file_dir):
-        parameters_dict= load_parameters(parameter_file_dir)
-        self.bats = [Bat(parameters_dict) for _ in range(Constants.NUM_BATS)]
-        self.obstacles = [Obstacle() for _ in range(Constants.OBSTACLE_COUNT)]
+        parameters_df= load_parameters(parameter_file_dir)
+        self.parameters_df= parameters_df
+        print(self.parameters_df.keys())
+        print(self.parameters_df["ARENA_WIDTH"][0])
+        self.bats = [Bat(self.parameters_df) for _ in range(int(self.parameters_df['NUM_BATS'][0]))]
+        self.obstacles = [Obstacle(self.parameters_df) for _ in range(int(self.parameters_df['OBSTACLE_COUNT'][0]))]
         self.sound_objects = []  # Contains both DirectSound and EchoSound
         self.time_elapsed = 0.0
         self.history = []
@@ -39,12 +40,12 @@ class Simulation:
 
     def setup_visualization(self):
         self.fig, self.ax = plt.subplots(figsize=(10, 7))
-        self.ax.set_xlim(0, self.parameters_dict["ARENA_WIDTH"])
-        self.ax.set_ylim(0, self.parameters_dict["ARENA_HEIGHT"])
+        self.ax.set_xlim(0, self.parameters_df["ARENA_WIDTH"][0])
+        self.ax.set_ylim(0, self.parameters_df["ARENA_HEIGHT"][0])
         self.ax.set_aspect('equal')
         self.ax.set_title('Bat Echolocation with Direct Calls and Echoes')
         
-        boundary = Rectangle((0, 0), self.parameters_dict["ARENA_WIDTH"], self.parameters_dict["ARENA_HEIGHT"],
+        boundary = Rectangle((0, 0), self.parameters_df["ARENA_WIDTH"][0], self.parameters_df["ARENA_HEIGHT"][0],
                            fill=False, linestyle='--', color='gray')
         self.ax.add_patch(boundary)
         
@@ -69,13 +70,13 @@ class Simulation:
         
     
     def run(self):
-        num_steps = int(Constants.SIM_DURATION / Constants.TIME_STEP)
+        num_steps = int(self.parameters_df['SIM_DURATION'][0] / self.parameters_df['TIME_STEP'][0])
         
         for step in range(num_steps):
-            self.time_elapsed = step * Constants.TIME_STEP
+            self.time_elapsed = step * self.parameters_df['TIME_STEP'][0]
             
             for bat in self.bats:
-                bat.update(Constants.TIME_STEP, self.obstacles, 
+                bat.update(self.parameters_df['TIME_STEP'][0], self.obstacles, 
                          self.bats, self.time_elapsed, self.sound_objects)
             
             self._handle_reflections(self.time_elapsed)
@@ -112,16 +113,16 @@ class Simulation:
         #         reflection_point = Vector2D(0, sound.origin.y)
         #         normal = Vector2D(1, 0)
         #         obstacle_id = "left_wall"
-        #     elif sound_edge.x >= self.parameters_dict["ARENA_WIDTH"]:
-        #         reflection_point = Vector2D(self.parameters_dict["ARENA_WIDTH"], sound.origin.y)
+        #     elif sound_edge.x >= self.parameters_df["ARENA_WIDTH"][0]:
+        #         reflection_point = Vector2D(self.parameters_df["ARENA_WIDTH"][0], sound.origin.y)
         #         normal = Vector2D(-1, 0)
         #         obstacle_id = "right_wall"
         #     elif sound_edge.y <= 0:
         #         reflection_point = Vector2D(sound.origin.x, 0)
         #         normal = Vector2D(0, 1)
         #         obstacle_id = "bottom_wall"
-        #     elif sound_edge.y >= self.parameters_dict["ARENA_HEIGHT"]:
-        #         reflection_point = Vector2D(sound.origin.x, self.parameters_dict["ARENA_HEIGHT"])
+        #     elif sound_edge.y >= self.parameters_df["ARENA_HEIGHT"][0]:
+        #         reflection_point = Vector2D(sound.origin.x, self.parameters_df["ARENA_HEIGHT"][0])
         #         normal = Vector2D(0, -1)
         #         obstacle_id = "top_wall"
             
@@ -174,8 +175,8 @@ class Simulation:
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
 
             # sound_edge = sound.origin + Vector(sound.current_radius, 0)
-            # if sound_edge.x >= self.parameters_dict["ARENA_WIDTH"]:
-            #     reflection_point = Vector(self.parameters_dict["ARENA_WIDTH"], sound.origin.y)
+            # if sound_edge.x >= self.parameters_df["ARENA_WIDTH"][0]:
+            #     reflection_point = Vector(self.parameters_df["ARENA_WIDTH"][0], sound.origin.y)
             #     normal = Vector(-1, 0)
             #     obstacle_id = "right_wall"
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
@@ -188,8 +189,8 @@ class Simulation:
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
 
             # sound_edge = sound.origin + Vector(0, sound.current_radius)
-            # if sound_edge.y >= self.parameters_dict["ARENA_HEIGHT"]:
-            #     reflection_point = Vector(sound.origin.x, self.parameters_dict["ARENA_HEIGHT"])
+            # if sound_edge.y >= self.parameters_df["ARENA_HEIGHT"][0]:
+            #     reflection_point = Vector(sound.origin.x, self.parameters_df["ARENA_HEIGHT"][0])
             #     normal = Vector(0, -1)
             #     obstacle_id = "top_wall"
             #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
@@ -257,29 +258,30 @@ class Simulation:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
         # Create a proper dictionary of constants
-        constants_dict = {
-            'ARENA_WIDTH': self.parameters_dict["ARENA_WIDTH"],
-            'ARENA_HEIGHT': self.parameters_dict["ARENA_HEIGHT"],
-            'SOUND_SPEED': Constants.SOUND_SPEED,
-            'BAT_SPEED': Constants.BAT_SPEED,
-            'SIM_DURATION': Constants.SIM_DURATION,
-            'TIME_STEP': Constants.TIME_STEP,
-            'CALL_DURATION': Constants.CALL_DURATION,
-            'CALL_RATE': Constants.CALL_RATE,
-            'OBSTACLE_COUNT': Constants.OBSTACLE_COUNT,
-            'OBSTACLE_RADIUS': Constants.OBSTACLE_RADIUS,
-            'EMITTED_SPL': Constants.EMITTED_SPL,
-            'MIN_DETECTABLE_SPL': Constants.MIN_DETECTABLE_SPL,
-            'NUM_BATS': Constants.NUM_BATS,
-            'AIR_ABSORPTION': Constants.AIR_ABSORPTION,
-            'REFLECTION_LOSS': Constants.REFLECTION_LOSS,
-            'SOUND_DISK_WIDTH': Constants.SOUND_DISK_WIDTH,
-            'MAX_REFLECTIONS': Constants.MAX_REFLECTIONS,
-            'timestamp': timestamp
-        }
-        
+        # constants_dict = {
+        #     'ARENA_WIDTH': self.parameters_df["ARENA_WIDTH"][0],
+        #     'ARENA_HEIGHT': self.parameters_df["ARENA_HEIGHT"][0],
+        #     'SOUND_SPEED': Constants.SOUND_SPEED,
+        #     'BAT_SPEED': Constants.BAT_SPEED,
+        #     'SIM_DURATION': Constants.SIM_DURATION,
+        #     'TIME_STEP': Constants.TIME_STEP,
+        #     'CALL_DURATION': Constants.CALL_DURATION,
+        #     'CALL_RATE': Constants.CALL_RATE,
+        #     'OBSTACLE_COUNT': Constants.OBSTACLE_COUNT,
+        #     'OBSTACLE_RADIUS': Constants.OBSTACLE_RADIUS,
+        #     'EMITTED_SPL': Constants.EMITTED_SPL,
+        #     'MIN_DETECTABLE_SPL': Constants.MIN_DETECTABLE_SPL,
+        #     'NUM_BATS': Constants.NUM_BATS,
+        #     'AIR_ABSORPTION': Constants.AIR_ABSORPTION,
+        #     'REFLECTION_LOSS': Constants.REFLECTION_LOSS,
+        #     'SOUND_DISK_WIDTH': Constants.SOUND_DISK_WIDTH,
+        #     'MAX_REFLECTIONS': Constants.MAX_REFLECTIONS,
+        #     'timestamp': timestamp
+        # }
+        constants_df= self.parameters_df
+        constants_df["timestamp"]= timestamp
         simulation_data = {
-            'parameters': constants_dict,  # Use the plain dictionary
+            'parameters': constants_df,  # Use the plain dictionary
             'bat_data': [],
             'obstacle_positions': [(o.position.x, o.position.y) for o in self.obstacles],
             'sound_history': self.history
@@ -304,11 +306,11 @@ class Simulation:
         with open(filepath, 'wb') as f:
             pickle.dump(simulation_data, f)
         
-        with open("mycsvfile.csv", "w", newline="") as f:
-            w = csv.DictWriter(f, constants_dict.keys())
-            w.writeheader()
-            w.writerow(constants_dict) 
-            print(f"Saved simulation data to {filepath}")
+        # with open("mycsvfile.csv", "w", newline="") as f:
+        #     w = csv.DictWriter(f, constants_df.keys())
+        #     w.writeheader()
+        #     w.writerow(constants_df) 
+        #     print(f"Saved simulation data to {filepath}")
         
     # TODO: make a different module for plotting; disconnect it from simulation
     #  
@@ -338,7 +340,7 @@ class Simulation:
                 emitter_color = colors[sound['emitter_id'] % len(colors)]
                 alpha = 0.5 - (0.1 * sound.get('reflection_count', 0))
                 
-                inner = max(0, sound['radius'] - Constants.SOUND_DISK_WIDTH)
+                inner = max(0, sound['radius'] - self.parameters_df['SOUND_DISK_WIDTH'][0])
                 outer = sound['radius']
 
                 if inner < outer :
@@ -352,7 +354,7 @@ class Simulation:
                     if inner==0:
                         width_of_disk = sound['radius']
                     else:
-                        width_of_disk = Constants.SOUND_DISK_WIDTH
+                        width_of_disk = self.parameters_df['SOUND_DISK_WIDTH'][0]
                     wedge = Wedge(sound['origin'], outer, 0, 360, 
                                 width=width_of_disk,
                                 fill=False, color=emitter_color,
@@ -381,7 +383,7 @@ class Simulation:
         
         ani = animation.FuncAnimation(
             self.fig, animate, frames=len(self.history),
-            init_func=init, blit=False, interval=Constants.FRAME_RATE
+            init_func=init, blit=False, interval=self.parameters_df['FRAME_RATE'][0]
         )
 
         self.handles, labels = self.ax.get_legend_handles_labels()
@@ -395,10 +397,11 @@ class Simulation:
         # plt.legend()
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=self.handles)
 
-        # FFwriter = animation.FFMpegWriter(fps= Constants.FRAME_RATE)
-        # ani.save(self.output_dir+f"/animation_numbats_{Constants.NUM_BATS}_numobs_{Constants.OBSTACLE_COUNT}_time_{Constants.SIM_DURATION}_call_duration_{Constants.CALL_DURATION}_call_rate_{Constants.CALL_RATE}_frame_rate_{Constants.FRAME_RATE}.mp4", writer=FFwriter)
+        FFwriter = animation.FFMpegWriter(fps= self.parameters_df['FRAME_RATE'])
+        ani.save(self.output_dir+f"/animation_w_changed_param_usage_testing_detections.mp4")#_{self.parameters_df['NUM_BATS']}_numobs_{self.parameters_df['OBSTACLE_COUNT']}_time_{self.parameters_df['SIM_DURATION']}_call_duration_{self.parameters_df['CALL_DURATION']}_call_rate_{self.parameters_df['CALL_RATE']}_frame_rate_{self.parameters_df['FRAME_RATE']}.mp4", writer=FFwriter)
         plt.show()
 
+parameter_file_dir= r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/paramsets/testing_detection.csv"
 if __name__ == "__main__":
-    sim = Simulation()
+    sim = Simulation(parameter_file_dir)
     sim.run()
