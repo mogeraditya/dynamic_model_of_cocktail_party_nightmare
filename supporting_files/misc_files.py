@@ -28,7 +28,7 @@ def load_parameters(file_dir):
         output_df[key] = [value]
     return output_df
 
-# file_dir= r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/paramsets/mycsvfile.csv"
+# file_dir= r"../paramsets/mycsvfile.csv"
 # df= load_parameters(file_dir)
 # print(df)
 # print(df["NUM_BATS"][0])
