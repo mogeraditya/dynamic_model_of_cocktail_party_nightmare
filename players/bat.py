@@ -89,7 +89,7 @@ class Bat:
     def _cleanup_sounds(self, current_time):
         # Keep only recent detections
         if (current_time-self.time_since_last_cleanup)>0.1: #10ms
-            dir_to_store= 'simulation_results/'+str(self.id)
+            dir_to_store= 'simulation_results/limit_test/'+str(self.id)
             make_dir(dir_to_store)
             np.save(dir_to_store+f'/received_sounds_snapshot_at_time_{current_time}.npy', self.received_sounds)
             np.save(dir_to_store+f'/emitted_sounds_snapshot_at_time_{current_time}.npy', self.emitted_sounds)

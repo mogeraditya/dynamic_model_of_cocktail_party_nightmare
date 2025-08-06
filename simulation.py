@@ -24,8 +24,8 @@ class Simulation:
     def __init__(self, parameter_file_dir):
         parameters_df= load_parameters(parameter_file_dir)
         self.parameters_df= parameters_df
-        print(self.parameters_df.keys())
-        print(self.parameters_df["ARENA_WIDTH"][0])
+        # print(self.parameters_df.keys())
+        # print(self.parameters_df["ARENA_WIDTH"][0])
         self.bats = [Bat(self.parameters_df) for _ in range(int(self.parameters_df['NUM_BATS'][0]))]
         self.obstacles = [Obstacle(self.parameters_df) for _ in range(int(self.parameters_df['OBSTACLE_COUNT'][0]))]
         self.sound_objects = []  # Contains both DirectSound and EchoSound
@@ -33,7 +33,7 @@ class Simulation:
         self.history = []
         self.setup_visualization()
         self.handles= []
-        self.output_dir = "simulation_results"
+        self.output_dir = "simulation_results/limit_test"
         os.makedirs(self.output_dir, exist_ok=True)
 
     # TODO: make a different module for plotting; disconnect it from simulation    
@@ -71,7 +71,8 @@ class Simulation:
     
     def run(self):
         num_steps = int(self.parameters_df['SIM_DURATION'][0] / self.parameters_df['TIME_STEP'][0])
-        
+        start_timing= datetime.now()
+        list_time_taken_for_each_loop=[]; save_time_of_last_iter= start_timing
         for step in range(num_steps):
             self.time_elapsed = step * self.parameters_df['TIME_STEP'][0]
             
@@ -81,18 +82,25 @@ class Simulation:
             
             self._handle_reflections(self.time_elapsed)
             
-            self.history.append({
-                'time': self.time_elapsed,
-                'bat_positions': [(bat.position.x, bat.position.y) for bat in self.bats],
-                'bat_detections': [bat.get_detections_at_time(self.time_elapsed) for bat in self.bats],
-                'sound_objects': [self._serialize_sound(s) for s in self.sound_objects if s.active and s.current_spl>20],
-                'sound_objects_count': len(self.sound_objects)
-            })
+            # self.history.append({
+            #     'time': self.time_elapsed,
+            #     'bat_positions': [(bat.position.x, bat.position.y) for bat in self.bats],
+            #     'bat_detections': [bat.get_detections_at_time(self.time_elapsed) for bat in self.bats],
+            #     'sound_objects': [self._serialize_sound(s) for s in self.sound_objects if s.active and s.current_spl>20],
+            #     'sound_objects_count': len(self.sound_objects)
+            # })
             
             self.sound_objects = [s for s in self.sound_objects if s.active and s.current_spl>20]
-        
+            
+            current_loop_time= datetime.now()
+            list_time_taken_for_each_loop.append(current_loop_time-save_time_of_last_iter)
+            print(current_loop_time-save_time_of_last_iter)
+            save_time_of_last_iter= current_loop_time
+        print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
+        print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
         self.save_simulation_data()
-        self.visualize()
+        print("DATA SAVED")
+        # self.visualize()
     
     # TODO: add handle reflections somewhere else ig?; disconnect it from simulation; but its okay if this is the 
     #     
@@ -380,7 +388,7 @@ class Simulation:
                     self.detection_artists.append(line)
             
             return self.bat_markers + self.sound_artists + self.detection_artists
-        
+        print("DONE RUNNING THE SIMULATION, NOW RUNNING ANIMATION STORAGE")
         ani = animation.FuncAnimation(
             self.fig, animate, frames=len(self.history),
             init_func=init, blit=False, interval=self.parameters_df['FRAME_RATE'][0]
@@ -401,7 +409,7 @@ class Simulation:
         ani.save(self.output_dir+f"/animation_w_changed_param_usage_testing_detections.mp4")#_{self.parameters_df['NUM_BATS']}_numobs_{self.parameters_df['OBSTACLE_COUNT']}_time_{self.parameters_df['SIM_DURATION']}_call_duration_{self.parameters_df['CALL_DURATION']}_call_rate_{self.parameters_df['CALL_RATE']}_frame_rate_{self.parameters_df['FRAME_RATE']}.mp4", writer=FFwriter)
         plt.show()
 
-parameter_file_dir= r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/paramsets/testing_detection.csv"
+parameter_file_dir= r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/paramsets/intensive_test.csv"
 if __name__ == "__main__":
     sim = Simulation(parameter_file_dir)
     sim.run()
