@@ -408,8 +408,8 @@ class Simulation:
         FFwriter = animation.FFMpegWriter(fps= self.parameters_df['FRAME_RATE'])
         ani.save(self.output_dir+f"/animation_w_changed_param_usage_testing_detections.mp4")#_{self.parameters_df['NUM_BATS']}_numobs_{self.parameters_df['OBSTACLE_COUNT']}_time_{self.parameters_df['SIM_DURATION']}_call_duration_{self.parameters_df['CALL_DURATION']}_call_rate_{self.parameters_df['CALL_RATE']}_frame_rate_{self.parameters_df['FRAME_RATE']}.mp4", writer=FFwriter)
         plt.show()
-
-parameter_file_dir= r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/paramsets/intensive_test.csv"
+print(os.getcwd())
+parameter_file_dir= r"./paramsets/intensive_test.csv"
 if __name__ == "__main__":
     sim = Simulation(parameter_file_dir)
     sim.run()
