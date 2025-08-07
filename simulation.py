@@ -21,20 +21,21 @@ class Simulation:
     this objects goal is to run the simulation for one 
     instance of the set of parameters chosen
    '''
-    def __init__(self, parameter_file_dir):
+    def __init__(self, parameter_file_dir, output_dir):
         parameters_df= load_parameters(parameter_file_dir)
+        
         self.parameters_df= parameters_df
+        self.output_dir = output_dir
+        os.makedirs(self.output_dir, exist_ok=True)
         # print(self.parameters_df.keys())
         # print(self.parameters_df["ARENA_WIDTH"][0])
-        self.bats = [Bat(self.parameters_df) for _ in range(int(self.parameters_df['NUM_BATS'][0]))]
+        self.bats = [Bat(self.parameters_df, self.output_dir) for _ in range(int(self.parameters_df['NUM_BATS'][0]))]
         self.obstacles = [Obstacle(self.parameters_df) for _ in range(int(self.parameters_df['OBSTACLE_COUNT'][0]))]
         self.sound_objects = []  # Contains both DirectSound and EchoSound
         self.time_elapsed = 0.0
         self.history = []
         self.setup_visualization()
         self.handles= []
-        self.output_dir = "simulation_results/limit_test"
-        os.makedirs(self.output_dir, exist_ok=True)
 
     # TODO: make a different module for plotting; disconnect it from simulation    
 
@@ -94,7 +95,7 @@ class Simulation:
             
             current_loop_time= datetime.now()
             list_time_taken_for_each_loop.append(current_loop_time-save_time_of_last_iter)
-            print(current_loop_time-save_time_of_last_iter)
+            # print(current_loop_time-save_time_of_last_iter)
             save_time_of_last_iter= current_loop_time
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
@@ -209,7 +210,7 @@ class Simulation:
                     id(obstacle) not in sound.reflected_obstacles):
                     normal = obstacle.get_reflection_normal(sound.origin)
                     reflection_point = obstacle.position + normal * obstacle.radius
-                    obstacle_id = id(obstacle)
+                    obstacle_id = f"obstacle_{obstacle.id}"
 
                     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
 
@@ -222,7 +223,7 @@ class Simulation:
                     id(bat) not in sound.reflected_obstacles):
                     normal = (sound.origin - bat.position).normalize()
                     reflection_point = bat.position + normal * 0.1
-                    obstacle_id = id(bat)
+                    obstacle_id = f"bat_{bat.id}"
 
                     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)                    
 
@@ -231,7 +232,7 @@ class Simulation:
             for i in range(len(reflection_point_arr)):
                 reflection_point= reflection_point_arr[i]; normal = normal_arr[i]; obstacle_id= obstacle_id_arr[i]
                 if reflection_point and normal and obstacle_id:
-                    echo = sound.create_echo(reflection_point, current_time, normal)
+                    echo = sound.create_echo(reflection_point, current_time, normal, obstacle_id)
                     # print(echo)
                     if echo:
                         # Mark this obstacle as reflected for the original sound
@@ -283,7 +284,7 @@ class Simulation:
         #     'AIR_ABSORPTION': Constants.AIR_ABSORPTION,
         #     'REFLECTION_LOSS': Constants.REFLECTION_LOSS,
         #     'SOUND_DISK_WIDTH': Constants.SOUND_DISK_WIDTH,
-        #     'MAX_REFLECTIONS': Constants.MAX_REFLECTIONS,
+
         #     'timestamp': timestamp
         # }
         constants_df= self.parameters_df
@@ -311,8 +312,8 @@ class Simulation:
         filename = f"bat_simulation_{timestamp}.pkl"
         filepath = os.path.join(self.output_dir, filename)
         
-        with open(filepath, 'wb') as f:
-            pickle.dump(simulation_data, f)
+        # with open(filepath, 'wb') as f:
+        #     pickle.dump(simulation_data, f)
         
         # with open("mycsvfile.csv", "w", newline="") as f:
         #     w = csv.DictWriter(f, constants_df.keys())
@@ -409,7 +410,8 @@ class Simulation:
         ani.save(self.output_dir+f"/animation_w_changed_param_usage_testing_detections.mp4")#_{self.parameters_df['NUM_BATS']}_numobs_{self.parameters_df['OBSTACLE_COUNT']}_time_{self.parameters_df['SIM_DURATION']}_call_duration_{self.parameters_df['CALL_DURATION']}_call_rate_{self.parameters_df['CALL_RATE']}_frame_rate_{self.parameters_df['FRAME_RATE']}.mp4", writer=FFwriter)
         plt.show()
 print(os.getcwd())
+output_dir= "test_storage"
 parameter_file_dir= r"./paramsets/intensive_test.csv"
 if __name__ == "__main__":
-    sim = Simulation(parameter_file_dir)
+    sim = Simulation(parameter_file_dir, output_dir)
     sim.run()

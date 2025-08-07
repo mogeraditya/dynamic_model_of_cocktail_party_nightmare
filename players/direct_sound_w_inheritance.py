@@ -8,7 +8,7 @@ class DirectSound(EchoSound):
         # self.parameters_df= parameters_df
         super().__init__(parameters_df=parameters_df, origin=origin, creation_time=creation_time, emitter_id=emitter_id, 
                          initial_spl=parameters_df['EMITTED_SPL'][0], parent_creation_time= parameters_df['EMITTED_SPL'][0], 
-                         reflection_count=0)
+                         reflection_count=0, reflected_from=None)
 
         # self.initial_spl = Constants.EMITTED_SPL
         self.current_spl = self.initial_spl
@@ -19,7 +19,7 @@ class DirectSound(EchoSound):
         self.reflected_obstacles = set() # Track obstacles that iit reflected off of in order to cap this in the future
         
     
-    def create_echo(self, point, current_time, normal):
+    def create_echo(self, point, current_time, normal, reflected_from):
         if self.has_reflected:
             return None
             
@@ -35,7 +35,8 @@ class DirectSound(EchoSound):
             emitter_id=self.emitter_id,
             initial_spl=reflected_spl,
             parent_creation_time=self.creation_time,
-            reflection_count=1
+            reflection_count=1,
+            reflected_from=reflected_from
         )
         echo.reflected_obstacles.update(self.reflected_obstacles)
         return echo
