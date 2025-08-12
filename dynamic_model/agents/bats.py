@@ -53,11 +53,15 @@ class Bat:
         self.update_movement()
         self.position_history.append((current_time, (self.position.x, self.position.y)))
 
-        self.emit_sounds(current_time, sound_objects)
         self.detect_sounds(current_time, sound_objects)
+        self.emit_sounds(current_time, sound_objects)
         self.cleanup_sounds(current_time)
 
     def update_movement(self):
+        """Update poisition of Bat when called.
+        Every timestep the position of the bat needs to be
+        updated based on velcoity and direction.
+        """
         self.position += self.direction * self.speed * self.time_step
 
         # Boundary checks with bounce
@@ -77,6 +81,14 @@ class Bat:
             self.direction = Vector().random_direction()
 
     def emit_sounds(self, current_time, sound_objects):
+        """Trigger sound emission by Bat.
+        Whenever the function is called, it checks if sufficient time
+        has passed and a DirectSoundObject is created.
+
+        Args:
+            current_time (float): Time, in seconds, for which the simualtion has been running.
+            sound_objects (list): List containing all active sounds in the simulation
+        """
         self.time_since_last_call += self.time_step
         call_interval = 1.0 / self.parameters_df["CALL_RATE"][0]
 
@@ -92,6 +104,14 @@ class Bat:
             self.time_since_last_call = 0
 
     def detect_sounds(self, current_time, sound_objects):
+        """Detects sound that are audible to the Bat
+        Checks if a bat can hear a sound based on dbSpl of sound
+        and position of bat.
+
+        Args:
+            current_time (float): Time, in seconds, for which the simualtion has been running.
+            sound_objects (list): _description_
+        """
         for sound in sound_objects:
             if not sound.active:
                 continue
@@ -119,6 +139,13 @@ class Bat:
                 )
 
     def cleanup_sounds(self, current_time):
+        """Stores the detections into a .npy file.
+        After a fixed amount of time the detection list is stored
+        into local memory and this is cleared from RAM.
+
+        Args:
+            current_time (float): Time, in seconds, for which the simualtion has been running.
+        """
         # Keep only recent detections
         if (current_time - self.time_since_last_cleanup) >= self.parameters_df[
             "CLEANUP_INTERVAL"
@@ -141,8 +168,16 @@ class Bat:
             self.emitted_sounds = []
             self.received_sounds = []
 
-    def get_detections_at_time(self, current_time):
-        return [d for d in self.received_sounds if d["time"] <= current_time]
+    # def get_detections_at_time(self, current_time):
+    #     """
+
+    #     Args:
+    #         current_time (_type_): _description_
+
+    #     Returns:
+    #         _type_: _description_
+    #     """
+    #     return [d for d in self.received_sounds if d["time"] <= current_time]
 
     def __repr__(self):
         return f"Bat(id={self.id}, position={self.position})"

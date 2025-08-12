@@ -5,13 +5,12 @@ import pickle
 import time
 from datetime import datetime
 
-import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 from agents.bats import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound, EchoSound
-from matplotlib.patches import Circle, Patch, Rectangle, Wedge
+from plotter import *
 from supporting_files.utilities import load_parameters
 from supporting_files.vectors import Vector
 
@@ -24,7 +23,7 @@ class Simulation:
     instance of the set of parameters chosen
     """
 
-    def __init__(self, parameter_file_dir, output_dir):
+    def __init__(self, parameter_file_dir, output_dir, visualize):
         parameters_df = load_parameters(parameter_file_dir)
 
         self.parameters_df = parameters_df
@@ -43,54 +42,17 @@ class Simulation:
         self.sound_objects = []  # Contains both DirectSound and EchoSound
         self.time_elapsed = 0.0
         self.history = []
-        self.setup_visualization()
+        if visualize:
+            (
+                self.fig,
+                self.ax,
+                self.bat_markers,
+                self.sound_artists,
+                self.detection_artists,
+            ) = setup_visualization(self.parameters_df, self.obstacles, self.bats)
         self.handles = []
 
     # TODO: make a different module for plotting; disconnect it from simulation
-
-    def setup_visualization(self):
-        self.fig, self.ax = plt.subplots(figsize=(10, 7))
-        self.ax.set_xlim(0, self.parameters_df["ARENA_WIDTH"][0])
-        self.ax.set_ylim(0, self.parameters_df["ARENA_HEIGHT"][0])
-        self.ax.set_aspect("equal")
-        self.ax.set_title("Bat Echolocation with Direct Calls and Echoes")
-
-        boundary = Rectangle(
-            (0, 0),
-            self.parameters_df["ARENA_WIDTH"][0],
-            self.parameters_df["ARENA_HEIGHT"][0],
-            fill=False,
-            linestyle="--",
-            color="gray",
-        )
-        self.ax.add_patch(boundary)
-
-        self.obstacle_patches = []
-        for obstacle in self.obstacles:
-            obs_circle = Circle(
-                (obstacle.position.x, obstacle.position.y),
-                obstacle.radius,
-                color="red",
-                alpha=0.5,
-            )  # , label=f"Obstacle {obstacle.id}")
-            self.ax.add_patch(obs_circle)
-            self.obstacle_patches.append(obs_circle)
-
-        self.bat_markers = []
-        self.sound_artists = []
-        self.detection_artists = []
-
-        colors = plt.cm.tab10.colors
-        for i, bat in enumerate(self.bats):
-            (marker,) = self.ax.plot(
-                [],
-                [],
-                "o",
-                markersize=10,
-                color=colors[i % len(colors)],
-                label=f"Bat {bat.id}",
-            )
-            self.bat_markers.append(marker)
 
     def run(self):
         num_steps = int(
@@ -105,15 +67,26 @@ class Simulation:
             for bat in self.bats:
                 bat.update(self.time_elapsed, self.sound_objects)
 
-            self._handle_reflections(self.time_elapsed)
+            self.handle_reflections(self.time_elapsed)
 
-            # self.history.append({
-            #     'time': self.time_elapsed,
-            #     'bat_positions': [(bat.position.x, bat.position.y) for bat in self.bats],
-            #     'bat_detections': [bat.get_detections_at_time(self.time_elapsed) for bat in self.bats],
-            #     'sound_objects': [self._serialize_sound(s) for s in self.sound_objects if s.active and s.current_spl>20],
-            #     'sound_objects_count': len(self.sound_objects)
-            # })
+            self.history.append(
+                {
+                    "time": self.time_elapsed,
+                    "bat_positions": [
+                        (bat.position.x, bat.position.y) for bat in self.bats
+                    ],
+                    "bat_detections": [
+                        bat.get_detections_at_time(self.time_elapsed)
+                        for bat in self.bats
+                    ],
+                    "sound_objects": [
+                        self._serialize_sound(s)
+                        for s in self.sound_objects
+                        if s.active and s.current_spl > 20
+                    ],
+                    "sound_objects_count": len(self.sound_objects),
+                }
+            )
 
             self.sound_objects = [
                 s for s in self.sound_objects if s.active and s.current_spl > 20
@@ -129,69 +102,22 @@ class Simulation:
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
         self.save_simulation_data()
         print("DATA SAVED")
-        # self.visualize()
+        visualize(
+            self.parameters_df,
+            self.history,
+            self.output_dir,
+            fig,
+            ax,
+            bat_markers,
+            sound_artists,
+            detection_artists,
+        )
 
     # TODO: add handle reflections somewhere else ig?; disconnect it from simulation; but its okay if this is the
     #
-    def _handle_reflections(self, current_time):
+    def handle_reflections(self, current_time):
         new_echoes = []
-        # for sound in self.sound_objects:
-        #     if not sound.active or isinstance(sound, EchoSound):#or sound.has_reflected :
-        #         continue
 
-        #     sound.update(current_time)
-        #     reflection_point = None
-        #     normal = None
-        #     obstacle_id = None
-
-        #     # Check arena boundaries
-        #     sound_edge = sound.origin + Vector2D(sound.current_radius, 0)
-        #     if sound_edge.x <= 0:
-        #         reflection_point = Vector2D(0, sound.origin.y)
-        #         normal = Vector2D(1, 0)
-        #         obstacle_id = "left_wall"
-        #     elif sound_edge.x >= self.parameters_df["ARENA_WIDTH"][0]:
-        #         reflection_point = Vector2D(self.parameters_df["ARENA_WIDTH"][0], sound.origin.y)
-        #         normal = Vector2D(-1, 0)
-        #         obstacle_id = "right_wall"
-        #     elif sound_edge.y <= 0:
-        #         reflection_point = Vector2D(sound.origin.x, 0)
-        #         normal = Vector2D(0, 1)
-        #         obstacle_id = "bottom_wall"
-        #     elif sound_edge.y >= self.parameters_df["ARENA_HEIGHT"][0]:
-        #         reflection_point = Vector2D(sound.origin.x, self.parameters_df["ARENA_HEIGHT"][0])
-        #         normal = Vector2D(0, -1)
-        #         obstacle_id = "top_wall"
-
-        #     # Check obstacles
-        #     for obstacle in self.obstacles:
-        #         if (sound.contains_point(obstacle.position) and
-        #             id(obstacle) not in sound.reflected_obstacles):
-        #             normal = obstacle.get_reflection_normal(sound.origin)
-        #             reflection_point = obstacle.position + normal * obstacle.radius
-        #             obstacle_id = id(obstacle)
-        #             break
-
-        #     # Check other bats
-        #     for bat in self.bats:
-        #         if (sound.contains_point(bat.position) and
-        #             sound.emitter_id != bat.id and
-        #             id(bat) not in sound.reflected_obstacles):
-        #             normal = (sound.origin - bat.position).normalize()
-        #             reflection_point = bat.position + normal * 0.1
-        #             obstacle_id = id(bat)
-        #             break
-
-        #     if reflection_point and normal and obstacle_id:
-        #         echo = sound.create_echo(reflection_point, current_time, normal)
-        #         if echo:
-        #             # Mark this obstacle as reflected for the original sound
-        #             sound.reflected_obstacles.add(obstacle_id)
-        #             # Copy reflected obstacles to the echo
-        #             echo.reflected_obstacles.update(sound.reflected_obstacles)
-        #             new_echoes.append(echo)
-
-        # self.sound_objects.extend(new_echoes)
         for sound in self.sound_objects:
             if not sound.active or not isinstance(
                 sound, DirectSound
@@ -204,35 +130,6 @@ class Simulation:
             obstacle_id = None
 
             reflection_point_arr, normal_arr, obstacle_id_arr = [], [], []
-
-            # Check arena boundaries
-            # sound_edge = sound.origin - Vector(sound.current_radius, 0)
-            # if sound_edge.x <= 0:
-            #     reflection_point = Vector(0, sound.origin.y)
-            #     normal = Vector(1, 0)
-            #     obstacle_id = "left_wall"
-            #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
-
-            # sound_edge = sound.origin + Vector(sound.current_radius, 0)
-            # if sound_edge.x >= self.parameters_df["ARENA_WIDTH"][0]:
-            #     reflection_point = Vector(self.parameters_df["ARENA_WIDTH"][0], sound.origin.y)
-            #     normal = Vector(-1, 0)
-            #     obstacle_id = "right_wall"
-            #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
-
-            # sound_edge = sound.origin - Vector(0, sound.current_radius)
-            # if sound_edge.y <= 0:
-            #     reflection_point = Vector(sound.origin.x, 0)
-            #     normal = Vector(0, 1)
-            #     obstacle_id = "bottom_wall"
-            #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
-
-            # sound_edge = sound.origin + Vector(0, sound.current_radius)
-            # if sound_edge.y >= self.parameters_df["ARENA_HEIGHT"][0]:
-            #     reflection_point = Vector(sound.origin.x, self.parameters_df["ARENA_HEIGHT"][0])
-            #     normal = Vector(0, -1)
-            #     obstacle_id = "top_wall"
-            #     normal_arr.append(normal); reflection_point_arr.append(reflection_point); obstacle_id_arr.append(obstacle_id)
 
             # Check obstacles
             for obstacle in self.obstacles:
@@ -372,117 +269,11 @@ class Simulation:
 
     # TODO: make a different module for plotting; disconnect it from simulation
     #
-    def visualize(self):
-        def init():
-            for marker in self.bat_markers:
-                marker.set_data([], [])
-            return self.bat_markers
-
-        def animate(i):
-            frame = self.history[i]
-
-            for j, (x, y) in enumerate(frame["bat_positions"]):
-                self.bat_markers[j].set_data([x], [y])
-
-            for artist in self.sound_artists + self.detection_artists:
-                artist.remove()
-            self.sound_artists.clear()
-            self.detection_artists.clear()
-            plt.title(f"time step: {i}")
-            colors = plt.cm.tab10.colors
-            for sound in frame["sound_objects"]:
-                # print(sound)
-                if not sound["status"]:
-                    continue
-
-                emitter_color = colors[sound["emitter_id"] % len(colors)]
-                alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
-
-                inner = max(
-                    0, sound["radius"] - self.parameters_df["SOUND_DISK_WIDTH"][0]
-                )
-                outer = sound["radius"]
-
-                if inner < outer:
-                    if sound["type"] == "direct":
-                        linestyle = "-"
-                        hatching_of_disk = "++"
-                    else:
-                        linestyle = "--"
-                        alpha = 0.5 * alpha
-                        hatching_of_disk = ".."
-                    if inner == 0:
-                        width_of_disk = sound["radius"]
-                    else:
-                        width_of_disk = self.parameters_df["SOUND_DISK_WIDTH"][0]
-                    wedge = Wedge(
-                        sound["origin"],
-                        outer,
-                        0,
-                        360,
-                        width=width_of_disk,
-                        fill=False,
-                        color=emitter_color,
-                        alpha=alpha,
-                        linestyle=linestyle,
-                        hatch=hatching_of_disk,
-                    )
-                    self.ax.add_patch(wedge)
-                    self.sound_artists.append(wedge)
-
-            for bat_idx, detections in enumerate(frame["bat_detections"]):
-                for detection in detections:
-                    if detection["type"] == "direct":
-                        color = "green"
-                    else:
-                        color = colors[detection["emitter_id"] % len(colors)]
-
-                    dx, dy = detection["position"]
-                    marker = Circle((dx, dy), 0.05, color=color, alpha=0.7)
-                    self.ax.add_patch(marker)
-                    self.detection_artists.append(marker)
-
-                    bat_x, bat_y = frame["bat_positions"][bat_idx]
-                    (line,) = self.ax.plot(
-                        [bat_x, dx], [bat_y, dy], color=color, alpha=0.2
-                    )
-                    self.detection_artists.append(line)
-
-            return self.bat_markers + self.sound_artists + self.detection_artists
-
-        print("DONE RUNNING THE SIMULATION, NOW RUNNING ANIMATION STORAGE")
-        ani = animation.FuncAnimation(
-            self.fig,
-            animate,
-            frames=len(self.history),
-            init_func=init,
-            blit=False,
-            interval=self.parameters_df["FRAME_RATE"][0],
-        )
-
-        self.handles, labels = self.ax.get_legend_handles_labels()
-
-        Obstacle_patch = Patch(color="red", alpha=0.5, label="Obstacle")
-        DirectSound_patch = Patch(hatch="++", label="DirectSound")
-        EchoSound_patch = Patch(hatch="..", label="EchoSound")
-
-        self.handles.append(DirectSound_patch)
-        self.handles.append(EchoSound_patch)
-        self.handles.append(Obstacle_patch)
-        # DirectSound_patch = Patch(hatch="++", label='DirectSound')
-        # plt.legend()
-        plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=self.handles)
-
-        FFwriter = animation.FFMpegWriter(fps=self.parameters_df["FRAME_RATE"])
-        ani.save(
-            self.output_dir + f"/animation_w_changed_param_usage_testing_detections.mp4"
-        )  # _{self.parameters_df['NUM_BATS']}_numobs_{self.parameters_df['OBSTACLE_COUNT']}_time_{self.parameters_df['SIM_DURATION']}_call_duration_{self.parameters_df['CALL_DURATION']}_call_rate_{self.parameters_df['CALL_RATE']}_frame_rate_{self.parameters_df['FRAME_RATE']}.mp4", writer=FFwriter)
-        plt.show()
 
 
 print(os.getcwd())
 output_dir = "test_storage"
-parameter_file_dir = r"./paramsets/intensive_test.csv"
+parameter_file_dir = r"./dynamic_model/paramsets/intensive_test.csv"
 if __name__ == "__main__":
     sim = Simulation(parameter_file_dir, output_dir)
     sim.run()
