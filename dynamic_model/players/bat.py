@@ -1,10 +1,12 @@
-from supporting_files.vectors import Vector
-import random
 import math
-from supporting_files.misc_files import *
-from players.direct_sound_w_inheritance import DirectSound
 import os
+import random
+
 import numpy as np
+from agents.sounds import DirectSound
+from supporting_files.utilities import *
+from supporting_files.vectors import Vector
+
 
 class Bat:
     _id_counter = 0

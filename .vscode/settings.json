@@ -1,0 +1,11 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+  },
+  "pylint.args": ["--disable=C0115", "--disable=E0401"],
+  "isort.args":["--profile", "black"],
+}

@@ -1,7 +1,7 @@
 from supporting_files.vectors import Vector
 import supporting_files.constants as Constants
 import math
-from players.echo_sound import EchoSound
+from agents.echo_sound import EchoSound
 
 class DirectSound:
     def __init__(self, origin, creation_time, emitter_id):

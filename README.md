@@ -1,4 +1,6 @@
-# coup the coupe gathering
+
+
+# Dynamic Model of Cocktail Party Nightmare
  Implementing a dynamic model of the cocktail party nightmare problem :)
 
 ## How to run
