@@ -11,7 +11,7 @@ from players.echo_sound import EchoSound
 import random        
 
 
-class TestingNoncentralAllocation(unittest.TestCase):
+class TestingSoundPropagation(unittest.TestCase):
     def setUp(self):
         self.sound_start_point= Vector(0,0)
         self.points_to_test= [Vector(1,1), Vector(-1,1), Vector(1,-1), Vector(-1,-1)]
