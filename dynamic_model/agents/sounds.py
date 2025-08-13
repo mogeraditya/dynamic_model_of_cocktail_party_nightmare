@@ -48,7 +48,7 @@ class EchoSound:
         Also, ensures sounds outside the arena are "disabled" and no longer tracked.
 
         Args:
-            current_time (float): time, in seconds, for which the simualtion has been running.
+            current_time (float): Time, in seconds, for which the simualtion has been running.
         """
         elapsed = current_time - self.creation_time
         self.current_radius = self.parameters_df["SOUND_SPEED"][0] * elapsed

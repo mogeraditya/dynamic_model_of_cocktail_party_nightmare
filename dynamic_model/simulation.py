@@ -1,18 +1,17 @@
-# place holder file that runs simulation for multiple different parameters
-import csv
+"""Contains the code that describes a Simulation object. Runs one instance, given parameters."""
+
 import os
 import pickle
-import time
 from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
 from agents.bats import Bat
 from agents.obstacles import Obstacle
-from agents.sounds import DirectSound, EchoSound
-from plotter import *
+from agents.sounds import DirectSound
 from supporting_files.utilities import load_parameters
-from supporting_files.vectors import Vector
+
+# from supporting_files.vectors import Vector
 
 plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
 
@@ -23,14 +22,13 @@ class Simulation:
     instance of the set of parameters chosen
     """
 
-    def __init__(self, parameter_file_dir, output_dir, visualize):
+    def __init__(self, parameter_file_dir, output_dir):
         parameters_df = load_parameters(parameter_file_dir)
 
         self.parameters_df = parameters_df
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
-        # print(self.parameters_df.keys())
-        # print(self.parameters_df["ARENA_WIDTH"][0])
+
         self.bats = [
             Bat(self.parameters_df, self.output_dir)
             for _ in range(int(self.parameters_df["NUM_BATS"][0]))
@@ -42,19 +40,16 @@ class Simulation:
         self.sound_objects = []  # Contains both DirectSound and EchoSound
         self.time_elapsed = 0.0
         self.history = []
-        if visualize:
-            (
-                self.fig,
-                self.ax,
-                self.bat_markers,
-                self.sound_artists,
-                self.detection_artists,
-            ) = setup_visualization(self.parameters_df, self.obstacles, self.bats)
+
         self.handles = []
 
     # TODO: make a different module for plotting; disconnect it from simulation
 
     def run(self):
+        """Runs one instance of the simulation.
+        After parsing the parameter file, it runs one instance of the simulation
+        for those sets of parameters.
+        """
         num_steps = int(
             self.parameters_df["SIM_DURATION"][0] / self.parameters_df["TIME_STEP"][0]
         )
@@ -80,7 +75,7 @@ class Simulation:
                         for bat in self.bats
                     ],
                     "sound_objects": [
-                        self._serialize_sound(s)
+                        self.serialize_sound(s)
                         for s in self.sound_objects
                         if s.active and s.current_spl > 20
                     ],
@@ -98,24 +93,38 @@ class Simulation:
             )
             # print(current_loop_time-save_time_of_last_iter)
             save_time_of_last_iter = current_loop_time
+            self.handle_data_storage_for_plotting(self.time_elapsed, False)
+        self.handle_data_storage_for_plotting(self.time_elapsed, True)
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
-        self.save_simulation_data()
+        # self.save_simulation_data()
         print("DATA SAVED")
-        visualize(
-            self.parameters_df,
-            self.history,
-            self.output_dir,
-            fig,
-            ax,
-            bat_markers,
-            sound_artists,
-            detection_artists,
+
+    def handle_data_storage_for_plotting(self, current_time, is_end_of_code):
+        """Generates files for data used for plotting.
+        Periodically the history list is cleared to ensure
+        RAM doesnt get used up.
+        """
+        history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
+        _dir_to_save = (
+            self.output_dir + f"/data_for_plotting/history_dump_{current_time:.3f}.pkl"
         )
+        # filepath = os.path.join(self.output_dir, _dir_to_save)
+        if len(self.history) > history_array_size_limit or is_end_of_code:
+            with open(_dir_to_save, "wb") as f:
+                pickle.dump(self.history, f)
+            self.history = []
 
     # TODO: add handle reflections somewhere else ig?; disconnect it from simulation; but its okay if this is the
     #
     def handle_reflections(self, current_time):
+        """Generates reflections of the sound objects.
+        Soud objects can reflect off of obstacles and bats
+        to generate EchoSound s.
+
+        Args:
+            current_time (float): Time, in seconds, for which the simualtion has been running.
+        """
         new_echoes = []
 
         for sound in self.sound_objects:
@@ -164,8 +173,7 @@ class Simulation:
 
                     # break
 
-            for i, arr in enumerate(reflection_point_arr):
-                reflection_point = reflection_point_arr[i]
+            for i, reflection_point in enumerate(reflection_point_arr):
                 normal = normal_arr[i]
                 obstacle_id = obstacle_id_arr[i]
                 if reflection_point and normal and obstacle_id:
@@ -182,9 +190,16 @@ class Simulation:
 
         self.sound_objects.extend(new_echoes)
 
-    def _serialize_sound(self, sound):
-        # if not isinstance(sound, EchoSound):
-        #     print(sound); print(isinstance(sound, DirectSound))
+    def serialize_sound(self, sound):
+        """Serializes sounds into dictionaries.
+        This is done for easier storage.
+
+        Args:
+            sound (EchoSound): input sound object to be serialized
+
+        Returns:
+            dict: data inside the sound obejct is serialized into a dict.
+        """
         data = {
             "origin": (sound.origin.x, sound.origin.y),
             "radius": sound.current_radius,
@@ -204,76 +219,75 @@ class Simulation:
 
         return data
 
-    def save_simulation_data(self):
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # def save_simulation_data(self):
+    #     """_summary_
+    #     """
+    #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        # Create a proper dictionary of constants
-        # constants_dict = {
-        #     'ARENA_WIDTH': self.parameters_df["ARENA_WIDTH"][0],
-        #     'ARENA_HEIGHT': self.parameters_df["ARENA_HEIGHT"][0],
-        #     'SOUND_SPEED': Constants.SOUND_SPEED,
-        #     'BAT_SPEED': Constants.BAT_SPEED,
-        #     'SIM_DURATION': Constants.SIM_DURATION,
-        #     'TIME_STEP': Constants.TIME_STEP,
-        #     'CALL_DURATION': Constants.CALL_DURATION,
-        #     'CALL_RATE': Constants.CALL_RATE,
-        #     'OBSTACLE_COUNT': Constants.OBSTACLE_COUNT,
-        #     'OBSTACLE_RADIUS': Constants.OBSTACLE_RADIUS,
-        #     'EMITTED_SPL': Constants.EMITTED_SPL,
-        #     'MIN_DETECTABLE_SPL': Constants.MIN_DETECTABLE_SPL,
-        #     'NUM_BATS': Constants.NUM_BATS,
-        #     'AIR_ABSORPTION': Constants.AIR_ABSORPTION,
-        #     'REFLECTION_LOSS': Constants.REFLECTION_LOSS,
-        #     'SOUND_DISK_WIDTH': Constants.SOUND_DISK_WIDTH,
+    #     # Create a proper dictionary of constants
+    #     # constants_dict = {
+    #     #     'ARENA_WIDTH': self.parameters_df["ARENA_WIDTH"][0],
+    #     #     'ARENA_HEIGHT': self.parameters_df["ARENA_HEIGHT"][0],
+    #     #     'SOUND_SPEED': Constants.SOUND_SPEED,
+    #     #     'BAT_SPEED': Constants.BAT_SPEED,
+    #     #     'SIM_DURATION': Constants.SIM_DURATION,
+    #     #     'TIME_STEP': Constants.TIME_STEP,
+    #     #     'CALL_DURATION': Constants.CALL_DURATION,
+    #     #     'CALL_RATE': Constants.CALL_RATE,
+    #     #     'OBSTACLE_COUNT': Constants.OBSTACLE_COUNT,
+    #     #     'OBSTACLE_RADIUS': Constants.OBSTACLE_RADIUS,
+    #     #     'EMITTED_SPL': Constants.EMITTED_SPL,
+    #     #     'MIN_DETECTABLE_SPL': Constants.MIN_DETECTABLE_SPL,
+    #     #     'NUM_BATS': Constants.NUM_BATS,
+    #     #     'AIR_ABSORPTION': Constants.AIR_ABSORPTION,
+    #     #     'REFLECTION_LOSS': Constants.REFLECTION_LOSS,
+    #     #     'SOUND_DISK_WIDTH': Constants.SOUND_DISK_WIDTH,
 
-        #     'timestamp': timestamp
-        # }
-        constants_df = self.parameters_df
-        constants_df["timestamp"] = timestamp
-        simulation_data = {
-            "parameters": constants_df,  # Use the plain dictionary
-            "bat_data": [],
-            "obstacle_positions": [
-                (o.position.x, o.position.y) for o in self.obstacles
-            ],
-            "sound_history": self.history,
-        }
+    #     #     'timestamp': timestamp
+    #     # }
+    #     constants_df = self.parameters_df
+    #     constants_df["timestamp"] = timestamp
+    #     simulation_data = {
+    #         "parameters": constants_df,  # Use the plain dictionary
+    #         "bat_data": [],
+    #         "obstacle_positions": [
+    #             (o.position.x, o.position.y) for o in self.obstacles
+    #         ],
+    #         "sound_history": self.history,
+    #     }
 
-        for bat in self.bats:
-            bat_data = {
-                "id": bat.id,
-                "position_history": bat.position_history,
-                "received_sounds": bat.received_sounds,
-                "emitted_sounds": [
-                    {
-                        "creation_time": s.creation_time,
-                        "origin": (s.origin.x, s.origin.y),
-                        "initial_spl": s.initial_spl,
-                    }
-                    for s in bat.emitted_sounds
-                ],
-            }
-            simulation_data["bat_data"].append(bat_data)
+    #     for bat in self.bats:
+    #         bat_data = {
+    #             "id": bat.id,
+    #             "position_history": bat.position_history,
+    #             "received_sounds": bat.received_sounds,
+    #             "emitted_sounds": [
+    #                 {
+    #                     "creation_time": s.creation_time,
+    #                     "origin": (s.origin.x, s.origin.y),
+    #                     "initial_spl": s.initial_spl,
+    #                 }
+    #                 for s in bat.emitted_sounds
+    #             ],
+    #         }
+    #         simulation_data["bat_data"].append(bat_data)
 
-        filename = f"bat_simulation_{timestamp}.pkl"
-        filepath = os.path.join(self.output_dir, filename)
+    #     filename = f"bat_simulation_{timestamp}.pkl"
+    #     filepath = os.path.join(self.output_dir, filename)
 
-        # with open(filepath, 'wb') as f:
-        #     pickle.dump(simulation_data, f)
+    #     # with open(filepath, 'wb') as f:
+    #     #     pickle.dump(simulation_data, f)
 
-        # with open("mycsvfile.csv", "w", newline="") as f:
-        #     w = csv.DictWriter(f, constants_df.keys())
-        #     w.writeheader()
-        #     w.writerow(constants_df)
-        #     print(f"Saved simulation data to {filepath}")
-
-    # TODO: make a different module for plotting; disconnect it from simulation
-    #
+    #     # with open("mycsvfile.csv", "w", newline="") as f:
+    #     #     w = csv.DictWriter(f, constants_df.keys())
+    #     #     w.writeheader()
+    #     #     w.writerow(constants_df)
+    #     #     print(f"Saved simulation data to {filepath}")
 
 
 print(os.getcwd())
-output_dir = "test_storage"
-parameter_file_dir = r"./dynamic_model/paramsets/intensive_test.csv"
+OUTPUT_DIR = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/test_storage"
+PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/intensive_test.csv"
 if __name__ == "__main__":
-    sim = Simulation(parameter_file_dir, output_dir)
+    sim = Simulation(PARAMETER_FILE_DIR, OUTPUT_DIR)
     sim.run()

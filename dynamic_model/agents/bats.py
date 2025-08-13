@@ -1,8 +1,10 @@
+"""This module contains the code that describes a Bat object and its behaviours"""
+
 import random
 
 import numpy as np
 from agents.sounds import DirectSound
-from supporting_files.utilities import *
+from supporting_files.utilities import make_dir
 from supporting_files.vectors import Vector
 
 
@@ -19,7 +21,6 @@ class Bat:
             random.uniform(1, self.parameters_df["ARENA_HEIGHT"][0] - 1),
         )
         self.direction = Vector().random_direction()  # randomize start direction
-        self.speed = self.parameters_df["BAT_SPEED"][0]
         self.time_since_last_call = random.uniform(
             0, 1 / self.parameters_df["CALL_RATE"][0]
         )
@@ -33,7 +34,6 @@ class Bat:
         # Clean up activates after every some steps to clear memory from RAM and store it on drive.
         self.time_since_last_cleanup = self.time_since_last_call
         self.output_dir = output_dir
-        self.time_step = parameters_df["TIME_STEP"][0]
 
     # TODO: dont allow movement through obstacles/ other bats
     def update(self, current_time, sound_objects):
@@ -43,11 +43,8 @@ class Bat:
         Bat detections over time is also cleared and stored locally.
 
         Args:
-            self.time_step (float): _description_
-            obstacles (Obstacle): _description_
-            bats (Bat): _description_
-            current_time (float): _description_
-            sound_objects (EchoSound): _description_
+            current_time (float): Time, in seconds, for which the simualtion has been running.
+            sound_objects (EchoSound): direct and echo sounds that are currently active.
         """
 
         self.update_movement()
@@ -62,7 +59,11 @@ class Bat:
         Every timestep the position of the bat needs to be
         updated based on velcoity and direction.
         """
-        self.position += self.direction * self.speed * self.time_step
+        self.position += (
+            self.direction
+            * self.parameters_df["BAT_SPEED"][0]
+            * self.parameters_df["TIME_STEP"][0]
+        )
 
         # Boundary checks with bounce
         if (
@@ -89,7 +90,7 @@ class Bat:
             current_time (float): Time, in seconds, for which the simualtion has been running.
             sound_objects (list): List containing all active sounds in the simulation
         """
-        self.time_since_last_call += self.time_step
+        self.time_since_last_call += self.parameters_df["TIME_STEP"][0]
         call_interval = 1.0 / self.parameters_df["CALL_RATE"][0]
 
         if self.time_since_last_call >= call_interval:
@@ -156,28 +157,28 @@ class Bat:
             make_dir(dir_to_store)
             np.save(
                 dir_to_store
-                + f'/bat_{self.id}_received_sounds_snapshot_at_time_{"%.3f" % current_time}.npy',
+                + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time:.3f}.npy",
                 self.received_sounds,
             )
             np.save(
                 dir_to_store
-                + f'/emitted_sounds_snapshot_at_time_{"%.3f" % current_time}.npy',
+                + f"/emitted_sounds_snapshot_at_time_{current_time:.3f}.npy",
                 self.emitted_sounds,
             )
             self.time_since_last_cleanup = current_time
             self.emitted_sounds = []
             self.received_sounds = []
 
-    # def get_detections_at_time(self, current_time):
-    #     """
+    def get_detections_at_time(self, current_time):
+        """
 
-    #     Args:
-    #         current_time (_type_): _description_
+        Args:
+            current_time (float): Time, in seconds, for which the simualtion has been running.
 
-    #     Returns:
-    #         _type_: _description_
-    #     """
-    #     return [d for d in self.received_sounds if d["time"] <= current_time]
+        Returns:
+            list: sounds that are detected by a bat before a certain time.
+        """
+        return [d for d in self.received_sounds if d["time"] <= current_time]
 
     def __repr__(self):
         return f"Bat(id={self.id}, position={self.position})"

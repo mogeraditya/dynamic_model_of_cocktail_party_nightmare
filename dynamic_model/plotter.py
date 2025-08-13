@@ -1,5 +1,9 @@
+import glob
+import pickle
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.patches import Circle, Patch, Rectangle, Wedge
 
 
@@ -161,3 +165,14 @@ def visualize(
         output_dir + f"/animation_w_changed_param_usage_testing_detections.mp4"
     )  # _{ parameters_df['NUM_BATS']}_numobs_{ parameters_df['OBSTACLE_COUNT']}_time_{ parameters_df['SIM_DURATION']}_call_duration_{ parameters_df['CALL_DURATION']}_call_rate_{ parameters_df['CALL_RATE']}_frame_rate_{ parameters_df['FRAME_RATE']}.mp4", writer=FFwriter)
     plt.show()
+
+
+def stitch_together_history_lists(history_output_dir):
+    list_of_dict_files = glob.glob(history_output_dir + "/*.pkl")
+    list_of_dict_files = np.sort(list_of_dict_files)
+    list_containing_data_from_all_pickle_files = []
+    for pickle_file in list_of_dict_files:
+        with open(pickle_file, "rb") as f:
+            _list_containing_subset = pickle.load(f)
+            list_containing_data_from_all_pickle_files.extend(_list_containing_subset)
+    return list_containing_data_from_all_pickle_files
