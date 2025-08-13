@@ -2,6 +2,7 @@
 
 import os
 
+import numpy as np
 import pandas
 
 
@@ -53,8 +54,27 @@ def load_parameters(file_dir):
     return output_df
 
 
-# file_dir= r"../paramsets/mycsvfile.csv"
-# df= load_parameters(file_dir)
-# print(df)
-# print(df["NUM_BATS"][0])
-# print(type(df["NUM_BATS"][0]))
+def call_directionality_factor(A, theta):
+    """Calculates the drop in source level as the angle
+    increases from on-axis.
+
+    The function calculates the drop using the third term
+    in equation 11 of Giuggioli et al. 2015
+
+     Parameters
+    ----------
+    A : float >0. Asymmetry parameter
+    theta : float. Angle at which the call directionality factor is
+            to be calculated in radians. 0 radians is on-axis.
+      Returns
+    -------
+
+    call_dirn : float <=0. The amount of drop in dB which occurs when the call
+                is measured off-axis.
+    """
+    if A <= 0:
+        raise ValueError("A should be >0 ! ")
+
+    call_dirn = A * (np.cos(theta) - 1)
+
+    return call_dirn
