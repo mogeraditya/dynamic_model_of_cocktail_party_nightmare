@@ -4,10 +4,54 @@ import pickle
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from matplotlib.patches import Circle, Patch, Rectangle, Wedge
 
+plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
 
-def setup_visualization(parameters_df, obstacles, bats):
+
+def stitch_together_history_lists(history_output_dir):
+    """Merges lists from all the pickle files together.
+
+    Args:
+        history_output_dir (string):
+
+    Returns:
+        list: list with all the merged lists from pickle files.
+    """
+    list_of_dict_files = glob.glob(history_output_dir + "/history_dump_*.pkl")
+    list_of_dict_files = np.sort(list_of_dict_files)
+    list_containing_data_from_all_pickle_files = []
+    for pickle_file in list_of_dict_files:
+        with open(pickle_file, "rb") as f:
+            _list_containing_subset = pickle.load(f)
+            list_containing_data_from_all_pickle_files.extend(_list_containing_subset)
+
+    parameter_file = glob.glob(history_output_dir + "/parameters_used.pkl")[0]
+    parameter_df = pd.read_pickle(parameter_file)
+    with open(history_output_dir + "/bats_initial.pkl", "rb") as f:
+        bats_initial_positions = pickle.load(f)
+    with open(history_output_dir + "/obstacles_initial.pkl", "rb") as f:
+        obstacles_initial_positions = pickle.load(f)
+    return (
+        list_containing_data_from_all_pickle_files,
+        parameter_df,
+        bats_initial_positions,
+        obstacles_initial_positions,
+    )
+
+
+def setup_visualization(parameters_df, bats, obstacles):
+    """Sets up the figure for animation.
+
+    Args:
+        parameters_df (DataFrame): parameters used to run the simulation
+        bats (list): bat objects that the simulation was intiated with
+        obstacles (list): obstacles objects that the simualtion was intiated with
+
+    Returns:
+        list: contains axes, figure, markers and artists to build the animation on.
+    """
     fig, ax = plt.subplots(figsize=(10, 7))
     ax.set_xlim(0, parameters_df["ARENA_WIDTH"][0])
     ax.set_ylim(0, parameters_df["ARENA_HEIGHT"][0])
@@ -51,19 +95,10 @@ def setup_visualization(parameters_df, obstacles, bats):
         )
         bat_markers.append(marker)
 
-    return fig, ax, bat_markers, sound_artists, detection_artists
+    return [fig, ax, bat_markers, sound_artists, detection_artists]
 
 
-def visualize(
-    parameters_df,
-    history,
-    output_dir,
-    fig,
-    ax,
-    bat_markers,
-    sound_artists,
-    detection_artists,
-):
+def visualize(output_dir):
     def init():
         for marker in bat_markers:
             marker.set_data([], [])
@@ -119,25 +154,28 @@ def visualize(
                 ax.add_patch(wedge)
                 sound_artists.append(wedge)
 
-        for bat_idx, detections in enumerate(frame["bat_detections"]):
-            for detection in detections:
-                if detection["type"] == "direct":
-                    color = "green"
-                else:
-                    color = colors[detection["emitter_id"] % len(colors)]
+        # for bat_idx, detections in enumerate(frame["bat_detections"]):
+        #     for detection in detections:
+        #         if detection["type"] == "direct":
+        #             color = "green"
+        #         else:
+        #             color = colors[detection["emitter_id"] % len(colors)]
 
-                dx, dy = detection["position"]
-                marker = Circle((dx, dy), 0.05, color=color, alpha=0.7)
-                ax.add_patch(marker)
-                detection_artists.append(marker)
+        #         dx, dy = detection["position"]
+        #         marker = Circle((dx, dy), 0.05, color=color, alpha=0.7)
+        #         ax.add_patch(marker)
+        #         detection_artists.append(marker)
 
-                bat_x, bat_y = frame["bat_positions"][bat_idx]
-                (line,) = ax.plot([bat_x, dx], [bat_y, dy], color=color, alpha=0.2)
-                detection_artists.append(line)
+        #         bat_x, bat_y = frame["bat_positions"][bat_idx]
+        #         (line,) = ax.plot([bat_x, dx], [bat_y, dy], color=color, alpha=0.2)
+        #         detection_artists.append(line)
 
         return bat_markers + sound_artists + detection_artists
 
-    print("DONE RUNNING THE SIMULATION, NOW RUNNING ANIMATION STORAGE")
+    history, parameters_df, bats, obstacles = stitch_together_history_lists(output_dir)
+    fig, ax, bat_markers, sound_artists, detection_artists = setup_visualization(
+        parameters_df, bats, obstacles
+    )
     ani = animation.FuncAnimation(
         fig,
         animate,
@@ -160,19 +198,12 @@ def visualize(
     # plt.legend()
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=handles)
 
-    FFwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"])
+    ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
     ani.save(
-        output_dir + f"/animation_w_changed_param_usage_testing_detections.mp4"
-    )  # _{ parameters_df['NUM_BATS']}_numobs_{ parameters_df['OBSTACLE_COUNT']}_time_{ parameters_df['SIM_DURATION']}_call_duration_{ parameters_df['CALL_DURATION']}_call_rate_{ parameters_df['CALL_RATE']}_frame_rate_{ parameters_df['FRAME_RATE']}.mp4", writer=FFwriter)
+        output_dir + "/animation.mp4",
+        writer=ffwriter,
+    )
     plt.show()
 
 
-def stitch_together_history_lists(history_output_dir):
-    list_of_dict_files = glob.glob(history_output_dir + "/*.pkl")
-    list_of_dict_files = np.sort(list_of_dict_files)
-    list_containing_data_from_all_pickle_files = []
-    for pickle_file in list_of_dict_files:
-        with open(pickle_file, "rb") as f:
-            _list_containing_subset = pickle.load(f)
-            list_containing_data_from_all_pickle_files.extend(_list_containing_subset)
-    return list_containing_data_from_all_pickle_files
+visualize(r"./test_storage_multiple_echoes/data_for_plotting")

@@ -82,41 +82,41 @@ class EchoSound:
             0, self.current_radius - self.parameters_df["SOUND_DISK_WIDTH"][0]
         )
 
-    def create_echo(self, point, current_time, normal, reflected_from):
-        """Handles EchoSound creation by the sound object.
-        Creates an echo at the specified point.
+    # def create_echo(self, point, current_time, normal, reflected_from):
+    #     """Handles EchoSound creation by the sound object.
+    #     Creates an echo at the specified point.
 
-        Args:
-            point (Vector): point of reflection of sound
-            current_time (float): time, in seconds, for which the simualtion has been running.
-            normal (Vector): Normal vector from the object that the sound reflects from.
-            reflected_from (string): The id of the object the sound reflects from.
+    #     Args:
+    #         point (Vector): point of reflection of sound
+    #         current_time (float): time, in seconds, for which the simualtion has been running.
+    #         normal (Vector): Normal vector from the object that the sound reflects from.
+    #         reflected_from (string): The id of the object the sound reflects from.
 
-        Returns:
-            EchoSound: The generated EchoSound object.
-        """
+    #     Returns:
+    #         EchoSound: The generated EchoSound object.
+    #     """
 
-        if self.has_reflected:  # or
-            # self.reflection_count >= self.parameters_df['MAX_REFLECTIONS'][0]):
-            return None
+    #     if self.has_reflected:  # or
+    #         # self.reflection_count >= self.parameters_df['MAX_REFLECTIONS'][0]):
+    #         return None
 
-        reflected_spl = self.current_spl - self.parameters_df["REFLECTION_LOSS"][0]
-        if reflected_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
-            return None
+    #     reflected_spl = self.current_spl - self.parameters_df["REFLECTION_LOSS"][0]
+    #     if reflected_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
+    #         return None
 
-        self.has_reflected = True
-        echo = EchoSound(
-            parameters_df=self.parameters_df,
-            origin=point,
-            creation_time=current_time,
-            emitter_id=self.emitter_id,
-            initial_spl=reflected_spl,
-            parent_creation_time=id(self),
-            reflection_count=self.reflection_count + 1,
-            reflected_from=reflected_from,
-        )
-        echo.reflected_obstacles.update(self.reflected_obstacles)
-        return echo
+    #     self.has_reflected = True
+    #     echo = EchoSound(
+    #         parameters_df=self.parameters_df,
+    #         origin=point,
+    #         creation_time=current_time,
+    #         emitter_id=self.emitter_id,
+    #         initial_spl=reflected_spl,
+    #         parent_creation_time=id(self),
+    #         reflection_count=self.reflection_count + 1,
+    #         reflected_from=reflected_from,
+    #     )
+    #     echo.reflected_obstacles.update(self.reflected_obstacles)
+    #     return echo
 
     def __repr__(self):
         return (

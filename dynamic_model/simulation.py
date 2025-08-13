@@ -1,5 +1,6 @@
 """Contains the code that describes a Simulation object. Runs one instance, given parameters."""
 
+import csv
 import os
 import pickle
 from datetime import datetime
@@ -10,10 +11,6 @@ from agents.bats import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
 from supporting_files.utilities import load_parameters
-
-# from supporting_files.vectors import Vector
-
-plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
 
 
 class Simulation:
@@ -27,7 +24,10 @@ class Simulation:
 
         self.parameters_df = parameters_df
         self.output_dir = output_dir
+        self.dir_to_store = self.output_dir + "/data_for_plotting/"
+
         os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.dir_to_store, exist_ok=True)
 
         self.bats = [
             Bat(self.parameters_df, self.output_dir)
@@ -42,6 +42,11 @@ class Simulation:
         self.history = []
 
         self.handles = []
+
+        with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
+            pickle.dump(self.bats, f)
+        with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
+            pickle.dump(self.obstacles, f)
 
     # TODO: make a different module for plotting; disconnect it from simulation
 
@@ -106,14 +111,19 @@ class Simulation:
         RAM doesnt get used up.
         """
         history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
-        _dir_to_save = (
-            self.output_dir + f"/data_for_plotting/history_dump_{current_time:.3f}.pkl"
-        )
+
         # filepath = os.path.join(self.output_dir, _dir_to_save)
         if len(self.history) > history_array_size_limit or is_end_of_code:
-            with open(_dir_to_save, "wb") as f:
+            with open(
+                self.dir_to_store + f"history_dump_{current_time:.3f}.pkl", "wb"
+            ) as f:
                 pickle.dump(self.history, f)
             self.history = []
+
+        if is_end_of_code:
+
+            self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
+        #     print(f"Saved simulation data to {filepath}")
 
     # TODO: add handle reflections somewhere else ig?; disconnect it from simulation; but its okay if this is the
     #
@@ -176,7 +186,8 @@ class Simulation:
             for i, reflection_point in enumerate(reflection_point_arr):
                 normal = normal_arr[i]
                 obstacle_id = obstacle_id_arr[i]
-                if reflection_point and normal and obstacle_id:
+                if obstacle_id not in sound.reflected_obstacles:
+                    # if reflection_point and normal and obstacle_id:
                     echo = sound.create_echo(
                         reflection_point, current_time, normal, obstacle_id
                     )
@@ -286,8 +297,8 @@ class Simulation:
 
 
 print(os.getcwd())
-OUTPUT_DIR = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/test_storage"
-PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/intensive_test.csv"
+OUTPUT_DIR = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/test_storage_multiple_echoes"
+PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/mycsvfile.csv"
 if __name__ == "__main__":
     sim = Simulation(PARAMETER_FILE_DIR, OUTPUT_DIR)
     sim.run()
