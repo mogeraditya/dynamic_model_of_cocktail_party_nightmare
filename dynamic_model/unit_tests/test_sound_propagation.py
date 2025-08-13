@@ -1,12 +1,8 @@
-import sys
+"""unit test to test sound propagation"""
 
-sys.path.insert(1, ".")
-
-import math
-import random
 import unittest
 
-from agents.sounds import DirectSound, EchoSound
+from agents.sounds import DirectSound
 from supporting_files.vectors import Vector
 
 

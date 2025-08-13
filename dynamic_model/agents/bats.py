@@ -162,7 +162,7 @@ class Bat:
             )
             np.save(
                 dir_to_store
-                + f"/emitted_sounds_snapshot_at_time_{current_time:.3f}.npy",
+                + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time:.3f}.npy",
                 self.emitted_sounds,
             )
             self.time_since_last_cleanup = current_time

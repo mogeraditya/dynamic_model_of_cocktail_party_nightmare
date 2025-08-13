@@ -99,6 +99,12 @@ def setup_visualization(parameters_df, bats, obstacles):
 
 
 def visualize(output_dir):
+    """Saves animation as an mp4 file and then also plays it.
+
+    Args:
+        output_dir (string): the directory of the folder where history pkl files are saved.
+    """
+
     def init():
         for marker in bat_markers:
             marker.set_data([], [])
@@ -187,13 +193,13 @@ def visualize(output_dir):
 
     handles, labels = ax.get_legend_handles_labels()
 
-    Obstacle_patch = Patch(color="red", alpha=0.5, label="Obstacle")
-    DirectSound_patch = Patch(hatch="++", label="DirectSound")
-    EchoSound_patch = Patch(hatch="..", label="EchoSound")
+    obstacle_patch = Patch(color="red", alpha=0.5, label="Obstacle")
+    directsound_patch = Patch(hatch="++", label="DirectSound")
+    echosound_patch = Patch(hatch="..", label="EchoSound")
 
-    handles.append(DirectSound_patch)
-    handles.append(EchoSound_patch)
-    handles.append(Obstacle_patch)
+    handles.append(directsound_patch)
+    handles.append(echosound_patch)
+    handles.append(obstacle_patch)
     # DirectSound_patch = Patch(hatch="++", label='DirectSound')
     # plt.legend()
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=handles)
