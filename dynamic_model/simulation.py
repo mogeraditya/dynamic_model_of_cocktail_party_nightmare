@@ -1,11 +1,9 @@
 """Contains the code that describes a Simulation object. Runs one instance, given parameters."""
 
-import csv
 import os
 import pickle
 from datetime import datetime
 
-import matplotlib.pyplot as plt
 import numpy as np
 from agents.bats import Bat
 from agents.obstacles import Obstacle
@@ -15,7 +13,7 @@ from supporting_files.utilities import load_parameters
 
 class Simulation:
     """one instance of the simulation;
-    this objects goal is to run the simulation for one
+    this object's goal is to run the simulation for one
     instance of the set of parameters chosen
     """
 
@@ -47,8 +45,6 @@ class Simulation:
             pickle.dump(self.bats, f)
         with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
             pickle.dump(self.obstacles, f)
-
-    # TODO: make a different module for plotting; disconnect it from simulation
 
     def run(self):
         """Runs one instance of the simulation.
@@ -125,8 +121,6 @@ class Simulation:
             self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
         #     print(f"Saved simulation data to {filepath}")
 
-    # TODO: add handle reflections somewhere else ig?; disconnect it from simulation; but its okay if this is the
-    #
     def handle_reflections(self, current_time):
         """Generates reflections of the sound objects.
         Soud objects can reflect off of obstacles and bats
@@ -230,74 +224,9 @@ class Simulation:
 
         return data
 
-    # def save_simulation_data(self):
-    #     """_summary_
-    #     """
-    #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    #     # Create a proper dictionary of constants
-    #     # constants_dict = {
-    #     #     'ARENA_WIDTH': self.parameters_df["ARENA_WIDTH"][0],
-    #     #     'ARENA_HEIGHT': self.parameters_df["ARENA_HEIGHT"][0],
-    #     #     'SOUND_SPEED': Constants.SOUND_SPEED,
-    #     #     'BAT_SPEED': Constants.BAT_SPEED,
-    #     #     'SIM_DURATION': Constants.SIM_DURATION,
-    #     #     'TIME_STEP': Constants.TIME_STEP,
-    #     #     'CALL_DURATION': Constants.CALL_DURATION,
-    #     #     'CALL_RATE': Constants.CALL_RATE,
-    #     #     'OBSTACLE_COUNT': Constants.OBSTACLE_COUNT,
-    #     #     'OBSTACLE_RADIUS': Constants.OBSTACLE_RADIUS,
-    #     #     'EMITTED_SPL': Constants.EMITTED_SPL,
-    #     #     'MIN_DETECTABLE_SPL': Constants.MIN_DETECTABLE_SPL,
-    #     #     'NUM_BATS': Constants.NUM_BATS,
-    #     #     'AIR_ABSORPTION': Constants.AIR_ABSORPTION,
-    #     #     'REFLECTION_LOSS': Constants.REFLECTION_LOSS,
-    #     #     'SOUND_DISK_WIDTH': Constants.SOUND_DISK_WIDTH,
-
-    #     #     'timestamp': timestamp
-    #     # }
-    #     constants_df = self.parameters_df
-    #     constants_df["timestamp"] = timestamp
-    #     simulation_data = {
-    #         "parameters": constants_df,  # Use the plain dictionary
-    #         "bat_data": [],
-    #         "obstacle_positions": [
-    #             (o.position.x, o.position.y) for o in self.obstacles
-    #         ],
-    #         "sound_history": self.history,
-    #     }
-
-    #     for bat in self.bats:
-    #         bat_data = {
-    #             "id": bat.id,
-    #             "position_history": bat.position_history,
-    #             "received_sounds": bat.received_sounds,
-    #             "emitted_sounds": [
-    #                 {
-    #                     "creation_time": s.creation_time,
-    #                     "origin": (s.origin.x, s.origin.y),
-    #                     "initial_spl": s.initial_spl,
-    #                 }
-    #                 for s in bat.emitted_sounds
-    #             ],
-    #         }
-    #         simulation_data["bat_data"].append(bat_data)
-
-    #     filename = f"bat_simulation_{timestamp}.pkl"
-    #     filepath = os.path.join(self.output_dir, filename)
-
-    #     # with open(filepath, 'wb') as f:
-    #     #     pickle.dump(simulation_data, f)
-
-    #     # with open("mycsvfile.csv", "w", newline="") as f:
-    #     #     w = csv.DictWriter(f, constants_df.keys())
-    #     #     w.writeheader()
-    #     #     w.writerow(constants_df)
-    #     #     print(f"Saved simulation data to {filepath}")
-
 
 print(os.getcwd())
-OUTPUT_DIR = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/test_storage_multiple_echoes"
+OUTPUT_DIR = r"./test_storage_multiple_echoes/"
 PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/mycsvfile.csv"
 if __name__ == "__main__":
     sim = Simulation(PARAMETER_FILE_DIR, OUTPUT_DIR)
