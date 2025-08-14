@@ -48,6 +48,20 @@ class Vector:
         """
         return (self - other).magnitude()
 
+    def angle_between(self, other):
+        """measure angle difference between two vectors
+
+        Args:
+            other (Vector): compute distance to this vector
+
+        Returns:
+            float: angle in radians
+        """
+        dot_product = self.x * other.x + self.y * other.y
+        product_of_magnitudes = self.magnitude() * other.magnitude()
+
+        return math.acos(dot_product / product_of_magnitudes)
+
     def random_direction(self):
         """generate a random vector
 
