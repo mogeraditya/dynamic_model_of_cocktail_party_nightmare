@@ -34,6 +34,8 @@ class Bat:
         # Clean up activates after every some steps to clear memory from RAM and store it on drive.
         self.time_since_last_cleanup = self.time_since_last_call
         self.output_dir = output_dir
+        self.speed = self.parameters_df["BAT_SPEED"][0]
+        self.radius = self.parameters_df["BAT_RADIUS"][0]
 
     # TODO: dont allow movement through obstacles/ other bats
     def update(self, current_time, sound_objects):
@@ -60,9 +62,7 @@ class Bat:
         updated based on velcoity and direction.
         """
         self.position += (
-            self.direction
-            * self.parameters_df["BAT_SPEED"][0]
-            * self.parameters_df["TIME_STEP"][0]
+            self.direction * self.speed * self.parameters_df["TIME_STEP"][0]
         )
 
         # Boundary checks with bounce
@@ -117,7 +117,7 @@ class Bat:
             if not sound.active:
                 continue
 
-            sound.update(current_time)
+            # sound.update(current_time)
 
             if sound.current_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
                 continue

@@ -18,11 +18,25 @@ class Vector:
     def __mul__(self, scalar):
         return Vector(self.x * scalar, self.y * scalar)
 
+    def compare(self, other):
+        """Compare two vectors
+
+        Args:
+            other (Vector): the other vector being compared to
+
+        Returns:
+            Boolean: true if same else false
+        """
+        if self.x == other.x and self.y == other.y:
+            return True
+        else:
+            return False
+
     def magnitude(self):
         """computed magnitude of vectors
 
         Returns:
-            flloat: magnitude of the vector
+            float: magnitude of the vector
         """
         return math.sqrt(self.x**2 + self.y**2)
 
@@ -47,6 +61,20 @@ class Vector:
             float: distance
         """
         return (self - other).magnitude()
+
+    def angle_between(self, other):
+        """measure angle difference between two vectors
+
+        Args:
+            other (Vector): compute distance to this vector
+
+        Returns:
+            float: angle in radians
+        """
+        dot_product = self.x * other.x + self.y * other.y
+        product_of_magnitudes = self.magnitude() * other.magnitude()
+
+        return math.acos(dot_product / product_of_magnitudes)
 
     def random_direction(self):
         """generate a random vector
