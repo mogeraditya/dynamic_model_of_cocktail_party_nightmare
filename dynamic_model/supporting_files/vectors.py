@@ -36,7 +36,7 @@ class Vector:
         """computed magnitude of vectors
 
         Returns:
-            flloat: magnitude of the vector
+            float: magnitude of the vector
         """
         return math.sqrt(self.x**2 + self.y**2)
 

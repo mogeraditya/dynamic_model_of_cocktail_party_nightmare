@@ -98,7 +98,7 @@ def setup_visualization(parameters_df, bats, obstacles):
     return [fig, ax, bat_markers, sound_artists, detection_artists]
 
 
-def visualize(output_dir):
+def visualize(output_dir, save_animation):
     """Saves animation as an mp4 file and then also plays it.
 
     Args:
@@ -192,7 +192,7 @@ def visualize(output_dir):
     )
 
     handles, labels = ax.get_legend_handles_labels()
-
+    print(labels)
     obstacle_patch = Patch(color="red", alpha=0.5, label="Obstacle")
     directsound_patch = Patch(hatch="++", label="DirectSound")
     echosound_patch = Patch(hatch="..", label="EchoSound")
@@ -203,13 +203,13 @@ def visualize(output_dir):
     # DirectSound_patch = Patch(hatch="++", label='DirectSound')
     # plt.legend()
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=handles)
-
-    ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
-    ani.save(
-        output_dir + "/animation.mp4",
-        writer=ffwriter,
-    )
+    if save_animation:
+        ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
+        ani.save(
+            output_dir + "/animation.mp4",
+            writer=ffwriter,
+        )
     plt.show()
 
 
-visualize(r"./test_storage_multiple_echoes/data_for_plotting")
+visualize(r"./test_storage_multiple_echoes/data_for_plotting", False)

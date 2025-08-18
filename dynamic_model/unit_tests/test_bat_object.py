@@ -50,12 +50,15 @@ class TestingBatObject(unittest.TestCase):
         array_with_booleans = []
         for time_passed in times_to_inspect:
             sound1.update(time_passed)
+            sound2.update(time_passed)
             self.bat.detect_sounds(time_passed, [sound1, sound2])
 
             if len(self.bat.received_sounds) > 0:
                 array_with_booleans.append("detected")
             else:
                 array_with_booleans.append("not detected")
+            # print(self.bat.received_sounds)
+            # print(sound2)
             self.bat.received_sounds = []
 
         expected_output = [

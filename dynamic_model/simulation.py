@@ -8,7 +8,7 @@ import numpy as np
 from agents.bats import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
-from supporting_files.utilities import load_parameters
+from supporting_files.utilities import creation_time_calculation, load_parameters
 
 
 class Simulation:
@@ -59,6 +59,9 @@ class Simulation:
         save_time_of_last_iter = start_timing
         for step in range(num_steps):
             self.time_elapsed = step * self.parameters_df["TIME_STEP"][0]
+
+            for sound in self.sound_objects:
+                sound.update(self.time_elapsed)
 
             for bat in self.bats:
                 bat.update(self.time_elapsed, self.sound_objects)
@@ -137,7 +140,7 @@ class Simulation:
             ):  # or sound.has_reflected :
                 continue
 
-            sound.update(current_time)
+            # sound.update(current_time)
             reflection_point = None
             normal = None
             obstacle_id = None
@@ -148,7 +151,7 @@ class Simulation:
             for obstacle in self.obstacles:
                 if (
                     sound.contains_point(obstacle.position)
-                    and id(obstacle) not in sound.reflected_obstacles
+                    and f"obstacle_{obstacle.id}" not in sound.reflected_obstacles
                 ):
                     normal = obstacle.get_reflection_normal(sound.origin)
                     reflection_point = obstacle.position + normal * obstacle.radius
@@ -165,10 +168,10 @@ class Simulation:
                 if (
                     sound.contains_point(bat.position)
                     and sound.emitter_id != bat.id
-                    and id(bat) not in sound.reflected_obstacles
+                    and f"bat_{bat.id}" not in sound.reflected_obstacles
                 ):
                     normal = (sound.origin - bat.position).normalize()
-                    reflection_point = bat.position + normal * 0.1
+                    reflection_point = bat.position + normal * bat.radius
                     obstacle_id = f"bat_{bat.id}"
 
                     normal_arr.append(normal)
@@ -182,17 +185,21 @@ class Simulation:
                 obstacle_id = obstacle_id_arr[i]
                 if obstacle_id not in sound.reflected_obstacles:
                     # if reflection_point and normal and obstacle_id:
+                    time_of_creation = creation_time_calculation(
+                        sound, reflection_point
+                    )
                     echo = sound.create_echo(
-                        reflection_point, current_time, normal, obstacle_id
+                        reflection_point, time_of_creation, normal, obstacle_id
                     )
                     # print(echo)
                     if echo:
                         # Mark this obstacle as reflected for the original sound
+                        echo.update(current_time)
                         sound.reflected_obstacles.add(obstacle_id)
                         # Copy reflected obstacles to the echo
                         echo.reflected_obstacles.update(sound.reflected_obstacles)
                         new_echoes.append(echo)
-
+        # print(new_echoes)
         self.sound_objects.extend(new_echoes)
 
     def serialize_sound(self, sound):
@@ -225,9 +232,8 @@ class Simulation:
         return data
 
 
-print(os.getcwd())
 OUTPUT_DIR = r"./test_storage_multiple_echoes/"
-PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/mycsvfile.csv"
+PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
 if __name__ == "__main__":
     sim = Simulation(PARAMETER_FILE_DIR, OUTPUT_DIR)
     sim.run()

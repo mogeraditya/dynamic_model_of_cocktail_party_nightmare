@@ -37,6 +37,7 @@ class EchoSound:
             self.parameters_df["SOUND_SPEED"][0]
             * self.parameters_df["CALL_DURATION"][0]
         )
+        self.speed = self.parameters_df["SOUND_SPEED"][0]
         # Keep track of when to kill sound; either when db is below 20 or when out of arena
         self.active = True
         self.has_reflected = False  # Keep track of if it has reflected in the past
@@ -56,7 +57,7 @@ class EchoSound:
             current_time (float): Time, in seconds, for which the simualtion has been running.
         """
         elapsed = current_time - self.creation_time
-        self.current_radius = self.parameters_df["SOUND_SPEED"][0] * elapsed
+        self.current_radius = self.speed * elapsed
 
         # Calculate spl with distance and air absorption
 
@@ -128,7 +129,7 @@ class EchoSound:
         return (
             f"EchoSound(origin={self.origin}, radius={self.current_radius:.2f}, "
             f"spl={self.current_spl:.1f}dB, reflections={self.reflection_count}, "
-            f"emitter={self.emitter_id}, parent={self.parent_creation_time})"
+            f"emitter={self.emitter_id}, parent={self.parent_creation_time}), creation_time={self.creation_time}"
         )
 
     def check_if_sound_outside_arena(self):
@@ -228,5 +229,5 @@ class DirectSound(EchoSound):
     def __repr__(self):
         return (
             f"DirectSound(origin={self.origin}, radius={self.current_radius:.2f}, "
-            f"spl={self.current_spl:.1f}dB, emitter={self.emitter_id})"
+            f"spl={self.current_spl:.1f}dB, emitter={self.emitter_id}), creation_time={self.creation_time}"
         )

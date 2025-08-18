@@ -78,3 +78,20 @@ def call_directionality_factor(A, theta):
     call_dirn = A * (np.cos(theta) - 1)
 
     return call_dirn
+
+
+def creation_time_calculation(sound, reflection_point):
+    """calculate the creation time of a echo given reflection point
+
+    Args:
+        sound (DirectSound): sound object generating the reflection
+        reflection_point (Vector): point of generation of echosound
+
+    Returns:
+        float: time of creation of echo
+    """
+    distance_from_sound_origin = (sound.origin - reflection_point).magnitude()
+    speed_of_sound = sound.speed
+    time_taken = distance_from_sound_origin / speed_of_sound
+    time_of_creation_of_echo = time_taken + sound.creation_time
+    return time_of_creation_of_echo
