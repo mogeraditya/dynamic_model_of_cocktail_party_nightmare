@@ -18,6 +18,20 @@ class Vector:
     def __mul__(self, scalar):
         return Vector(self.x * scalar, self.y * scalar)
 
+    def compare(self, other):
+        """Compare two vectors
+
+        Args:
+            other (Vector): the other vector being compared to
+
+        Returns:
+            Boolean: true if same else false
+        """
+        if self.x == other.x and self.y == other.y:
+            return True
+        else:
+            return False
+
     def magnitude(self):
         """computed magnitude of vectors
 
