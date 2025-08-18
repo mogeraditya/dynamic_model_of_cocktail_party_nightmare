@@ -15,6 +15,6 @@
 ## Installation of environment
 
 Use the environment_cocktail_3.yml alongside conda in order to install all the pre-requistite packages needed to run these simulations. This can be come running;
-> conda env create -f environment_cocktail_3.yml
+>>conda env create -f environment_cocktail_3.yml
 
 ---
