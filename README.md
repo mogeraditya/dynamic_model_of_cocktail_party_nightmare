@@ -22,6 +22,9 @@ Use the environment_cocktail_3.yml alongside conda in order to install all the p
 
 4. Change directories in the plotter.py file
     change the OUTPUT_DIR (directory where the output of the simulation is saved) and SAVE_SIMULATION (False if animation need not be saved, else is the directory where the animation needs to be saved)
+
+5. Run plotter.py 
+    animation will pop out of a video after it is processed!
 ---
 
 ## 
