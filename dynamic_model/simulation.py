@@ -5,6 +5,7 @@ import pickle
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 from agents.bats import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
@@ -17,9 +18,10 @@ class Simulation:
     instance of the set of parameters chosen
     """
 
-    def __init__(self, parameter_file_dir, output_dir):
-        parameters_df = load_parameters(parameter_file_dir)
-
+    def __init__(self, parameters_df, output_dir):
+        # parameters_df = load_parameters(parameter_file_dir)
+        Bat._id_counter = 0
+        Obstacle._id_counter = 0
         self.parameters_df = parameters_df
         self.output_dir = output_dir
         self.dir_to_store = self.output_dir + "/data_for_plotting/"
