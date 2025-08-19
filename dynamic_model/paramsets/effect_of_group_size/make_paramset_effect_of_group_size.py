@@ -1,0 +1,33 @@
+import csv
+import math
+import os
+import sys
+import unittest
+
+import numpy as np
+import pandas as pd
+
+sys.path.append("./dynamic_model")
+
+from supporting_files.utilities import load_parameters, make_dir
+
+simulation_parameters = load_parameters(r"./dynamic_model/common_parameters.csv")
+
+# We will vary num_bats and generate multiple paramsets for different number of bats keeping everything else the same.
+
+group_sizes = [2, 3, 4, 5, 10, 15]
+
+DIR_TO_STORE_PARAMSETS = (
+    r"./dynamic_model/paramsets/effect_of_group_size/store_paramsets/"
+)
+make_dir(DIR_TO_STORE_PARAMSETS)
+for group_size in group_sizes:
+    simulation_parameters["NUM_BATS"] = group_size
+
+    simulation_parameters["OUTPUT_DIR_FOR_SIMULATION"] = (
+        f"./test_storage_multiple_parameters/{group_size}/"
+    )
+
+    simulation_parameters.to_csv(
+        DIR_TO_STORE_PARAMSETS + f"paramset_w_group_size_{group_size:02d}.csv"
+    )

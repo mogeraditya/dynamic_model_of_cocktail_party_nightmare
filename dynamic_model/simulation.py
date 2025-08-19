@@ -5,6 +5,7 @@ import pickle
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 from agents.bats import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
@@ -17,8 +18,8 @@ class Simulation:
     instance of the set of parameters chosen
     """
 
-    def __init__(self, parameter_file_dir, output_dir):
-        parameters_df = load_parameters(parameter_file_dir)
+    def __init__(self, parameters_df, output_dir):
+        # parameters_df = load_parameters(parameter_file_dir)
 
         self.parameters_df = parameters_df
         self.output_dir = output_dir
@@ -233,7 +234,7 @@ class Simulation:
 
 
 OUTPUT_DIR = r"./test_storage_multiple_echoes/"
-PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
+PARAMETER_DF = pd.read_csv(r"./dynamic_model/paramsets/paramset_for_trial_run.csv")
 if __name__ == "__main__":
-    sim = Simulation(PARAMETER_FILE_DIR, OUTPUT_DIR)
+    sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()
