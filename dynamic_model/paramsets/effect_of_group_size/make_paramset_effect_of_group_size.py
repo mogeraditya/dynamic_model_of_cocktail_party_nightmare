@@ -23,10 +23,11 @@ DIR_TO_STORE_PARAMSETS = (
 make_dir(DIR_TO_STORE_PARAMSETS)
 for group_size in group_sizes:
     simulation_parameters["NUM_BATS"] = group_size
-
+    simulation_parameters["N_RUNS"] = 100
     simulation_parameters["OUTPUT_DIR_FOR_SIMULATION"] = (
-        f"./test_storage_multiple_parameters/{group_size}/"
+        f"/effect_of_group_size/{group_size}/"
     )
+    simulation_parameters["VARYING_PARAM"] = "NUM_BATS"
 
     simulation_parameters.to_csv(
         DIR_TO_STORE_PARAMSETS + f"paramset_w_group_size_{group_size:02d}.csv"

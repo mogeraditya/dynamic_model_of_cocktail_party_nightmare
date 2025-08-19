@@ -20,7 +20,8 @@ class Simulation:
 
     def __init__(self, parameters_df, output_dir):
         # parameters_df = load_parameters(parameter_file_dir)
-
+        Bat._id_counter = 0
+        Obstacle._id_counter = 0
         self.parameters_df = parameters_df
         self.output_dir = output_dir
         self.dir_to_store = self.output_dir + "/data_for_plotting/"
