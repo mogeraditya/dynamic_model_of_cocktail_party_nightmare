@@ -11,21 +11,26 @@ sys.path.append("./dynamic_model")
 
 from supporting_files.utilities import load_parameters, make_dir
 
-simulation_parameters = load_parameters(r"./dynamic_model/common_parameters.csv")
+simulation_parameters = load_parameters(
+    r"./dynamic_model/paramsets/common_parameters.csv"
+)
 
 # We will vary num_bats and generate multiple paramsets for different number of bats keeping everything else the same.
 
-group_sizes = [2, 3, 4, 5, 10, 15]
+group_sizes = [10, 25, 50, 100]
 
 DIR_TO_STORE_PARAMSETS = (
     r"./dynamic_model/paramsets/effect_of_group_size/store_paramsets/"
 )
 make_dir(DIR_TO_STORE_PARAMSETS)
+simulation_parameters["ARENA_WIDTH"] = 50
+simulation_parameters["ARENA_HEIGHT"] = 70
+
 for group_size in group_sizes:
     simulation_parameters["NUM_BATS"] = group_size
     simulation_parameters["N_RUNS"] = 100
     simulation_parameters["OUTPUT_DIR_FOR_SIMULATION"] = (
-        f"/effect_of_group_size/{group_size}/"
+        f"/DATA_effect_of_group_size/{group_size}/"
     )
     simulation_parameters["VARYING_PARAM"] = "NUM_BATS"
 

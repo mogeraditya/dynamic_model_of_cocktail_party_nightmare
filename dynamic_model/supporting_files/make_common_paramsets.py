@@ -42,6 +42,6 @@ simulation_parameters["OBSTACLE_COUNT"] = 0  # number of obstacles
 simulation_parameters["OBSTACLE_RADIUS"] = 0.1  # m; radius of obstacles
 
 
-DIR_TO_SAVE_COMMON_PARAMETERS = "./dynamic_model/common_parameters.csv"
+DIR_TO_SAVE_COMMON_PARAMETERS = "./dynamic_model/paramsets/common_parameters.csv"
 simulation_parameters.to_csv(DIR_TO_SAVE_COMMON_PARAMETERS)
 print(simulation_parameters)

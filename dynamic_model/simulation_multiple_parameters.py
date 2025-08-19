@@ -4,7 +4,7 @@ import os
 import time
 
 import pandas as pd
-from simulation import Simulation
+from simulation_and_plotting.simulation import Simulation
 from supporting_files.utilities import make_dir
 
 
@@ -72,8 +72,8 @@ def parallel_process_with_pool(param_dir, n_runs, data_storage_dir, max_workers=
 if __name__ == "__main__":
     # Directory containing your parameter files
     PARAM_DIR = "./dynamic_model/paramsets/effect_of_group_size/store_paramsets/"
-    N_RUNS = 2  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = ""  # Base output directory
+    N_RUNS = 100  # Number of iterations per parameter set
+    DATA_STORAGE_DIR = "."  # Base output directory
     MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing
@@ -82,5 +82,5 @@ if __name__ == "__main__":
         param_dir=PARAM_DIR,
         n_runs=N_RUNS,
         data_storage_dir=DATA_STORAGE_DIR,
-        # max_workers=MAX_WORKERS,
+        max_workers=MAX_WORKERS,
     )
