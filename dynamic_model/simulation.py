@@ -234,8 +234,8 @@ class Simulation:
         return data
 
 
-OUTPUT_DIR = r"./test_storage_multiple_echoes/"
-PARAMETER_DF = pd.read_csv(r"./dynamic_model/paramsets/paramset_for_trial_run.csv")
 if __name__ == "__main__":
-    sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
+    OUTPUT_DIR = r"./test_storage_multiple_echoes/"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
+    sim = Simulation(PARAMETER_FILE_DIR, OUTPUT_DIR)
     sim.run()
