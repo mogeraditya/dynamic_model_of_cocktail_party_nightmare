@@ -21,7 +21,7 @@ def run_one_instance_of_simulation(
     output_dir = (
         data_storage_dir
         + parameter_df["OUTPUT_DIR_FOR_SIMULATION"][0]
-        + f"/iteration_number_{simulation_id:02d}/"
+        + f"/iteration_number_{simulation_id}/"
     )
     make_dir(output_dir)
     print(output_dir)
@@ -36,9 +36,6 @@ def parallel_process_with_pool(param_dir, n_runs, data_storage_dir, max_workers=
         param_dir (str): directory containing all the parameter files
         n_runs (int): number of iteraitions per parameter file
         max_workers (int, optional): maximum number of cores that need to be used. Defaults to None.
-
-    Returns:
-        _type_: _description_
     """
     # Find parameter files
     param_files = glob.glob(os.path.join(param_dir, "*.csv"))
