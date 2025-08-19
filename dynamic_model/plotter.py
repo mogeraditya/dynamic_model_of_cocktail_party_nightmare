@@ -206,10 +206,13 @@ def visualize(output_dir, save_animation):
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            output_dir + "/animation.mp4",
+            save_animation + "/animation.mp4",
             writer=ffwriter,
         )
     plt.show()
 
 
-visualize(r"./test_storage_multiple_echoes/data_for_plotting", False)
+if __name__ == "__main__":
+    OUTPUT_DIR = r"./test_storage_multiple_echoes/data_for_plotting"
+    SAVE_ANIMATION = r"./test_storage_multiple_echoes/data_for_plotting"
+    visualize(OUTPUT_DIR, SAVE_ANIMATION)

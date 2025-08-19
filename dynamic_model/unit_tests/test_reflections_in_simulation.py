@@ -1,7 +1,5 @@
 """unit test to test sound propagation"""
 
-import math
-import os
 import sys
 import unittest
 
