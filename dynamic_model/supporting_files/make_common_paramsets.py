@@ -16,6 +16,7 @@ simulation_parameters["CLEANUP_PLOT_DATA"] = (
 simulation_parameters["ARENA_WIDTH"] = 7  # m; width of arena
 simulation_parameters["ARENA_HEIGHT"] = 5  # m; height of arena
 simulation_parameters["TIME_STEP"] = 0.001  # s; time step of simulation
+simulation_parameters["FRAME_RATE"] = 100  # frame of the plotted video
 
 simulation_parameters["SOUND_SPEED"] = 343  # m/s; speed of sound
 simulation_parameters["AIR_ABSORPTION"] = 1  # absorption of medium
