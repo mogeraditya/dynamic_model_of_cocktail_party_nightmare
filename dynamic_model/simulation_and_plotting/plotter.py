@@ -213,6 +213,6 @@ def visualize(output_dir, save_animation):
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./test_storage_multiple_echoes/data_for_plotting"
-    SAVE_ANIMATION = r"./test_storage_multiple_echoes/data_for_plotting"
+    OUTPUT_DIR = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/DATA_effect_of_group_size/100/iteration_number_0/data_for_plotting"
+    SAVE_ANIMATION = False  # r"./test_storage_multiple_echoes/data_for_plotting"
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
