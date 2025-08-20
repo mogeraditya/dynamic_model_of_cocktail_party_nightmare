@@ -79,5 +79,5 @@ if __name__ == "__main__":
         param_dir=PARAM_DIR,
         n_runs=N_RUNS,
         data_storage_dir=DATA_STORAGE_DIR,
-        max_workers=MAX_WORKERS,
+        # max_workers=MAX_WORKERS,
     )

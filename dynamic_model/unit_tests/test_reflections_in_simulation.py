@@ -8,7 +8,7 @@ import numpy as np
 sys.path.append("./dynamic_model")
 from agents.bats import Bat
 from agents.sounds import DirectSound
-from simulation import Simulation
+from simulation_and_plotting.simulation import Simulation
 from supporting_files.utilities import load_parameters
 from supporting_files.vectors import Vector
 
@@ -28,7 +28,7 @@ class TestReflections(unittest.TestCase):
 
         self.parameters_df = load_parameters(DIR_PARAMS)
         self.bat = Bat(self.parameters_df, output_dir=OUTPUT_DIR)
-        self.simulation = Simulation(DIR_PARAMS, OUTPUT_DIR)
+        self.simulation = Simulation(self.parameters_df, OUTPUT_DIR)
 
     def test_echo_generation(self):
         """Test the echo generation"""

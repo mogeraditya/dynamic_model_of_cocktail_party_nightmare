@@ -38,6 +38,7 @@ class Simulation:
             for _ in range(int(self.parameters_df["OBSTACLE_COUNT"][0]))
         ]
         self.sound_objects = []  # Contains both DirectSound and EchoSound
+
         self.time_elapsed = 0.0
         self.history = []
 
