@@ -34,4 +34,8 @@ For detailed description of the parameters used in model, please refer to ./dyna
 1. Run ./dynamic_model/supporting_files/make_common_parameters.py to generate the template parameter file. This parameter file is stored in ./dynamic_model/paramsets/common_parameters.csv and contains the defalt values of all the parameters.
 2. An example to generate multiple paramsets is given in ./dynamic_model/paramsets/effect_of_group_size/make_paramset_effect_of_group_size.py. This can be modified for your specific use case.
 3. In order to run the simulation over the newly generated parameter files, head to ./dynamic_model/simulation_multiple_parameters.py and change the following variables
-    1. 
+    1. PARAM_DIR - the directory of the folder containing all the paraameter files you wish to run the simulation over
+    2. N_RUNS - the numbr of runs each parameter file needs to be run for.
+    3. DATA_STORAGE_DIR - the directory where data from all the simulation runs need to be stored. 
+    4. MAX_WORKERS - if you wish to limit the number of cores assigned to running the simulation then set this to the desired number. If left blank, the max possible number of cores will be used.
+
