@@ -52,8 +52,14 @@ class Bat:
         self.update_movement()
         self.position_history.append((current_time, (self.position.x, self.position.y)))
 
-        self.detect_sounds(current_time, sound_objects)
-        self.emit_sounds(current_time, sound_objects)
+        self.time_since_last_call += self.parameters_df["TIME_STEP"][0]
+        call_interval = 1.0 / self.parameters_df["CALL_RATE"][0]
+        if self.time_since_last_call >= call_interval:
+            self.emit_sounds(current_time, sound_objects)
+            self.detect_sounds(current_time, sound_objects)
+            self.time_since_last_call = 0
+
+        self.decide_next_direction(self.received_sounds)
         self.cleanup_sounds(current_time)
 
     def update_movement(self):
@@ -77,10 +83,6 @@ class Bat:
         ):
             self.direction.y *= -1
 
-        # Random direction change occasionally
-        if random.random() < self.parameters_df["PROPENSITY_TO_CHANGE_DIRECTION"][0]:
-            self.direction = Vector().random_direction()
-
     def emit_sounds(self, current_time, sound_objects):
         """Trigger sound emission by Bat.
         Whenever the function is called, it checks if sufficient time
@@ -90,19 +92,18 @@ class Bat:
             current_time (float): Time, in seconds, for which the simualtion has been running.
             sound_objects (list): List containing all active sounds in the simulation
         """
-        self.time_since_last_call += self.parameters_df["TIME_STEP"][0]
-        call_interval = 1.0 / self.parameters_df["CALL_RATE"][0]
+        # self.time_since_last_call += self.parameters_df["TIME_STEP"][0]
+        # call_interval = 1.0 / self.parameters_df["CALL_RATE"][0]
 
-        if self.time_since_last_call >= call_interval:
-            sound = DirectSound(
-                parameters_df=self.parameters_df,
-                origin=self.position,
-                creation_time=current_time,
-                emitter_id=self.id,
-            )
-            self.emitted_sounds.append(sound)
-            sound_objects.append(sound)
-            self.time_since_last_call = 0
+        # if self.time_since_last_call >= call_interval:
+        sound = DirectSound(
+            parameters_df=self.parameters_df,
+            origin=self.position,
+            creation_time=current_time,
+            emitter_id=self.id,
+        )
+        self.emitted_sounds.append(sound)
+        sound_objects.append(sound)
 
     def detect_sounds(self, current_time, sound_objects):
         """Detects sound that are audible to the Bat
@@ -117,6 +118,8 @@ class Bat:
             if not sound.active:
                 continue
 
+            if sound.emitter_id == self.id and isinstance(sound, DirectSound):
+                continue
             # sound.update(current_time)
 
             if sound.current_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
@@ -150,9 +153,9 @@ class Bat:
         # Keep only recent detections
         if (current_time - self.time_since_last_cleanup) >= self.parameters_df[
             "CLEANUP_INTERVAL"
-        ][
-            0
-        ]:  # 10ms
+        ][0] or np.round(
+            self.time_since_last_cleanup, 3
+        ) == current_time:  # 10ms
             dir_to_store = self.output_dir + "/" + str(self.id)
             make_dir(dir_to_store)
             np.save(
@@ -179,6 +182,73 @@ class Bat:
             list: sounds that are detected by a bat before a certain time.
         """
         return [d for d in self.received_sounds if d["time"] <= current_time]
+
+    # inelligent movement
+    def generate_random_direction(self):
+        """assign a random direction to the bat"""
+        if random.random() < self.parameters_df["PROPENSITY_TO_CHANGE_DIRECTION"][0]:
+            self.direction = Vector().random_direction()
+
+    def generate_direction_vector_given_sound(self, sound):
+        """generate direction vector of any sound
+
+        Args:
+            sound (EchoSound): sound to convert to vector
+
+        Returns:
+            Vector: Vector form of the input sound
+        """
+        spl_of_sound = sound["spl"]
+
+        normalized_sound_vector = (
+            Vector(x=sound["position"][0], y=sound["position"][1]) - self.position
+        ).normalize()
+
+        vector_w_spl_magnitude = normalized_sound_vector * spl_of_sound
+        return vector_w_spl_magnitude
+
+    def decide_next_direction(self, detected_sound_objects):
+        """decide next direction of bat based on sound
+
+        Args:
+            detected_sound_objects (list): list containing detected sounds
+        """
+
+        if len(detected_sound_objects) != 0:
+            max_spl = np.max([i["spl"] for i in detected_sound_objects])
+            if max_spl > 20:
+
+                max_spl_sound = [
+                    i for i in detected_sound_objects if i["spl"] == max_spl
+                ][0]
+                # sum_of_sound_vectors = Vector(0, 0)
+                # for sound in detected_sound_objects:
+                #     sum_of_sound_vectors += (
+                #         self.generate_direction_vector_given_sound(sound)
+                #     )
+                # mean_vector = sum_of_sound_vectors * (
+                #     1 / len(detected_sound_objects)
+                # )
+                max_spl_sound_vector = self.generate_direction_vector_given_sound(
+                    max_spl_sound
+                )
+                if max_spl > 82:
+                    print("repulse")
+                    next_direction = max_spl_sound_vector.rotate(np.pi)
+                    # next_direction = mean_vector.rotate(np.pi)
+                    self.direction = next_direction.normalize()
+                else:
+                    print("attract")
+                    next_direction = max_spl_sound_vector
+                    # next_direction = mean_vector
+                    self.direction = next_direction.normalize()
+
+            else:
+                # Random direction change occasionally
+                self.generate_random_direction()
+        else:
+            self.generate_random_direction()
+            print("random")
 
     def __repr__(self):
         return f"Bat(id={self.id}, position={self.position})"

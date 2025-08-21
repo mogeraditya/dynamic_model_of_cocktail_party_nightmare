@@ -2,10 +2,13 @@
 
 import os
 import pickle
+import sys
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
+
+sys.path.append("./dynamic_model")
 from agents.bats import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
@@ -238,5 +241,6 @@ class Simulation:
 if __name__ == "__main__":
     OUTPUT_DIR = r"./test_storage_multiple_echoes/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
-    sim = Simulation(PARAMETER_FILE_DIR, OUTPUT_DIR)
+    PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
+    sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()

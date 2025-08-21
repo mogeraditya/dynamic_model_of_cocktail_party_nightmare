@@ -106,5 +106,18 @@ class Vector:
         """
         return (self.x, self.y)
 
+    def rotate(self, angle):
+        """rotate a vector
+
+        Args:
+            angle (float): angle in radians
+
+        Returns:
+            Vector: new rotated vector
+        """
+        new_x = self.x * math.cos(angle) - self.y * math.sin(angle)
+        new_y = self.x * math.sin(angle) + self.y * math.cos(angle)
+        return Vector(new_x, new_y)
+
     def __repr__(self):
-        return f"Vector({self.x:.2f}, {self.y:.2f})"
+        return f"Vector({self.x:.3f}, {self.y:.3f})"
