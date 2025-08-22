@@ -37,6 +37,8 @@ class Bat:
         self.speed = self.parameters_df["BAT_SPEED"][0]
         self.radius = self.parameters_df["BAT_RADIUS"][0]
 
+        self.time_since_dir_change = self.time_since_last_call + 0.05
+
     # TODO: dont allow movement through obstacles/ other bats
     def update(self, current_time, sound_objects):
         """Function to update bats with time.
@@ -56,10 +58,17 @@ class Bat:
         call_interval = 1.0 / self.parameters_df["CALL_RATE"][0]
         if self.time_since_last_call >= call_interval:
             self.emit_sounds(current_time, sound_objects)
-            self.detect_sounds(current_time, sound_objects)
             self.time_since_last_call = 0
 
-        self.decide_next_direction(self.received_sounds)
+        self.time_since_dir_change += self.parameters_df["TIME_STEP"][0]
+        dir_change_time_interval = (
+            1.0 / self.parameters_df["FREQUENCY_OF_DIRECTION_CHANGE"][0]
+        )
+        if self.time_since_dir_change >= dir_change_time_interval:
+            self.decide_next_direction(self.received_sounds)
+            self.time_since_dir_change = 0
+
+        self.detect_sounds(current_time, sound_objects)
         self.cleanup_sounds(current_time)
 
     def update_movement(self):
@@ -232,7 +241,7 @@ class Bat:
                 max_spl_sound_vector = self.generate_direction_vector_given_sound(
                     max_spl_sound
                 )
-                if max_spl > 82:
+                if max_spl > 72:
                     print("repulse")
                     next_direction = max_spl_sound_vector.rotate(np.pi)
                     # next_direction = mean_vector.rotate(np.pi)
@@ -246,9 +255,16 @@ class Bat:
             else:
                 # Random direction change occasionally
                 self.generate_random_direction()
+
         else:
-            self.generate_random_direction()
             print("random")
+            self.generate_random_direction()
+
+    def given_next_direction_change_gradually(self, next_dir, decision_time):
+        current_dir = self.direction
+        number_of_steps = int(decision_time / self.parameters_df["TIME_STEP"][0])
+        angle_between_current_and_next_dir = current_dir.angle_between(next_dir)
+        angle_per
 
     def __repr__(self):
         return f"Bat(id={self.id}, position={self.position})"

@@ -1,4 +1,5 @@
 import glob
+import os
 import pickle
 import sys
 
@@ -87,15 +88,23 @@ def setup_visualization(parameters_df, bats, obstacles):
 
     colors = plt.cm.tab10.colors
     for i, bat in enumerate(bats):
-        (marker,) = ax.plot(
-            [],
-            [],
-            "o",
-            markersize=10,
+        bat_circle = Circle(
+            (bat.position.x, bat.position.y),
+            bat.radius,
             color=colors[i % len(colors)],
             label=f"Bat {bat.id}",
-        )
-        bat_markers.append(marker)
+            # alpha=0.5,
+        )  # , label=f"Obstacle {obstacle.id}")
+        ax.add_patch(bat_circle)
+        # (marker,) = ax.plot(
+        #     [],
+        #     [],
+        #     "o",
+        #     markersize=10,
+        #     color=colors[i % len(colors)],
+        #     label=f"Bat {bat.id}",
+        # )
+        bat_markers.append(bat_circle)
 
     return [fig, ax, bat_markers, sound_artists, detection_artists]
 
@@ -109,14 +118,16 @@ def visualize(output_dir, save_animation):
 
     def init():
         for marker in bat_markers:
-            marker.set_data([], [])
+            # print(marker)
+            # marker.set_data([], [])
+            marker.center = (np.nan, np.nan)
         return bat_markers
 
     def animate(i):
         frame = history[i]
 
         for j, (x, y) in enumerate(frame["bat_positions"]):
-            bat_markers[j].set_data([x], [y])
+            bat_markers[j].center = (x, y)
 
         for artist in sound_artists + detection_artists:
             artist.remove()
@@ -190,7 +201,7 @@ def visualize(output_dir, save_animation):
         frames=len(history),
         init_func=init,
         blit=False,
-        interval=parameters_df["FRAME_RATE"][0] * 0.01,
+        interval=parameters_df["FRAME_RATE"][0] * 0.0001,
     )
 
     handles, labels = ax.get_legend_handles_labels()
@@ -208,13 +219,19 @@ def visualize(output_dir, save_animation):
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            save_animation + "/animation.mp4",
+            save_animation + "/animation_wo_sound.mp4",
             writer=ffwriter,
         )
     plt.show()
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/test_storage_multiple_echoes/data_for_plotting/"
-    SAVE_ANIMATION = False  # r"./test_storage_multiple_echoes/data_for_plotting"
+    print(os.getcwd())
+    OUTPUT_DIR = r"./test_intelligent_movement_5bats/data_for_plotting/"
+    SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
+
+# x = Circle((0, 0), 1)
+# print(x)
+# x.center = (, )
+# print(x)
