@@ -227,7 +227,9 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = r"./test_intelligent_movement_5bats/data_for_plotting/"
+    OUTPUT_DIR = (
+        r"./test_intelligent_movement_15bats_10x_large_arena/data_for_plotting/"
+    )
     SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 
