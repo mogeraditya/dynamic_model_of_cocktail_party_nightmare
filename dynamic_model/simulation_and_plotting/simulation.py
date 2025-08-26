@@ -80,6 +80,10 @@ class Simulation:
                     "bat_positions": [
                         (bat.position.x, bat.position.y) for bat in self.bats
                     ],
+                    "bat_directions": [
+                        (bat.direction.normalize().x, bat.direction.normalize().y)
+                        for bat in self.bats
+                    ],
                     "bat_detections": [
                         bat.get_detections_at_time(self.time_elapsed)
                         for bat in self.bats
@@ -239,7 +243,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./test_intelligent_movement_1bat_many_obstacles/"
+    OUTPUT_DIR = r"./test_intelligent_movement_1bats/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

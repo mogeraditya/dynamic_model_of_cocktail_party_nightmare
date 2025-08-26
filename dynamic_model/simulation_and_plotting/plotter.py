@@ -7,7 +7,7 @@ import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.patches import Circle, Patch, Rectangle, Wedge
+from matplotlib.patches import Arrow, Circle, Patch, Rectangle, Wedge
 
 sys.path.append("./dynamic_model")
 plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
@@ -83,6 +83,7 @@ def setup_visualization(parameters_df, bats, obstacles):
         obstacle_patches.append(obs_circle)
 
     bat_markers = []
+    direction_arrows = []
     sound_artists = []
     detection_artists = []
 
@@ -96,6 +97,7 @@ def setup_visualization(parameters_df, bats, obstacles):
             # alpha=0.5,
         )  # , label=f"Obstacle {obstacle.id}")
         ax.add_patch(bat_circle)
+
         # (marker,) = ax.plot(
         #     [],
         #     [],
@@ -105,8 +107,19 @@ def setup_visualization(parameters_df, bats, obstacles):
         #     label=f"Bat {bat.id}",
         # )
         bat_markers.append(bat_circle)
+        direction_arrow = Arrow(
+            bat.position.x,
+            bat.position.y,
+            0,
+            0,  # Initial direction (0, 0)
+            width=0.3,  # Adjust arrow width as needed
+            color=colors[i % len(colors)],
+            alpha=0.8,
+        )
+        ax.add_patch(direction_arrow)
+        direction_arrows.append(direction_arrow)
 
-    return [fig, ax, bat_markers, sound_artists, detection_artists]
+    return [fig, ax, bat_markers, direction_arrows, sound_artists, detection_artists]
 
 
 def visualize(output_dir, save_animation):
@@ -121,13 +134,20 @@ def visualize(output_dir, save_animation):
             # print(marker)
             # marker.set_data([], [])
             marker.center = (np.nan, np.nan)
-        return bat_markers
+        for arrow in direction_arrows:
+            arrow.set_data(x=np.nan, y=np.nan, dx=0, dy=0)
+        return bat_markers + direction_arrows
 
     def animate(i):
         frame = history[i]
 
         for j, (x, y) in enumerate(frame["bat_positions"]):
             bat_markers[j].center = (x, y)
+            if "bat_directions" in frame and j < len(frame["bat_directions"]):
+                dx, dy = frame["bat_directions"][j]
+                # Scale the direction vector for better visualization
+                scale = 0.5  # Adjust this scale factor as needed
+                direction_arrows[j].set_data(x=x, y=y, dx=dx * scale, dy=dy * scale)
 
         for artist in sound_artists + detection_artists:
             artist.remove()
@@ -135,6 +155,13 @@ def visualize(output_dir, save_animation):
         detection_artists.clear()
         plt.title(f"time step: {i}")
         colors = plt.cm.tab10.colors
+
+        # number_frames_in_the_past = i
+        # steps_history_to_show= 20
+        # if i>steps_history_to_show:
+        #     alpha_gradient= np.arange(0.1,1.001,0.9/steps_history_to_show)
+        #     for iter, alpha in enumerate(alpha_gradient):
+
         for sound in frame["sound_objects"]:
             # print(sound)
             if not sound["status"]:
@@ -192,8 +219,8 @@ def visualize(output_dir, save_animation):
         return bat_markers + sound_artists + detection_artists
 
     history, parameters_df, bats, obstacles = stitch_together_history_lists(output_dir)
-    fig, ax, bat_markers, sound_artists, detection_artists = setup_visualization(
-        parameters_df, bats, obstacles
+    fig, ax, bat_markers, direction_arrows, sound_artists, detection_artists = (
+        setup_visualization(parameters_df, bats, obstacles)
     )
     ani = animation.FuncAnimation(
         fig,
@@ -201,7 +228,7 @@ def visualize(output_dir, save_animation):
         frames=len(history),
         init_func=init,
         blit=False,
-        interval=parameters_df["FRAME_RATE"][0] * 0.0001,
+        interval=parameters_df["FRAME_RATE"][0] * 0.00001,
     )
 
     handles, labels = ax.get_legend_handles_labels()
@@ -227,10 +254,8 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = (
-        r"./test_intelligent_movement_15bats_10x_large_arena/data_for_plotting/"
-    )
-    SAVE_ANIMATION = OUTPUT_DIR
+    OUTPUT_DIR = r"./test_intelligent_movement_1bats/data_for_plotting/"
+    SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 
 # x = Circle((0, 0), 1)

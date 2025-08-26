@@ -62,7 +62,7 @@ class EchoSound:
         # Calculate spl with distance and air absorption
 
         if self.current_radius > 0:
-            distance_effect = 20 * math.log10(self.current_radius / 0.1)
+            distance_effect = 20 * math.log10(self.current_radius / 1)
             self.current_spl = (
                 self.initial_spl
                 - distance_effect

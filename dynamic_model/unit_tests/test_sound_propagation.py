@@ -85,7 +85,7 @@ class TestingSoundPropagation(unittest.TestCase):
         time_passed = 1
         radius = time_passed * self.parameters_df["SOUND_SPEED"][0]
         initial_spl = self.parameters_df["EMITTED_SPL"][0]
-        distance_effect = 20 * math.log10(radius / 0.1)
+        distance_effect = 20 * math.log10(radius / 1)
         calculated_spl = (
             initial_spl
             - distance_effect
