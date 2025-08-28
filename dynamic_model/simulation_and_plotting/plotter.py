@@ -206,44 +206,44 @@ def visualize(output_dir, save_animation):
         detection_artists.clear()
         plt.title(f"time step: {i}")
 
-        colors = plt.cm.tab10.colors
-        for sound in frame["sound_objects"]:
-            # print(sound)
-            if not sound["status"]:
-                continue
+        # colors = plt.cm.tab10.colors
+        # for sound in frame["sound_objects"]:
+        #     # print(sound)
+        #     if not sound["status"]:
+        #         continue
 
-            emitter_color = colors[sound["emitter_id"] % len(colors)]
-            alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
+        #     emitter_color = colors[sound["emitter_id"] % len(colors)]
+        #     alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
 
-            inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
-            outer = sound["radius"]
+        #     inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
+        #     outer = sound["radius"]
 
-            if inner < outer:
-                if sound["type"] == "direct":
-                    linestyle = "-"
-                    hatching_of_disk = "++"
-                else:
-                    linestyle = "--"
-                    alpha = 0.5 * alpha
-                    hatching_of_disk = ".."
-                if inner == 0:
-                    width_of_disk = sound["radius"]
-                else:
-                    width_of_disk = parameters_df["SOUND_DISK_WIDTH"][0]
-                wedge = Wedge(
-                    sound["origin"],
-                    outer,
-                    0,
-                    360,
-                    width=width_of_disk,
-                    fill=False,
-                    color=emitter_color,
-                    alpha=alpha,
-                    linestyle=linestyle,
-                    hatch=hatching_of_disk,
-                )
-                ax.add_patch(wedge)
-                sound_artists.append(wedge)
+        #     if inner < outer:
+        #         if sound["type"] == "direct":
+        #             linestyle = "-"
+        #             hatching_of_disk = "++"
+        #         else:
+        #             linestyle = "--"
+        #             alpha = 0.5 * alpha
+        #             hatching_of_disk = ".."
+        #         if inner == 0:
+        #             width_of_disk = sound["radius"]
+        #         else:
+        #             width_of_disk = parameters_df["SOUND_DISK_WIDTH"][0]
+        #         wedge = Wedge(
+        #             sound["origin"],
+        #             outer,
+        #             0,
+        #             360,
+        #             width=width_of_disk,
+        #             fill=False,
+        #             color=emitter_color,
+        #             alpha=alpha,
+        #             linestyle=linestyle,
+        #             hatch=hatching_of_disk,
+        #         )
+        #         ax.add_patch(wedge)
+        #         sound_artists.append(wedge)
 
         # for bat_idx, detections in enumerate(frame["bat_detections"]):
         #     for detection in detections:
@@ -312,9 +312,17 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = r"./test_intelligent_movement_4bats_nice_rotations/data_for_plotting/"
-    SAVE_ANIMATION = OUTPUT_DIR
+    OUTPUT_DIR = (
+        r"./test_intelligent_movement_2bats_nice_rotations_capped/data_for_plotting/"
+    )
+    SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
+    # history, parameters_df, bats, obstacles = stitch_together_history_lists(OUTPUT_DIR)
+    # next_dir_data = [np.degrees(i["next_dir_angle"][0]) for i in history]
+    # dir_data = [np.degrees(i["current_dir_angle"][0]) for i in history]
+    # plt.plot(next_dir_data)
+    # plt.plot(dir_data)
+    # plt.show()
 
 # x = Circle((0, 0), 1)
 # print(x)

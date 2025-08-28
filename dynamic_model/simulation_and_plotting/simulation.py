@@ -13,6 +13,7 @@ from agents.bats import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
 from supporting_files.utilities import creation_time_calculation, load_parameters
+from supporting_files.vectors import Vector
 
 
 class Simulation:
@@ -94,6 +95,13 @@ class Simulation:
                         if s.active and s.current_spl > 20
                     ],
                     "sound_objects_count": len(self.sound_objects),
+                    "next_dir_angle": [
+                        bat.next_direction.angle_between(Vector(1, 0))
+                        for bat in self.bats
+                    ],
+                    "current_dir_angle": [
+                        bat.direction.angle_between(Vector(1, 0)) for bat in self.bats
+                    ],
                 }
             )
 
@@ -243,7 +251,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./test_intelligent_movement_4bats_nice_rotations/"
+    OUTPUT_DIR = r"./test_intelligent_movement_2bats_nice_rotations_capped/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

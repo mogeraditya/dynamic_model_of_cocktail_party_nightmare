@@ -78,11 +78,13 @@ class Bat:
             or self.position.x >= self.parameters_df["ARENA_WIDTH"][0]
         ):
             self.direction.x *= -1
+            self.next_direction = self.direction
         if (
             self.position.y <= 0
             or self.position.y >= self.parameters_df["ARENA_HEIGHT"][0]
         ):
             self.direction.y *= -1
+            self.next_direction = self.direction
 
     def emit_sounds(self, current_time, sound_objects):
         """Trigger sound emission by Bat.
@@ -238,7 +240,7 @@ class Bat:
 
         if len(detected_sound_objects) != 0:
             max_spl = np.max([i["spl"] for i in detected_sound_objects])
-            if max_spl > 91:
+            if max_spl > 20:
 
                 max_spl_sound = [
                     i for i in detected_sound_objects if i["spl"] == max_spl
@@ -254,9 +256,11 @@ class Bat:
                 max_spl_sound_vector = self.generate_direction_vector_given_sound(
                     max_spl_sound
                 )
+
                 if max_spl > 98:
 
                     next_direction = max_spl_sound_vector.rotate(np.pi).normalize()
+
                     # next_direction = mean_vector.rotate(np.pi)
                     # self.direction = next_direction.normalize()
                 else:
@@ -273,6 +277,14 @@ class Bat:
         else:
             print("random")
             next_direction = self.generate_random_direction()
+
+        cap_dir_change = 60
+        if self.direction.angle_between(next_direction) > np.radians(cap_dir_change):
+            next_direction = self.direction.rotate(np.radians(cap_dir_change))
+        elif self.direction.angle_between(next_direction) < np.radians(-cap_dir_change):
+            next_direction = self.direction.rotate(np.radians(-cap_dir_change))
+        # else:
+        #     next_direction = next_direction
 
         return next_direction
 
