@@ -165,6 +165,27 @@ class Simulation:
 
             reflection_point_arr, normal_arr, obstacle_id_arr = [], [], []
 
+            # Check walls
+            wall_points_to_check = [
+                Vector(0, sound.origin.y),
+                Vector(sound.origin.x, 0),
+                Vector(self.parameters_df["ARENA_WIDTH"][0], sound.origin.y),
+                Vector(sound.origin.x, self.parameters_df["ARENA_HEIGHT"][0]),
+            ]
+            wall_ids = ["left", "down", "right", "up"]
+            for i, wall_point in enumerate(wall_points_to_check):
+                if (
+                    sound.contains_point(wall_point)
+                    and f"wall_{wall_ids[i]}" not in sound.reflected_obstacles
+                ):
+                    normal = (sound.origin - wall_point).normalize()
+                    reflection_point = wall_point
+                    obstacle_id = f"wall_{wall_ids[i]}"
+
+                    normal_arr.append(normal)
+                    reflection_point_arr.append(reflection_point)
+                    obstacle_id_arr.append(obstacle_id)
+
             # Check obstacles
             for obstacle in self.obstacles:
                 if (
@@ -251,7 +272,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./test_intelligent_movement_2bats_nice_rotations_capped/"
+    OUTPUT_DIR = r"./test_intelligent_movement_bats_final_epic_pog/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

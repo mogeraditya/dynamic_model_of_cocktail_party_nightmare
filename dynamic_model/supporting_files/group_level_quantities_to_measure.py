@@ -24,13 +24,32 @@ def compute_collision_rate(history):
 
     return np.sum(number_of_collisions_across_time)
 
-def compute_median_interindividual_distance()
+
+def compute_median_interindividual_distance(history):
+    bat_positions = [i["bat_positions"] for i in history]
+    # compute distance matrix in allf rames
+    distances_array = []
+
+    for position_frame in bat_positions:
+        distance_matrix = scp.spatial.distance_matrix(position_frame, position_frame)
+        inter_bat_distances_given_frame = []
+        for i in range(distance_matrix.shape[0]):
+            for j in range(distance_matrix.shape[0]):
+                if i < j:
+                    inter_bat_distances_given_frame.append(distance_matrix[i, j])
+        distances_array.append(inter_bat_distances_given_frame)
+
+    return distances_array
+
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = r"./test_intelligent_movement_12bats_nice_rotations/data_for_plotting/"
+    OUTPUT_DIR = r"./test_intelligent_movement_25bats_final_epic/data_for_plotting/"
     SAVE_ANIMATION = False  # OUTPUT_DIR
     history, parameters_df, bats, obstacles = stitch_together_history_lists(OUTPUT_DIR)
     # plt.plot(compute_collision_rate(history))
     # plt.show()
     print(compute_collision_rate(history))
+    median_array = np.median(compute_median_interindividual_distance(history), axis=1)
+    plt.plot(median_array)
+    plt.show()

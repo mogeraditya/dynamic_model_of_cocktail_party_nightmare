@@ -32,7 +32,7 @@ class EchoSound:
             parent_creation_time  # ID of sound that created this echo
         )
         self.reflection_count = reflection_count
-        self.current_radius = 0
+        self.current_radius = 0.0
         self.max_radius = (
             self.parameters_df["SOUND_SPEED"][0]
             * self.parameters_df["CALL_DURATION"][0]
@@ -203,9 +203,15 @@ class DirectSound(EchoSound):
         # call_directionality = call_directionality_factor(
         #     A=7, theta=angle_between_sound_and_reflection_point
         # )
+        object_type = reflected_from[0:4]
+        if object_type == "wall":
+            reflection_loss = 0
+        else:
+            reflection_loss = self.parameters_df["REFLECTION_LOSS"][0]
+
         reflected_spl = (
             self.current_spl
-            - self.parameters_df["REFLECTION_LOSS"][0]
+            - reflection_loss
             # + call_directionality
         )
         if reflected_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:

@@ -60,8 +60,8 @@ class Bat:
 
         # self.decide_next_direction(self.received_sounds)
         self.update_dir(current_time, sound_objects)
-        self.cleanup_sounds(current_time)
-        self.detect_sounds(current_time, sound_objects)
+        # self.cleanup_sounds(current_time)
+        # self.detect_sounds(current_time, sound_objects)
 
     def update_movement(self):
         """Update poisition of Bat when called.
@@ -108,7 +108,7 @@ class Bat:
             self.emitted_sounds.append(sound)
             sound_objects.append(sound)
             self.time_since_dir_change = 0
-            self.time_since_last_call = np.random.normal(0, 0.02)
+            self.time_since_last_call = np.random.normal(0, 0.01)
             self.detections_for_dir_change = []
 
     def given_sound_objects_return_detected(self, current_time, sound_objects):
@@ -237,10 +237,10 @@ class Bat:
         Args:
             detected_sound_objects (list): list containing detected sounds
         """
-
+        effect_strength = np.pi
         if len(detected_sound_objects) != 0:
             max_spl = np.max([i["spl"] for i in detected_sound_objects])
-            if max_spl > 20:
+            if max_spl > 93:
 
                 max_spl_sound = [
                     i for i in detected_sound_objects if i["spl"] == max_spl
@@ -260,12 +260,13 @@ class Bat:
                 if max_spl > 98:
 
                     next_direction = max_spl_sound_vector.rotate(np.pi).normalize()
-
+                    effect_strength = ((max_spl - 98) / 4.4) * np.pi
                     # next_direction = mean_vector.rotate(np.pi)
                     # self.direction = next_direction.normalize()
                 else:
                     # print("attract")
                     next_direction = max_spl_sound_vector.normalize()
+                    effect_strength = ((max_spl - 93) / 5.1) * np.pi
                     # next_direction = mean_vector
                     # self.direction = next_direction.normalize()
                     # self.generate_random_direction()
@@ -278,11 +279,11 @@ class Bat:
             print("random")
             next_direction = self.generate_random_direction()
 
-        cap_dir_change = 60
-        if self.direction.angle_between(next_direction) > np.radians(cap_dir_change):
-            next_direction = self.direction.rotate(np.radians(cap_dir_change))
-        elif self.direction.angle_between(next_direction) < np.radians(-cap_dir_change):
-            next_direction = self.direction.rotate(np.radians(-cap_dir_change))
+        cap_dir_change = effect_strength
+        if self.direction.angle_between(next_direction) > cap_dir_change:
+            next_direction = self.direction.rotate(cap_dir_change)
+        elif self.direction.angle_between(next_direction) < -cap_dir_change:
+            next_direction = self.direction.rotate(-cap_dir_change)
         # else:
         #     next_direction = next_direction
 

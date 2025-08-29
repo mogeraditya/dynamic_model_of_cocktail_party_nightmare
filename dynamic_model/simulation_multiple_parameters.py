@@ -68,10 +68,12 @@ def parallel_process_with_pool(param_dir, n_runs, data_storage_dir, max_workers=
 
 if __name__ == "__main__":
     # Directory containing your parameter files
-    PARAM_DIR = "./dynamic_model/paramsets/effect_of_group_size/store_paramsets/"
-    N_RUNS = 100  # Number of iterations per parameter set
+    PARAM_DIR = (
+        "./dynamic_model/paramsets/effect_time_delay_of_decision/store_paramsets/"
+    )
+    N_RUNS = 50  # Number of iterations per parameter set
     DATA_STORAGE_DIR = "."  # Base output directory
-    MAX_WORKERS = 4  # Limit number of parallel processes
+    # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing
     print("Starting parallel processing...")
