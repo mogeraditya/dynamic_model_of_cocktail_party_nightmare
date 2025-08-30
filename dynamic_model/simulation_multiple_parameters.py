@@ -71,8 +71,8 @@ if __name__ == "__main__":
     PARAM_DIR = (
         "./dynamic_model/paramsets/effect_time_delay_of_decision/store_paramsets/"
     )
-    N_RUNS = 50  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = "."  # Base output directory
+    N_RUNS = 100  # Number of iterations per parameter set
+    DATA_STORAGE_DIR = "./POSTER/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing

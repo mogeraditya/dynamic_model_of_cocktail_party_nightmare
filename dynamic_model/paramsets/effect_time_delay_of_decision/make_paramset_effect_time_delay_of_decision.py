@@ -17,19 +17,20 @@ simulation_parameters = load_parameters(
 
 # We will vary num_bats and generate multiple paramsets for different number of bats keeping everything else the same.
 
-time_delays = [0.01, 0.02, 0.05, 0.07]
+time_delays = [0.01, 0.02, 0.03, 0.05, 0.07, 0.08]
 
 DIR_TO_STORE_PARAMSETS = (
     r"./dynamic_model/paramsets/effect_time_delay_of_decision/store_paramsets/"
 )
 make_dir(DIR_TO_STORE_PARAMSETS)
-simulation_parameters["ARENA_WIDTH"] = 5
-simulation_parameters["ARENA_HEIGHT"] = 7
-simulation_parameters["NUM_BATS"] = 20
+simulation_parameters["ARENA_WIDTH"] = 7
+simulation_parameters["ARENA_HEIGHT"] = 5
+simulation_parameters["NUM_BATS"] = 25
+simulation_parameters["SIM_DURATION"] = 10
 for time_delay in time_delays:
     simulation_parameters["TIME_DELAY_FOR_DIR_CHANGE"] = time_delay
     simulation_parameters["OUTPUT_DIR_FOR_SIMULATION"] = (
-        f"/DATA_effect_time_delay_of_decision/{time_delay}/"
+        f"/POSTER_effect_time_delay_of_decision/{time_delay}/"
     )
     simulation_parameters["VARYING_PARAM"] = "TIME_DELAY_FOR_DIR_CHANGE"
 

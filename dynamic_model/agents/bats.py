@@ -108,7 +108,7 @@ class Bat:
             self.emitted_sounds.append(sound)
             sound_objects.append(sound)
             self.time_since_dir_change = 0
-            self.time_since_last_call = np.random.normal(0, 0.01)
+            self.time_since_last_call = np.random.uniform(-0.01, 0.01)
             self.detections_for_dir_change = []
 
     def given_sound_objects_return_detected(self, current_time, sound_objects):
@@ -303,7 +303,7 @@ class Bat:
             ).normalize()
             self.detections_for_dir_change = []
             self.time_since_dir_change = -np.inf
-
+        # 600 degrees per second rotation rate at 3 m/s converted to radians
         self.rotate_towards_given_degree(self.next_direction, 0.010472)
 
     # def given_next_direction_change_gradually(self, next_dir, decision_time):
