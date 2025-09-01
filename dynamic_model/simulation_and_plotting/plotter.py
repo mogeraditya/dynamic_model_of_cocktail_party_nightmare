@@ -87,15 +87,16 @@ def setup_visualization(parameters_df, bats, obstacles):
     sound_artists = []
     detection_artists = []
     trajectory_lines = []
-
-    colors = plt.cm.tab10.colors
+    NUM_COLORS = 25
+    cm = plt.get_cmap("gist_rainbow")
+    # colors = plt.cm.tab30.colors
     for i, bat in enumerate(bats):
 
         # trajectory line place holders
         (trajectory_line,) = ax.plot(
             [],
             [],
-            color=colors[i % len(colors)],
+            color=cm(i / NUM_COLORS),  # colors[i % len(colors)],
             linestyle="--",
             alpha=1,
             linewidth=1.5,
@@ -106,7 +107,7 @@ def setup_visualization(parameters_df, bats, obstacles):
         bat_circle = Circle(
             (bat.position.x, bat.position.y),
             bat.radius,
-            color=colors[i % len(colors)],
+            color=cm(i / NUM_COLORS),  # colors[i % len(colors)],
             label=f"Bat {bat.id}",
             # alpha=0.5,
         )  # , label=f"Obstacle {obstacle.id}")
@@ -129,7 +130,7 @@ def setup_visualization(parameters_df, bats, obstacles):
             0,
             0,  # Initial direction (0, 0)
             width=0.3,  # Adjust arrow width as needed
-            color=colors[i % len(colors)],
+            color=cm(i / NUM_COLORS),  # colors[i % len(colors)],
             alpha=0.8,
         )
         ax.add_patch(direction_arrow)
@@ -291,21 +292,20 @@ def visualize(output_dir, save_animation):
 
     handles, labels = ax.get_legend_handles_labels()
     print(labels)
-    obstacle_patch = Patch(color="red", alpha=0.5, label="Obstacle")
-    directsound_patch = Patch(hatch="++", label="DirectSound")
-    echosound_patch = Patch(hatch="..", label="EchoSound")
+    # obstacle_patch = Patch(color="red", alpha=0.5, label="Obstacle")
+    # directsound_patch = Patch(hatch="++", label="DirectSound")
+    # echosound_patch = Patch(hatch="..", label="EchoSound")
 
-    handles.append(directsound_patch)
-    handles.append(echosound_patch)
-    handles.append(obstacle_patch)
+    # handles.append(directsound_patch)
+    # handles.append(echosound_patch)
+    # handles.append(obstacle_patch)
     # DirectSound_patch = Patch(hatch="++", label='DirectSound')
     # plt.legend()
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=handles)
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            save_animation
-            + "/animation_wall_echoes_4_bat_with_reflection_loss_yay.mp4",
+            save_animation + "/animation.mp4",
             writer=ffwriter,
         )
     plt.show()
@@ -313,8 +313,8 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = r"./test_intelligent_movement_bats_final_epic_pog/data_for_plotting/"
-    SAVE_ANIMATION = False  # OUTPUT_DIR
+    OUTPUT_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/POSTER/make_video_for_poster/"  # r"./poster_videos/5_bats/data_for_plotting/"
+    SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
     # history, parameters_df, bats, obstacles = stitch_together_history_lists(OUTPUT_DIR)
     # next_dir_data = [np.degrees(i["next_dir_angle"][0]) for i in history]

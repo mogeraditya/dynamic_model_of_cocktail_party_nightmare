@@ -1,15 +1,20 @@
 import glob
 import os
+import pickle
 import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as scp
 import seaborn as sns
+import statsmodels.stats.multitest as multi
 from scipy import stats
+from scipy.stats import ttest_ind
 
 sys.path.append("./dynamic_model")
+import statannot
 from simulation_and_plotting.plotter import stitch_together_history_lists
+from supporting_files.utilities import combine_pickle_files
 
 
 # implement collision rate
@@ -31,6 +36,42 @@ def compute_collision_rate(history):
         number_of_collisions_across_time.append(count_collisions)
 
     return np.sum(number_of_collisions_across_time) / len(bat_positions)
+
+
+def compute_collision_counts_and_length(history):
+    bat_positions = [i["bat_positions"] for i in history][1000:]
+    collision_counter = 0
+    collision_duration = []
+    track_collision_in_last_frame_w_bats = []
+    track_collision_in_last_frame_w_walls = []
+
+    duration_tracker = np.zeros(shape=(len(bat_positions), len(bat_positions)))
+    for position_frame in bat_positions:
+        distance_matrix = scp.spatial.distance_matrix(position_frame, position_frame)
+
+        track_collision_in_current_frame_w_bats = []
+        track_collision_in_current_frame_w_walls = []
+
+        for i in range(distance_matrix.shape[0]):
+            for j in range(distance_matrix.shape[0]):
+                if i < j:
+                    if distance_matrix[i, j] < 0.25:
+                        track_collision_in_current_frame_w_bats.append((i, j))
+                        if (i, j) not in track_collision_in_last_frame_w_bats:
+                            collision_counter += 1
+
+        for i, bat in enumerate(position_frame):
+
+            if bat[0] >= 5 or bat[0] <= 0 or bat[1] >= 7 or bat[1] <= 0:
+                track_collision_in_current_frame_w_walls.append(i)
+
+                if i not in track_collision_in_last_frame_w_walls:
+                    collision_counter += 1
+
+        track_collision_in_last_frame_w_bats = track_collision_in_current_frame_w_bats
+        track_collision_in_last_frame_w_walls = track_collision_in_current_frame_w_walls
+
+    return collision_counter
 
 
 def compute_interindividual_distance(history):
@@ -66,7 +107,9 @@ def plot_data_across_parameters(output_dir):
             history, parameters_df = stitch_together_history_lists(
                 iteration_folder + "/data_for_plotting/"
             )[0:2]
-            dict_w_values["collision"].append(compute_collision_rate(history))
+            dict_w_values["collision"].append(
+                compute_collision_counts_and_length(history)
+            )
             dict_w_values["parameters"].append(
                 parameters_df[parameters_df["VARYING_PARAM"][0]][0]
             )
@@ -81,6 +124,35 @@ def plot_data_across_parameters(output_dir):
     return dict_w_values
 
 
+def save_extracted_data(output_dir, dir_to_store):
+    folders_in_parameter = np.sort(glob.glob(output_dir + "/*"))
+    dict_w_values = {}
+    dict_w_values["collision"] = []
+    dict_w_values["parameters"] = []
+    dict_w_values["median interindividual dist"] = []
+    dict_w_values["mean interindividual dist"] = []
+    for iteration_folder in folders_in_parameter:
+        history, parameters_df = stitch_together_history_lists(
+            iteration_folder + "/data_for_plotting/"
+        )[0:2]
+        dict_w_values["collision"].append(compute_collision_counts_and_length(history))
+        dict_w_values["parameters"].append(
+            parameters_df[parameters_df["VARYING_PARAM"][0]][0]
+        )
+        interindividual_distance = compute_interindividual_distance(history)
+        dict_w_values["mean interindividual dist"].append(
+            np.mean(interindividual_distance)
+        )
+        dict_w_values["median interindividual dist"].append(
+            np.median(interindividual_distance)
+        )
+        print(iteration_folder)
+    with open(
+        dir_to_store + f'{dict_w_values["parameters"][0]}.pickle', "wb"
+    ) as handle:
+        pickle.dump(dict_w_values, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
 def rarefaction_curve(output_dir):
     folders = np.sort(glob.glob(output_dir + "/*"))
     store_values = []
@@ -88,7 +160,7 @@ def rarefaction_curve(output_dir):
         history, parameters_df, bats, obstacles = stitch_together_history_lists(
             folder + "/data_for_plotting/"
         )
-        store_values.append(compute_collision_rate(history))
+        store_values.append(compute_collision_counts_and_length(history))
     return store_values
     # x_values_on_curve = np.arange(10, 110, 1)
     # y_values_on_curve_mean = []
@@ -118,7 +190,7 @@ def plot_saturation_analysis(simulation_results, parameter_name):
     """
 
     n_runs = len(simulation_results)
-    cumulative_means = np.cumsum(simulation_results) / np.arange(1, n_runs + 1)
+    # cumulative_means = np.cumsum(simulation_results) / np.arange(1, n_runs + 1)
 
     # Calculate running statistics
     running_means = []
@@ -209,33 +281,82 @@ def plot_saturation_analysis(simulation_results, parameter_name):
         print("May need more simulations for better convergence")
 
 
+# Usage
+
 if __name__ == "__main__":
-    print(os.getcwd())
-    OUTPUT_DIR = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/DATA_effect_time_delay_of_decision/0.01/iteration_number_4/data_for_plotting"  # r"./test_intelligent_movement_25bats_final_epic/data_for_plotting/"
-    SAVE_ANIMATION = False  # OUTPUT_DIR
-    history, parameters_df, bats, obstacles = stitch_together_history_lists(OUTPUT_DIR)
-    # plt.plot(compute_collision_rate(history))
-    # plt.show()
-    print(compute_collision_rate(history))
-    # median_array = np.median(compute_median_interindividual_distance(history), axis=1)
-    # plt.plot(median_array)
-    # plt.show()
-    #
-    # plt.boxplot(rarefaction_curve(output_folder))
-    # plt.show()
+    # print(os.getcwd())
+    # OUTPUT_DIR = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/test_intelligent_movement_1bat_wall_echoes/data_for_plotting"  # r"./test_intelligent_movement_25bats_final_epic/data_for_plotting/"
+    # SAVE_ANIMATION = False  # OUTPUT_DIR
+    # history, parameters_df, bats, obstacles = stitch_together_history_lists(OUTPUT_DIR)
+    # print(compute_collision_counts_and_length(history))
+    # # plt.plot(compute_collision_rate(history))
+    # # plt.show()
+    # print(compute_collision_rate(history))
+    # # median_array = np.median(compute_median_interindividual_distance(history), axis=1)
+    # # plt.plot(median_array)
+    # # plt.show()
+    # #
+    # # plt.boxplot(rarefaction_curve(output_folder))
+    # # plt.show()
+
     # output_folder = (
     #     r"dynamic_model/rarefaction/DATA_effect_time_delay_of_decision/0.05/"
     # )
     # values = rarefaction_curve(output_folder)
 
-    # plot_saturation_analysis(values, "collision count/ no. of frames")
-    output_folder = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/DATA_effect_time_delay_of_decision/"
-    dict_w_values = plot_data_across_parameters(output_folder)
+    # plot_saturation_analysis(values, "collision count")
 
-    plt.subplot(1, 3, 1)
-    sns.violinplot(data=dict_w_values, x="parameters", y="collision")
-    plt.subplot(1, 3, 2)
-    sns.violinplot(data=dict_w_values, x="parameters", y="median interindividual dist")
-    plt.subplot(1, 3, 3)
-    sns.violinplot(data=dict_w_values, x="parameters", y="mean interindividual dist")
+    # dict_w_values = plot_data_across_parameters(output_folder)
+
+    # plt.subplot(1, 3, 1)
+    # sns.violinplot(data=dict_w_values, x="parameters", y="collision")
+    # plt.subplot(1, 3, 2)
+    # sns.violinplot(data=dict_w_values, x="parameters", y="median interindividual dist")
+    # plt.subplot(1, 3, 3)
+    # sns.violinplot(data=dict_w_values, x="parameters", y="mean interindividual dist")
+    # plt.show()
+    # output_folder = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/POSTER/POSTER_effect_time_delay_of_decision/"
+    # for output_dir in glob.glob(output_folder + "/*")[0:5]:
+    #     print(output_dir)
+    #     # output_dir = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/POSTER/POSTER_effect_time_delay_of_decision/0.01/"
+    #     dir_to_store = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/POSTER/extracted_data/"
+    #     save_extracted_data(output_dir, dir_to_store)
+
+    dir_to_store = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/POSTER/extracted_data/"
+    dict_w_values = combine_pickle_files(dir_to_store)
+    print(dict_w_values)
+    plt.figure(figsize=(10, 9))
+    plt.rcParams["font.size"] = "23"
+    # plt.subplot(1, 3, 1)
+    ax = sns.violinplot(data=dict_w_values, x="parameters", y="collision")
+    # ax = sns.violinplot(
+    #     data=dict_w_values, x="parameters", y="mean interindividual dist"
+    # )
+    # statannot.add_stat_annotation(
+    #     ax,
+    #     data=dict_w_values,
+    #     x="parameters",
+    #     y="mean interindividual dist",
+    #     box_pairs=[
+    #         (0.01, 0.02),
+    #         (0.02, 0.03),
+    #         (0.03, 0.05),
+    #         (0.05, 0.07),
+    #         (0.07, 0.08),
+    #     ],
+    #     test="t-test_ind",
+    #     text_format="star",
+    #     loc="outside",
+    # )
+
+    # # plt.title("Violin Plot with Corrected Statistical Significance")
+    plt.tight_layout()
     plt.show()
+    # plt.subplot(1, 3, 2)
+    # sns.violinplot(data=dict_w_values, x="parameters", y="median interindividual dist")
+    # plt.subplot(1, 3, 3)
+    # sns.violinplot(data=dict_w_values, x="parameters", y="mean interindividual dist")
+    # plt.show()
+
+    # array = [[1, 1, 1, 0], [2, 2, 2, 2]]
+    # print(np.median(array, axis=0))
