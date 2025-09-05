@@ -119,7 +119,7 @@ class Bat:
             sound_objects (list): List containing all active sounds in the simulation
 
         Returns:
-            list:
+            list: sound detections given time.
         """
         array_of_sound_detections = []
         for sound in sound_objects:
