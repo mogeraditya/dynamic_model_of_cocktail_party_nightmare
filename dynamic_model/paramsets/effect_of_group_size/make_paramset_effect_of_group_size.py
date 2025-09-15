@@ -17,7 +17,7 @@ simulation_parameters = load_parameters(
 
 # We will vary num_bats and generate multiple paramsets for different number of bats keeping everything else the same.
 
-group_sizes = [25, 50, 100]
+group_sizes = [2]
 
 DIR_TO_STORE_PARAMSETS = (
     r"./dynamic_model/paramsets/effect_of_group_size/store_paramsets/"

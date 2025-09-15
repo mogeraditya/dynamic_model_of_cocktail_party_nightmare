@@ -37,6 +37,10 @@ class Bat:
         self.speed = self.parameters_df["BAT_SPEED"][0]
         self.radius = self.parameters_df["BAT_RADIUS"][0]
 
+        self.detections_for_dir_change = []
+        self.time_since_dir_change = -np.inf
+        self.next_direction = self.direction
+
     # TODO: dont allow movement through obstacles/ other bats
     def update(self, current_time, sound_objects):
         """Function to update bats with time.
@@ -52,9 +56,12 @@ class Bat:
         self.update_movement()
         self.position_history.append((current_time, (self.position.x, self.position.y)))
 
-        self.detect_sounds(current_time, sound_objects)
         self.emit_sounds(current_time, sound_objects)
-        self.cleanup_sounds(current_time)
+
+        # self.decide_next_direction(self.received_sounds)
+        self.update_dir(current_time, sound_objects)
+        # self.cleanup_sounds(current_time)
+        # self.detect_sounds(current_time, sound_objects)
 
     def update_movement(self):
         """Update poisition of Bat when called.
@@ -71,15 +78,13 @@ class Bat:
             or self.position.x >= self.parameters_df["ARENA_WIDTH"][0]
         ):
             self.direction.x *= -1
+            self.next_direction = self.direction
         if (
             self.position.y <= 0
             or self.position.y >= self.parameters_df["ARENA_HEIGHT"][0]
         ):
             self.direction.y *= -1
-
-        # Random direction change occasionally
-        if random.random() < self.parameters_df["PROPENSITY_TO_CHANGE_DIRECTION"][0]:
-            self.direction = Vector().random_direction()
+            self.next_direction = self.direction
 
     def emit_sounds(self, current_time, sound_objects):
         """Trigger sound emission by Bat.
@@ -102,21 +107,27 @@ class Bat:
             )
             self.emitted_sounds.append(sound)
             sound_objects.append(sound)
-            self.time_since_last_call = 0
+            self.time_since_dir_change = 0
+            self.time_since_last_call = np.random.uniform(-0.01, 0.01)
+            self.detections_for_dir_change = []
 
-    def detect_sounds(self, current_time, sound_objects):
-        """Detects sound that are audible to the Bat
-        Checks if a bat can hear a sound based on dbSpl of sound
-        and position of bat.
+    def given_sound_objects_return_detected(self, current_time, sound_objects):
+        """given sounds generate list of sounds that a bat can hear
 
         Args:
             current_time (float): Time, in seconds, for which the simualtion has been running.
-            sound_objects (list): _description_
+            sound_objects (list): List containing all active sounds in the simulation
+
+        Returns:
+            list: sound detections given time.
         """
+        array_of_sound_detections = []
         for sound in sound_objects:
             if not sound.active:
                 continue
 
+            if sound.emitter_id == self.id and isinstance(sound, DirectSound):
+                continue
             # sound.update(current_time)
 
             if sound.current_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
@@ -124,7 +135,7 @@ class Bat:
 
             if sound.contains_point(self.position):
                 sound_type = "direct" if isinstance(sound, DirectSound) else "echo"
-                self.received_sounds.append(
+                array_of_sound_detections.append(
                     {
                         "time": current_time,
                         "position": (sound.origin.x, sound.origin.y),
@@ -138,6 +149,20 @@ class Bat:
                         "sound_object_id": id(sound),
                     }
                 )
+        return array_of_sound_detections
+
+    def detect_sounds(self, current_time, sound_objects):
+        """Detects sound that are audible to the Bat
+        Checks if a bat can hear a sound based on dbSpl of sound
+        and position of bat.
+
+        Args:
+            current_time (float): Time, in seconds, for which the simualtion has been running.
+            sound_objects (list): _description_
+        """
+        self.received_sounds.extend(
+            self.given_sound_objects_return_detected(current_time, sound_objects)
+        )
 
     def cleanup_sounds(self, current_time):
         """Stores the detections into a .npy file.
@@ -150,9 +175,9 @@ class Bat:
         # Keep only recent detections
         if (current_time - self.time_since_last_cleanup) >= self.parameters_df[
             "CLEANUP_INTERVAL"
-        ][
-            0
-        ]:  # 10ms
+        ][0] or np.round(
+            self.time_since_last_cleanup, 3
+        ) == current_time:  # 10ms
             dir_to_store = self.output_dir + "/" + str(self.id)
             make_dir(dir_to_store)
             np.save(
@@ -179,6 +204,131 @@ class Bat:
             list: sounds that are detected by a bat before a certain time.
         """
         return [d for d in self.received_sounds if d["time"] <= current_time]
+
+    # inelligent movement
+    def generate_random_direction(self):
+        """assign a random direction to the bat"""
+        direction = self.direction
+        if random.random() < self.parameters_df["PROPENSITY_TO_CHANGE_DIRECTION"][0]:
+            direction = Vector().random_direction()
+        return direction
+
+    def generate_direction_vector_given_sound(self, sound):
+        """generate direction vector of any sound
+
+        Args:
+            sound (EchoSound): sound to convert to vector
+
+        Returns:
+            Vector: Vector form of the input sound
+        """
+        spl_of_sound = sound["spl"]
+
+        normalized_sound_vector = (
+            Vector(x=sound["position"][0], y=sound["position"][1]) - self.position
+        ).normalize()
+
+        vector_w_spl_magnitude = normalized_sound_vector * spl_of_sound
+        return vector_w_spl_magnitude
+
+    def decide_next_direction(self, detected_sound_objects):
+        """decide next direction of bat based on sound
+
+        Args:
+            detected_sound_objects (list): list containing detected sounds
+        """
+        effect_strength = np.pi
+        if len(detected_sound_objects) != 0:
+            max_spl = np.max([i["spl"] for i in detected_sound_objects])
+            if max_spl > 93:
+
+                max_spl_sound = [
+                    i for i in detected_sound_objects if i["spl"] == max_spl
+                ][0]
+                # sum_of_sound_vectors = Vector(0, 0)
+                # for sound in detected_sound_objects:
+                #     sum_of_sound_vectors += (
+                #         self.generate_direction_vector_given_sound(sound)
+                #     )
+                # mean_vector = sum_of_sound_vectors * (
+                #     1 / len(detected_sound_objects)
+                # )
+                max_spl_sound_vector = self.generate_direction_vector_given_sound(
+                    max_spl_sound
+                )
+
+                if max_spl > 98:
+
+                    next_direction = max_spl_sound_vector.rotate(np.pi).normalize()
+                    effect_strength = ((max_spl - 98) / 4.4) * np.pi
+                    # next_direction = mean_vector.rotate(np.pi)
+                    # self.direction = next_direction.normalize()
+                else:
+                    # print("attract")
+                    next_direction = max_spl_sound_vector.normalize()
+                    effect_strength = ((max_spl - 93) / 5.1) * np.pi
+                    # next_direction = mean_vector
+                    # self.direction = next_direction.normalize()
+                    # self.generate_random_direction()
+
+            else:
+                # Random direction change occasionally
+                next_direction = self.generate_random_direction()
+
+        else:
+            print("random")
+            next_direction = self.generate_random_direction()
+
+        cap_dir_change = effect_strength
+        if self.direction.angle_between(next_direction) > cap_dir_change:
+            next_direction = self.direction.rotate(cap_dir_change)
+        elif self.direction.angle_between(next_direction) < -cap_dir_change:
+            next_direction = self.direction.rotate(-cap_dir_change)
+        # else:
+        #     next_direction = next_direction
+
+        return next_direction
+
+    def update_dir(self, current_time, sound_objects):
+
+        self.time_since_dir_change += self.parameters_df["TIME_STEP"][0]
+        dir_change_time_interval = self.parameters_df["TIME_DELAY_FOR_DIR_CHANGE"][0]
+        self.detections_for_dir_change.extend(
+            self.given_sound_objects_return_detected(current_time, sound_objects)
+        )
+
+        if self.time_since_dir_change >= dir_change_time_interval:
+            self.next_direction = self.decide_next_direction(
+                self.detections_for_dir_change
+            ).normalize()
+            self.detections_for_dir_change = []
+            self.time_since_dir_change = -np.inf
+        # 600 degrees per second rotation rate at 3 m/s converted to radians
+        self.rotate_towards_given_degree(self.next_direction, 0.010472)
+
+    # def given_next_direction_change_gradually(self, next_dir, decision_time):
+    #     current_dir = self.direction
+    #     number_of_steps = int(decision_time / self.parameters_df["TIME_STEP"][0])
+    #     angle_between_current_and_next_dir = current_dir.angle_between(next_dir)
+    #     angle_per
+    def rotate_towards_given_degree(self, new_direction, rotation_rate):
+        # want to slowly rotate towards the new_dir from current_dir
+        current_direction = self.direction
+        if current_direction != new_direction:
+            angle_between_current_and_new = current_direction.angle_between(
+                new_direction
+            )
+
+            if angle_between_current_and_new > rotation_rate:
+                rotation_angle = 1 * rotation_rate
+            elif angle_between_current_and_new < -rotation_rate:
+                rotation_angle = -1 * rotation_rate
+            else:
+                rotation_angle = angle_between_current_and_new
+
+            rotated_vector = current_direction.rotate(rotation_angle)
+
+            self.direction = rotated_vector.normalize()
 
     def __repr__(self):
         return f"Bat(id={self.id}, position={self.position})"

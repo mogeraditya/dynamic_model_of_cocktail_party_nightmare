@@ -1,4 +1,4 @@
-name: cocktail_3
+name: cocktail_3_dynamic_model
 channels:
   - conda-forge
   - defaults

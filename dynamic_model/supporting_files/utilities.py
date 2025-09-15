@@ -1,9 +1,10 @@
 """These are misc functions that are used across many files"""
 
 import os
+import pickle
 
 import numpy as np
-import pandas
+import pandas as pd
 
 
 def make_dir(directory):
@@ -45,8 +46,8 @@ def load_parameters(file_dir):
         DataFrame: DataFrame extracted from csv file
     """
     with open(file_dir, "r") as csv_file:
-        reader = pandas.read_csv(csv_file)
-    output_df = pandas.DataFrame()
+        reader = pd.read_csv(csv_file)
+    output_df = pd.DataFrame()
     for key in reader.keys():
         value = reader[key][0]
         value = convert_txt_to_int_or_float(value)
@@ -61,16 +62,13 @@ def call_directionality_factor(A, theta):
     The function calculates the drop using the third term
     in equation 11 of Giuggioli et al. 2015
 
-     Parameters
-    ----------
-    A : float >0. Asymmetry parameter
-    theta : float. Angle at which the call directionality factor is
-            to be calculated in radians. 0 radians is on-axis.
-      Returns
-    -------
+    Args:
+        A (float >0): Asymmetry parameter
+        theta (float): Angle at which the call directionality factor is
+                to be calculated in radians. 0 radians is on-axis.
+    Returns:
 
-    call_dirn : float <=0. The amount of drop in dB which occurs when the call
-                is measured off-axis.
+        float <=0: The amount of drop in dB which occurs when the call is measured off-axis.
     """
     if A <= 0:
         raise ValueError("A should be >0 ! ")
@@ -95,3 +93,21 @@ def creation_time_calculation(sound, reflection_point):
     time_taken = distance_from_sound_origin / speed_of_sound
     time_of_creation_of_echo = time_taken + sound.creation_time
     return time_of_creation_of_echo
+
+
+def combine_pickle_files(directory_path):
+    combined_df = (
+        pd.DataFrame()
+    )  # Initialize an empty DataFrame to store the merged data
+
+    for file_name in os.listdir(directory_path):
+        if file_name.endswith(".pickle"):
+            print(file_name)
+            file_path = os.path.join(directory_path, file_name)
+            with open(file_path, "rb") as f:
+                content = pd.DataFrame.from_dict(pickle.load(f))
+
+                if isinstance(content, pd.DataFrame):
+                    combined_df = pd.concat([combined_df, content], ignore_index=True)
+
+    return combined_df

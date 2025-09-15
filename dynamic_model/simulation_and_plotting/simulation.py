@@ -2,14 +2,18 @@
 
 import os
 import pickle
+import sys
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
+
+sys.path.append("./dynamic_model")
 from agents.bats import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
 from supporting_files.utilities import creation_time_calculation, load_parameters
+from supporting_files.vectors import Vector
 
 
 class Simulation:
@@ -77,6 +81,10 @@ class Simulation:
                     "bat_positions": [
                         (bat.position.x, bat.position.y) for bat in self.bats
                     ],
+                    "bat_directions": [
+                        (bat.direction.normalize().x, bat.direction.normalize().y)
+                        for bat in self.bats
+                    ],
                     "bat_detections": [
                         bat.get_detections_at_time(self.time_elapsed)
                         for bat in self.bats
@@ -87,6 +95,13 @@ class Simulation:
                         if s.active and s.current_spl > 20
                     ],
                     "sound_objects_count": len(self.sound_objects),
+                    "next_dir_angle": [
+                        bat.next_direction.angle_between(Vector(1, 0))
+                        for bat in self.bats
+                    ],
+                    "current_dir_angle": [
+                        bat.direction.angle_between(Vector(1, 0)) for bat in self.bats
+                    ],
                 }
             )
 
@@ -149,6 +164,27 @@ class Simulation:
             obstacle_id = None
 
             reflection_point_arr, normal_arr, obstacle_id_arr = [], [], []
+
+            # Check walls
+            wall_points_to_check = [
+                Vector(0, sound.origin.y),
+                Vector(sound.origin.x, 0),
+                Vector(self.parameters_df["ARENA_WIDTH"][0], sound.origin.y),
+                Vector(sound.origin.x, self.parameters_df["ARENA_HEIGHT"][0]),
+            ]
+            wall_ids = ["left", "down", "right", "up"]
+            for i, wall_point in enumerate(wall_points_to_check):
+                if (
+                    sound.contains_point(wall_point)
+                    and f"wall_{wall_ids[i]}" not in sound.reflected_obstacles
+                ):
+                    normal = (sound.origin - wall_point).normalize()
+                    reflection_point = wall_point
+                    obstacle_id = f"wall_{wall_ids[i]}"
+
+                    normal_arr.append(normal)
+                    reflection_point_arr.append(reflection_point)
+                    obstacle_id_arr.append(obstacle_id)
 
             # Check obstacles
             for obstacle in self.obstacles:
@@ -236,7 +272,8 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./test_storage_multiple_echoes/"
+    OUTPUT_DIR = r"./poster_videos/5_bats/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
-    sim = Simulation(PARAMETER_FILE_DIR, OUTPUT_DIR)
+    PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
+    sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()

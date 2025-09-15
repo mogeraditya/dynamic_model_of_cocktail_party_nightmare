@@ -71,10 +71,12 @@ class Vector:
         Returns:
             float: angle in radians
         """
-        dot_product = self.x * other.x + self.y * other.y
-        product_of_magnitudes = self.magnitude() * other.magnitude()
+        angle = math.degrees(math.atan2(other.y, other.x) - math.atan2(self.y, self.x))
+        return math.radians((angle + 180) % 360 - 180)
+        # dot_product = self.x * other.x + self.y * other.y
+        # product_of_magnitudes = self.magnitude() * other.magnitude()
 
-        return math.acos(dot_product / product_of_magnitudes)
+        # return math.acos(dot_product / product_of_magnitudes)
 
     def random_direction(self):
         """generate a random vector
@@ -106,5 +108,18 @@ class Vector:
         """
         return (self.x, self.y)
 
+    def rotate(self, angle):
+        """rotate a vector
+
+        Args:
+            angle (float): angle in radians
+
+        Returns:
+            Vector: new rotated vector
+        """
+        new_x = self.x * math.cos(angle) - self.y * math.sin(angle)
+        new_y = self.x * math.sin(angle) + self.y * math.cos(angle)
+        return Vector(new_x, new_y)
+
     def __repr__(self):
-        return f"Vector({self.x:.2f}, {self.y:.2f})"
+        return f"Vector({self.x:.3f}, {self.y:.3f})"
