@@ -62,16 +62,13 @@ def call_directionality_factor(A, theta):
     The function calculates the drop using the third term
     in equation 11 of Giuggioli et al. 2015
 
-     Parameters
-    ----------
-    A : float >0. Asymmetry parameter
-    theta : float. Angle at which the call directionality factor is
-            to be calculated in radians. 0 radians is on-axis.
-      Returns
-    -------
+    Args:
+        A (float >0): Asymmetry parameter
+        theta (float): Angle at which the call directionality factor is
+                to be calculated in radians. 0 radians is on-axis.
+    Returns:
 
-    call_dirn : float <=0. The amount of drop in dB which occurs when the call
-                is measured off-axis.
+        float <=0: The amount of drop in dB which occurs when the call is measured off-axis.
     """
     if A <= 0:
         raise ValueError("A should be >0 ! ")

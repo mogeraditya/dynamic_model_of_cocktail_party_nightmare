@@ -197,12 +197,14 @@ class DirectSound(EchoSound):
         """
         if self.has_reflected:
             return None
+
         # angle_between_sound_and_reflection_point = self.direction_vector.angle_between(
         #     point
         # )
         # call_directionality = call_directionality_factor(
         #     A=7, theta=angle_between_sound_and_reflection_point
         # )
+
         object_type = reflected_from[0:4]
         if object_type == "wall":
             reflection_loss = 0
