@@ -122,7 +122,7 @@ class TestingSoundPropagation(unittest.TestCase):
             origin=self.sound_start_point,
             creation_time=self.creation_time,
             emitter_id=self.emitter_id,
-            direction_vector=Vector(1, 1),
+            direction_vector=Vector(0, 1),
         )
         obstacle = Obstacle(self.parameters_df)
         distance = self.parameters_df["SOUND_DISK_WIDTH"][0]
@@ -170,6 +170,7 @@ class TestingSoundPropagation(unittest.TestCase):
         spl_by_model = [np.round(i.current_spl, 1) for i in sound_objects]
         self.assertTrue((expected_spls == spl_by_model))
 
+    def test_directionality()
 
 if __name__ == "__main__":
 
