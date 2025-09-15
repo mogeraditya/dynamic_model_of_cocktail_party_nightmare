@@ -4,7 +4,7 @@ import random
 
 import numpy as np
 from agents.sounds import DirectSound
-from supporting_files.utilities import make_dir
+from supporting_files.utilities import call_directionality_factor, make_dir
 from supporting_files.vectors import Vector
 
 
@@ -104,6 +104,7 @@ class Bat:
                 origin=self.position,
                 creation_time=current_time,
                 emitter_id=self.id,
+                direction_vector=self.direction,
             )
             self.emitted_sounds.append(sound)
             sound_objects.append(sound)
@@ -135,18 +136,25 @@ class Bat:
 
             if sound.contains_point(self.position):
                 sound_type = "direct" if isinstance(sound, DirectSound) else "echo"
+                angle_between_sound_and_reflection_point = (
+                    sound.direction_vector.angle_between(self.position)
+                )
+                call_directionality = call_directionality_factor(
+                    A=7, theta=angle_between_sound_and_reflection_point
+                )
                 array_of_sound_detections.append(
                     {
                         "time": current_time,
                         "position": (sound.origin.x, sound.origin.y),
                         "distance": sound.origin.distance_to(self.position),
-                        "spl": sound.current_spl,
+                        "spl": sound.current_spl + call_directionality,
                         "emitter_id": sound.emitter_id,
                         "type": sound_type,
                         "reflection_count": getattr(sound, "reflection_count", 0),
                         # 'parent_id': getattr(sound, 'parent_id', None),
                         "reflected_from": sound.reflected_from,
                         "sound_object_id": id(sound),
+                        "sound_direction": sound.direction_vector,
                     }
                 )
         return array_of_sound_detections
@@ -240,7 +248,7 @@ class Bat:
         effect_strength = np.pi
         if len(detected_sound_objects) != 0:
             max_spl = np.max([i["spl"] for i in detected_sound_objects])
-            if max_spl > 93:
+            if max_spl > 95:
 
                 max_spl_sound = [
                     i for i in detected_sound_objects if i["spl"] == max_spl
@@ -257,16 +265,16 @@ class Bat:
                     max_spl_sound
                 )
 
-                if max_spl > 98:
+                if max_spl > 95:
 
                     next_direction = max_spl_sound_vector.rotate(np.pi).normalize()
-                    effect_strength = ((max_spl - 98) / 4.4) * np.pi
+                    effect_strength = ((max_spl - 95) / 4.4) * np.pi
                     # next_direction = mean_vector.rotate(np.pi)
                     # self.direction = next_direction.normalize()
                 else:
                     # print("attract")
                     next_direction = max_spl_sound_vector.normalize()
-                    effect_strength = ((max_spl - 93) / 5.1) * np.pi
+                    effect_strength = ((max_spl - 90) / 5.1) * np.pi
                     # next_direction = mean_vector
                     # self.direction = next_direction.normalize()
                     # self.generate_random_direction()

@@ -34,6 +34,7 @@ class TestingSoundPropagation(unittest.TestCase):
             origin=self.sound_start_point,
             creation_time=self.creation_time,
             emitter_id=self.emitter_id,
+            direction_vector=Vector(1, 0),
         )
         time_passed = 5  # seconds
         sound.update(time_passed)
@@ -53,6 +54,7 @@ class TestingSoundPropagation(unittest.TestCase):
             origin=self.sound_start_point,
             creation_time=self.creation_time,
             emitter_id=self.emitter_id,
+            direction_vector=Vector(1, 0),
         )
         time_passed = 1  # seconds
         sound.update(time_passed)
@@ -82,6 +84,7 @@ class TestingSoundPropagation(unittest.TestCase):
             origin=self.sound_start_point,
             creation_time=self.creation_time,
             emitter_id=self.emitter_id,
+            direction_vector=Vector(0, 1),
         )
         time_passed = 1
         radius = time_passed * self.parameters_df["SOUND_SPEED"][0]
@@ -119,6 +122,7 @@ class TestingSoundPropagation(unittest.TestCase):
             origin=self.sound_start_point,
             creation_time=self.creation_time,
             emitter_id=self.emitter_id,
+            direction_vector=Vector(1, 1),
         )
         obstacle = Obstacle(self.parameters_df)
         distance = self.parameters_df["SOUND_DISK_WIDTH"][0]
@@ -127,12 +131,8 @@ class TestingSoundPropagation(unittest.TestCase):
 
         time_passed = 0.005  # obstacle should be inside sound disk now
         sound.update(time_passed)
-        print(sound.contains_point(obstacle.position))
-        print(sound)
-        print(isinstance(sound, DirectSound))
-        print(sound)
+
         if sound.active or isinstance(sound, DirectSound):
-            print("ball")
             if (
                 sound.contains_point(obstacle.position)
                 and f"obstacle_{obstacle.id}" not in sound.reflected_obstacles
@@ -140,14 +140,14 @@ class TestingSoundPropagation(unittest.TestCase):
                 normal = obstacle.get_reflection_normal(sound.origin)
                 reflection_point = obstacle.position + normal * obstacle.radius
                 obstacle_id = f"obstacle_{obstacle.id}"
-                print("lauda")
 
             time_of_creation = creation_time_calculation(sound, reflection_point)
             echo = sound.create_echo(
                 reflection_point, time_of_creation, normal, obstacle_id
             )
-
+            print(echo)
             if echo:
+
                 # Mark this obstacle as reflected for the original sound
                 echo.update(time_passed)
                 sound.reflected_obstacles.add(obstacle_id)
