@@ -39,3 +39,12 @@ For detailed description of the parameters used in model, please refer to ./dyna
     3. DATA_STORAGE_DIR - the directory where data from all the simulation runs need to be stored. 
     4. MAX_WORKERS - if you wish to limit the number of cores assigned to running the simulation then set this to the desired number. If left blank, the max possible number of cores will be used.
 
+## Implementation of intelligent movement 
+
+1. You attract to "close" objects. However, if object is too close, you repel. 
+2. Distance to an object is measured based on the intensity of sound. It uses intensity as a proxy for distance, self echoes are not treated differently. 
+3. You only respond to the loudest sound that you receive, X seconds after your call. 
+4. Attraction and Repuslion response strengths are linear (w spl). 
+    - Say you attract to spls above 93 db and repel sounds above 98 db. The repulsion linear response scales from 93 to 98, with maximum allowed angle change being $\pm$ 0 degree at 93db and $\pm$ 180 degree at 98 dB.
+5. Fixed angular speed of 6000 deg/s, 2015 vanderelst et al
+6. 
