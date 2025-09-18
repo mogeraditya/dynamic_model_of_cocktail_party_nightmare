@@ -197,18 +197,37 @@ class DirectSound(EchoSound):
             point
         )
         call_directionality = call_directionality_factor(
-            A=7, theta=angle_between_sound_and_reflection_point
+            A=0, theta=angle_between_sound_and_reflection_point
         )
 
         object_type = reflected_from[0:4]
         if object_type == "wall":
-            reflection_loss = 0
+            reflection_loss = 20 * math.log10(2)
         else:
             reflection_loss = self.parameters_df["REFLECTION_LOSS"][0]
 
-        reflected_spl = self.current_spl - reflection_loss + call_directionality
+        distance_between_sound_and_echo = self.origin.distance_to(point)
+        distance_effect_for_echoes = 20 * math.log10(
+            distance_between_sound_and_echo / 1
+        )
+        spl_corrected_for_width = (
+            self.initial_spl
+            - distance_effect_for_echoes
+            - (
+                self.parameters_df["AIR_ABSORPTION"][0]
+                * distance_between_sound_and_echo
+            )
+        )
+
+        reflected_spl = spl_corrected_for_width - reflection_loss + call_directionality
         if reflected_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
             return None
+
+        if reflected_spl > spl_corrected_for_width:
+            print(self.current_spl)
+            print(
+                f"reflected spl {reflected_spl}, self spl {self.current_spl}, spl corrected {spl_corrected_for_width}, reflection_loss {reflection_loss}, call directionality {call_directionality}"
+            )
 
         # self.has_reflected = True
         echo = EchoSound(

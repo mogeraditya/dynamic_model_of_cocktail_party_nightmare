@@ -1,5 +1,6 @@
 """This module contains the code that describes a Bat object and its behaviours"""
 
+import math
 import random
 
 import numpy as np
@@ -60,8 +61,8 @@ class Bat:
 
         # self.decide_next_direction(self.received_sounds)
         self.update_dir(current_time, sound_objects)
-        # self.cleanup_sounds(current_time)
-        # self.detect_sounds(current_time, sound_objects)
+        self.cleanup_sounds(current_time)
+        self.detect_sounds(current_time, sound_objects)
 
     def update_movement(self):
         """Update poisition of Bat when called.
@@ -112,7 +113,9 @@ class Bat:
             self.time_since_last_call = np.random.uniform(-0.01, 0.01)
             self.detections_for_dir_change = []
 
-    def given_sound_objects_return_detected(self, current_time, sound_objects):
+    def given_sound_objects_return_detected(
+        self, current_time, sound_objects, detect_self_call
+    ):
         """given sounds generate list of sounds that a bat can hear
 
         Args:
@@ -127,27 +130,59 @@ class Bat:
             if not sound.active:
                 continue
 
-            if sound.emitter_id == self.id and isinstance(sound, DirectSound):
+            if (
+                sound.emitter_id == self.id
+                and isinstance(sound, DirectSound)
+                and not detect_self_call
+            ):
                 continue
             # sound.update(current_time)
 
             if sound.current_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
                 continue
 
+            if sound.reflected_from == f"bat_{self.id}":
+                # print(sound)
+                continue
+
             if sound.contains_point(self.position):
                 sound_type = "direct" if isinstance(sound, DirectSound) else "echo"
-                angle_between_sound_and_reflection_point = (
-                    sound.direction_vector.angle_between(self.position)
+                angle_between_sound_and_bat = sound.direction_vector.angle_between(
+                    self.position
                 )
                 call_directionality = call_directionality_factor(
-                    A=7, theta=angle_between_sound_and_reflection_point
+                    A=0, theta=angle_between_sound_and_bat
                 )
+
+                distance_between_sound_and_bat = self.position.distance_to(sound.origin)
+                # print(distance_between_sound_and_bat)
+
+                if distance_between_sound_and_bat == 0:
+
+                    spl_corrected_for_width = sound.initial_spl
+                else:
+                    distance_effect = 20 * math.log10(
+                        distance_between_sound_and_bat / 1
+                    )
+                    spl_corrected_for_width = (
+                        sound.initial_spl
+                        - distance_effect
+                        - (
+                            self.parameters_df["AIR_ABSORPTION"][0]
+                            * distance_between_sound_and_bat
+                        )
+                    )
+                # if sound.emitter_id == self.id and isinstance(sound, DirectSound):
+                #     print(
+                #         f"distnace {distance_between_sound_and_bat}, spl {spl_corrected_for_width}"
+                #     )
+
                 array_of_sound_detections.append(
                     {
                         "time": current_time,
                         "position": (sound.origin.x, sound.origin.y),
                         "distance": sound.origin.distance_to(self.position),
-                        "spl": sound.current_spl + call_directionality,
+                        "spl": spl_corrected_for_width + call_directionality,
                         "emitter_id": sound.emitter_id,
                         "type": sound_type,
                         "reflection_count": getattr(sound, "reflection_count", 0),
@@ -155,6 +190,8 @@ class Bat:
                         "reflected_from": sound.reflected_from,
                         "sound_object_id": id(sound),
                         "sound_direction": sound.direction_vector,
+                        "incident_direction": sound.origin - self.position,
+                        "self_direction": self.direction,
                     }
                 )
         return array_of_sound_detections
@@ -169,7 +206,9 @@ class Bat:
             sound_objects (list): _description_
         """
         self.received_sounds.extend(
-            self.given_sound_objects_return_detected(current_time, sound_objects)
+            self.given_sound_objects_return_detected(
+                current_time, sound_objects, detect_self_call=True
+            )
         )
 
     def cleanup_sounds(self, current_time):
@@ -248,7 +287,7 @@ class Bat:
         effect_strength = np.pi
         if len(detected_sound_objects) != 0:
             max_spl = np.max([i["spl"] for i in detected_sound_objects])
-            if max_spl > 95:
+            if max_spl > 93:
 
                 max_spl_sound = [
                     i for i in detected_sound_objects if i["spl"] == max_spl
@@ -265,16 +304,16 @@ class Bat:
                     max_spl_sound
                 )
 
-                if max_spl > 95:
+                if max_spl > 98:
 
                     next_direction = max_spl_sound_vector.rotate(np.pi).normalize()
-                    effect_strength = ((max_spl - 95) / 4.4) * np.pi
+                    effect_strength = ((max_spl - 98) / 4.4) * np.pi
                     # next_direction = mean_vector.rotate(np.pi)
                     # self.direction = next_direction.normalize()
                 else:
                     # print("attract")
                     next_direction = max_spl_sound_vector.normalize()
-                    effect_strength = ((max_spl - 90) / 5.1) * np.pi
+                    effect_strength = ((max_spl - 93) / 5.1) * np.pi
                     # next_direction = mean_vector
                     # self.direction = next_direction.normalize()
                     # self.generate_random_direction()
@@ -302,7 +341,9 @@ class Bat:
         self.time_since_dir_change += self.parameters_df["TIME_STEP"][0]
         dir_change_time_interval = self.parameters_df["TIME_DELAY_FOR_DIR_CHANGE"][0]
         self.detections_for_dir_change.extend(
-            self.given_sound_objects_return_detected(current_time, sound_objects)
+            self.given_sound_objects_return_detected(
+                current_time, sound_objects, detect_self_call=False
+            )
         )
 
         if self.time_since_dir_change >= dir_change_time_interval:

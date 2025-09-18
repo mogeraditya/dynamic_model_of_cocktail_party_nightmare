@@ -70,7 +70,7 @@ def call_directionality_factor(A, theta):
 
         float <=0: The amount of drop in dB which occurs when the call is measured off-axis.
     """
-    if A <= 0:
+    if A < 0:
         raise ValueError("A should be >0 ! ")
 
     call_dirn = A * (np.cos(theta) - 1)

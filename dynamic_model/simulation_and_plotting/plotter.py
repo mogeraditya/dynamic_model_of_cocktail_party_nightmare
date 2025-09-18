@@ -87,7 +87,7 @@ def setup_visualization(parameters_df, bats, obstacles):
     sound_artists = []
     detection_artists = []
     trajectory_lines = []
-    NUM_COLORS = 25
+    NUM_COLORS = len(bats)
     cm = plt.get_cmap("gist_rainbow")
     # colors = plt.cm.tab30.colors
     for i, bat in enumerate(bats):
@@ -178,6 +178,8 @@ def visualize(output_dir, save_animation):
         return bat_markers + direction_arrows + trajectory_lines
 
     def animate(i):
+        NUM_COLORS = len(bats)
+        cm = plt.get_cmap("gist_rainbow")
         frame = history[i]
 
         for j, (x, y) in enumerate(frame["bat_positions"]):
@@ -207,13 +209,15 @@ def visualize(output_dir, save_animation):
         detection_artists.clear()
         plt.title(f"time step: {i}")
 
-        colors = plt.cm.tab10.colors
+        # colors = plt.cm.tab10.colors
         for sound in frame["sound_objects"]:
             # print(sound)
             if not sound["status"]:
                 continue
 
-            emitter_color = colors[sound["emitter_id"] % len(colors)]
+            emitter_color = cm(
+                sound["emitter_id"] / NUM_COLORS
+            )  # colors[sound["emitter_id"] % len(colors)]
             alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
 
             inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
@@ -305,7 +309,7 @@ def visualize(output_dir, save_animation):
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            save_animation + "/animation only repulsion.mp4",
+            save_animation + "/animation with sound.mp4",
             writer=ffwriter,
         )
     plt.show()
@@ -313,7 +317,7 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = r"./dump_files/poster_videos/5_bats/data_for_plotting/"
+    OUTPUT_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/simulation_outputs/10bats_selfecho_vs_other/data_for_plotting/"
     SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
     # history, parameters_df, bats, obstacles = stitch_together_history_lists(OUTPUT_DIR)

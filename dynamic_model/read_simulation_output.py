@@ -63,7 +63,7 @@ def read_data_per_simulation_per_bat_received(folder_dir):
     Returns:
         list: array containing all the received data per bat
     """
-    list_of_files_per_bat = glob.glob(folder_dir + "/*_received_*.npy")
+    list_of_files_per_bat = np.sort(glob.glob(folder_dir + "/*_received_*.npy"))
     _array_to_dump_data = []
     for file_dir in list_of_files_per_bat:
         data_per_timestep = np.load(file_dir, allow_pickle=True)
