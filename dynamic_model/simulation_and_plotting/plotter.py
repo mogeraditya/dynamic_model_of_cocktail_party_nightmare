@@ -207,7 +207,7 @@ def visualize(output_dir, save_animation):
             artist.remove()
         sound_artists.clear()
         detection_artists.clear()
-        plt.title(f"time step: {i}")
+        plt.title(f"time step: {frame["time"]:.3f}")
 
         # colors = plt.cm.tab10.colors
         for sound in frame["sound_objects"]:
