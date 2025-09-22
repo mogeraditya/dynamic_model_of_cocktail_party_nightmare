@@ -5,6 +5,7 @@ import pickle
 
 import numpy as np
 import pandas as pd
+from supporting_files.vectors import Vector
 
 
 def make_dir(directory):
@@ -111,3 +112,9 @@ def combine_pickle_files(directory_path):
                     combined_df = pd.concat([combined_df, content], ignore_index=True)
 
     return combined_df
+
+
+def make_vector(tuple):
+    # makes vector object
+    vectorized_tuple = Vector(x=tuple[0], y=tuple[1])
+    return vectorized_tuple

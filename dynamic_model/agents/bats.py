@@ -188,6 +188,7 @@ class Bat:
                     )
 
                 # store only necessary things of sound object
+                incident_direction = sound.origin - self.position
                 array_of_sound_detections.append(
                     {
                         "time": current_time,
@@ -200,10 +201,16 @@ class Bat:
                         # 'parent_id': getattr(sound, 'parent_id', None),
                         "reflected_from": sound.reflected_from,
                         "sound_object_id": id(sound),
-                        "sound_direction": sound.direction_vector,
-                        "incident_direction": sound.origin - self.position,
-                        "bat_direction": self.direction,
-                        "bat_position": self.position,
+                        "sound_direction": (
+                            sound.direction_vector.x,
+                            sound.direction_vector.y,
+                        ),
+                        "incident_direction": (
+                            incident_direction.x,
+                            incident_direction.y,
+                        ),
+                        "bat_direction": (self.direction.x, self.direction.y),
+                        "bat_position": (self.position.x, self.position.y),
                         "bat_last_call_time": self.emit_times[-1],
                     }
                 )

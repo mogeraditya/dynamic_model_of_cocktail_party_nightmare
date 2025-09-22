@@ -317,7 +317,7 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/simulation_outputs/10bats_selfecho_vs_other/data_for_plotting/"
+    OUTPUT_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/dump_files/30bats_selfecho_vs_other/data_for_plotting/"
     SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
     # history, parameters_df, bats, obstacles = stitch_together_history_lists(OUTPUT_DIR)
