@@ -5,6 +5,7 @@ import sys
 import numpy as np
 
 sys.path.append("./dynamic_model")
+import matplotlib.pyplot as plt
 from read_simulation_output import read_data_per_simulation_per_bat
 from supporting_files.utilities import make_dir
 
@@ -115,7 +116,10 @@ def generate_profile(list_of_sounds, focal_sound_object):
                 time_of_sound_wrt_focal_sound + sound["duration"] - sim_time_step / 2,
                 sim_time_step,
             )
-
+            print(time_intervals_to_add_intensity)
+            print(sound["all_spl_values"])
+            print(sound["occurance_times"] - start_time_of_focal_sound)
+            print(sound)
             for j, time_step in enumerate(time_intervals_to_add_intensity):
                 index_to_put_spl = np.where(time_axis_given_sound == time_step)[0]
 
@@ -126,17 +130,19 @@ def generate_profile(list_of_sounds, focal_sound_object):
 
     time_intervals_to_add_intensity = np.arange(
         0.0,
-        0.0 + sound["duration"] + sim_time_step - sim_time_step / 2,
-        sim_time_step,
+        0.0 - focal_sound_object["duration"] + sim_time_step / 2,
+        -sim_time_step,
     )
+    print(time_intervals_to_add_intensity)
+    print(focal_sound_object["all_spl_values"])
     for i, time_step in enumerate(time_intervals_to_add_intensity):
         index_to_put_spl = np.where(time_axis_given_sound == time_step)[0]
-        echo_profile[index_to_put_spl] = focal_sound_object["all_spl_values"][j]
+        echo_profile[index_to_put_spl] = focal_sound_object["all_spl_values"][i]
 
     # print(masker_profile)
     # print(echo_profile)
     echo_masker_ratio = echo_profile - masker_profile
-    print(echo_masker_ratio)
+    return echo_masker_ratio, masker_profile, echo_profile, time_axis_given_sound
 
 
 # def is_signal_detected (serialized_sound_objects, focal_sound_object_id):
@@ -152,7 +158,7 @@ if __name__ == "__main__":
     )
     # print(received_sounds_sorted_by_time[1])
     parsed_sounds = parse_sound_info(
-        received_sounds_sorted_by_time[1], time_threshold=0.02
+        received_sounds_sorted_by_time[1], time_threshold=0.06
     )
     # print([i["received_spl"] for i in parsed_sounds])
     print([i["duration"] for i in parsed_sounds])
@@ -164,4 +170,11 @@ if __name__ == "__main__":
     # print([i["bat_last_call_time"] for i in parsed_sounds])
     # print([[]] * 6)
     # received_sounds_sorted_by_time
-    generate_profile(parsed_sounds, parsed_sounds[3])
+    for sound in parsed_sounds:
+        if sound["emitter_id"] == FOCAL_BAT:
+            y = generate_profile(parsed_sounds, sound)
+            plt.scatter(y[3], y[1], label="masker_profile")
+            plt.scatter(y[3], y[2], label="focal_sound_profile")
+            plt.gca().invert_xaxis()
+            plt.legend()
+            plt.show()

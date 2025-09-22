@@ -200,7 +200,7 @@ class Bat:
                         "reflection_count": getattr(sound, "reflection_count", 0),
                         # 'parent_id': getattr(sound, 'parent_id', None),
                         "reflected_from": sound.reflected_from,
-                        "sound_object_id": id(sound),
+                        "sound_object_id": sound.id,
                         "sound_direction": (
                             sound.direction_vector.x,
                             sound.direction_vector.y,
