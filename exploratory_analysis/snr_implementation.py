@@ -116,10 +116,10 @@ def generate_profile(list_of_sounds, focal_sound_object):
                 time_of_sound_wrt_focal_sound + sound["duration"] - sim_time_step / 2,
                 sim_time_step,
             )
-            print(time_intervals_to_add_intensity)
-            print(sound["all_spl_values"])
-            print(sound["occurance_times"] - start_time_of_focal_sound)
-            print(sound)
+            # print(time_intervals_to_add_intensity)
+            # print(sound["all_spl_values"])
+            # print(sound["occurance_times"] - start_time_of_focal_sound)
+            # print(sound)
             for j, time_step in enumerate(time_intervals_to_add_intensity):
                 index_to_put_spl = np.where(time_axis_given_sound == time_step)[0]
 
@@ -133,8 +133,8 @@ def generate_profile(list_of_sounds, focal_sound_object):
         0.0 - focal_sound_object["duration"] + sim_time_step / 2,
         -sim_time_step,
     )
-    print(time_intervals_to_add_intensity)
-    print(focal_sound_object["all_spl_values"])
+    # print(time_intervals_to_add_intensity)
+    # print(focal_sound_object["all_spl_values"])
     for i, time_step in enumerate(time_intervals_to_add_intensity):
         index_to_put_spl = np.where(time_axis_given_sound == time_step)[0]
         echo_profile[index_to_put_spl] = focal_sound_object["all_spl_values"][i]
@@ -152,7 +152,7 @@ def generate_profile(list_of_sounds, focal_sound_object):
 
 if __name__ == "__main__":
     FOCAL_BAT = 0
-    OUTPUT_DIR = f"./dump_files/2bats_selfecho_vs_other/{FOCAL_BAT}/"
+    OUTPUT_DIR = f"./dump_files/snr_20_bats/{FOCAL_BAT}/"
     received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
         OUTPUT_DIR, "received"
     )
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         received_sounds_sorted_by_time[1], time_threshold=0.06
     )
     # print([i["received_spl"] for i in parsed_sounds])
-    print([i["duration"] for i in parsed_sounds])
+    # print([i["duration"] for i in parsed_sounds])
     # print([i["sound_object_id"] for i in parsed_sounds])
     # print([i["emitter_id"] for i in parsed_sounds])
     # print([i["reflected_from"] for i in parsed_sounds])
@@ -173,8 +173,8 @@ if __name__ == "__main__":
     for sound in parsed_sounds:
         if sound["emitter_id"] == FOCAL_BAT:
             y = generate_profile(parsed_sounds, sound)
-            plt.scatter(y[3], y[1], label="masker_profile")
-            plt.scatter(y[3], y[2], label="focal_sound_profile")
+            plt.scatter(y[3], y[1], label="masker_profile", color="r")
+            plt.scatter(y[3], y[2], label="focal_sound_profile", color="b")
             plt.gca().invert_xaxis()
-            plt.legend()
-            plt.show()
+        # plt.legend()
+    plt.show()
