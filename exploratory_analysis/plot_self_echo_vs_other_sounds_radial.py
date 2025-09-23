@@ -7,12 +7,13 @@ sys.path.append("./dynamic_model")
 from read_simulation_output import read_data_per_simulation_per_bat
 from supporting_files.utilities import make_dir
 
+plt.style.use("dark_background")
 FOCAL_BAT = 7
-NUM_COLORS = 2
+NUM_COLORS = 20
 
 
-for FOCAL_BAT in [0, 7, 17]:
-    OUTPUT_DIR = f"./dump_files/2bats_selfecho_vs_other/{FOCAL_BAT}/"
+for FOCAL_BAT in [1, 7]:
+    OUTPUT_DIR = f"./dump_files/snr_20_bats_2/{FOCAL_BAT}/"
     received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
         OUTPUT_DIR, "received"
     )
@@ -31,7 +32,7 @@ for FOCAL_BAT in [0, 7, 17]:
             subplot_kw={"projection": "polar"},
             layout="constrained",
         )
-        plt.style.use("dark_background")
+
         axs.set_theta_zero_location("N")
         axs.set_theta_direction(-1)
         for sound_object in frame:
@@ -99,9 +100,10 @@ for FOCAL_BAT in [0, 7, 17]:
                 marker=marker,
                 alpha=alpha,
             )
-        dir_to_store = "./dump_files/2bats_selfecho_vs_other/plots_self_echo_vs_other_sounds_radial_transparent/"
+            # print("areee")
+        dir_to_store = "./dump_files/snr_20_bats_2/plots_self_echo_vs_other_sounds_radial_transparent/"
         make_dir(dir_to_store)
-        plt.ylim(0, 0.1)
+        plt.ylim(0, 0.04)
         plt.savefig(
             dir_to_store + f"bat_{FOCAL_BAT}_interpulse_number_{i+1}.png",
             transparent=True,

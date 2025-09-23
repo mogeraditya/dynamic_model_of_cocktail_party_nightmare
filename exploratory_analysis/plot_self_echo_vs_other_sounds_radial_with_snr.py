@@ -11,26 +11,25 @@ from supporting_files.utilities import make_dir
 plt.style.use("dark_background")
 
 FOCAL_BAT = 7
-NUM_COLORS = 10
+NUM_COLORS = 20
 TEMPORAL_MASKING_DIR = "./exploratory_analysis/temporal_masking_fn.csv"
 
-for FOCAL_BAT in [0, 7, 17]:
-    OUTPUT_DIR = f"./dump_files/snr_10_bats/{FOCAL_BAT}/"
+for FOCAL_BAT in [1, 7]:
+    OUTPUT_DIR = f"./dump_files/snr_20_bats_2/{FOCAL_BAT}/"
     received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
         OUTPUT_DIR, "received"
     )
-    # print(received_sounds_sorted_by_time[0][-1])
-    # print(received_sounds_sorted_by_time[1][0])
-    # len(bats)
+
     cm = plt.get_cmap("gist_rainbow")
-    # colors = plt.cm.tab10.colors
+
     interpulse_counter = 0
     for i, frame in enumerate(received_sounds_sorted_by_time[1:10]):
         heard_sounds = given_sound_objects_return_detected_sounds(
             sound_objects=frame,
-            time_threshold_post_call=np.inf,
+            time_threshold_post_call=0.035,
             dir_of_temporal_masking_fn_file=TEMPORAL_MASKING_DIR,
-            minimum_echo_detection_fraction=0.25,
+            minimum_echo_detection_fraction=0.75,
+            focal_bat=FOCAL_BAT,
         )
         fig, axs = plt.subplots(
             1,
@@ -43,48 +42,6 @@ for FOCAL_BAT in [0, 7, 17]:
         axs.set_theta_zero_location("N")
         axs.set_theta_direction(-1)
         for sound_object in heard_sounds:
-            # section to rebuild vector objects
-
-            if (
-                sound_object["received_spl"] == 100
-                and sound_object["emitter_id"] == FOCAL_BAT
-            ):
-                # plt.axvline(
-                #     sound_object["time"], color=cm(FOCAL_BAT / NUM_COLORS), ls="-."
-                # )
-                print(sound_object["time"])
-                value = sound_object["time"]
-            # else:
-
-            # fig, axs = plt.subplots(
-            #     1,
-            #     1,
-            #     figsize=(5, 8),
-            #     subplot_kw={"projection": "polar"},
-            #     layout="constrained",
-            # )
-
-            # if sound_object["type"] == "echo":
-            #     marker = "x"
-            # else:
-            #     marker = "o"
-
-            # if sound_object["emitter_id"] == FOCAL_BAT:
-            #     color = "green"
-            #     alpha = 1
-            # else:
-            #     color = "red"
-            #     alpha = 0.5
-
-            # axs.scatter(
-
-            #     sound_object["incident_direction"],
-            #     sound_object["time"]
-            #     color=cm(sound_object["emitter_id"] / NUM_COLORS),
-            #     marker=marker,
-            #     alpha=alpha,
-            # )
-            # if sound_object["time"] > 0.27 and sound_object["time"] < 0.320:
 
             if sound_object["type"] == "echo":
                 marker = "x"
@@ -92,10 +49,8 @@ for FOCAL_BAT in [0, 7, 17]:
                 marker = "o"
 
             if sound_object["emitter_id"] == FOCAL_BAT:
-                color = "green"
                 alpha = 1
             else:
-                color = "red"
                 alpha = 0.5
 
             r = (
@@ -107,6 +62,11 @@ for FOCAL_BAT in [0, 7, 17]:
                     sound_object["incident_direction"]
                 )
             ] * len(r)
+            if len(r) < 5:
+                print(len(r))
+                print(
+                    f"bat_{sound_object["emitter_id"]}_and_{sound_object["reflected_from"]}and_r_{r}"
+                )
             axs.scatter(
                 theta,
                 r,
@@ -114,9 +74,9 @@ for FOCAL_BAT in [0, 7, 17]:
                 marker=marker,
                 alpha=alpha,
             )
-        dir_to_store = "./dump_files/snr_10_bats/plots_self_echo_vs_other_sounds_radial_transparent_with_snr/"
+        dir_to_store = "./dump_files/snr_20_bats_2/plots_self_echo_vs_other_sounds_radial_transparent_with_snr/"
         make_dir(dir_to_store)
-        plt.ylim(0, 0.1)
+        plt.ylim(0, 0.04)
         plt.savefig(
             dir_to_store + f"bat_{FOCAL_BAT}_interpulse_number_{i+1}.png",
             transparent=True,

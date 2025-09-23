@@ -11,7 +11,7 @@ import pandas as pd
 sys.path.append("./dynamic_model")
 from agents.bats import Bat
 from agents.obstacles import Obstacle
-from agents.sounds import DirectSound
+from agents.sounds import DirectSound, EchoSound
 from supporting_files.utilities import creation_time_calculation, load_parameters
 from supporting_files.vectors import Vector
 
@@ -272,7 +272,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./dump_files/snr_20_bats/"
+    OUTPUT_DIR = r"./dump_files/snr_20_bats_2/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
