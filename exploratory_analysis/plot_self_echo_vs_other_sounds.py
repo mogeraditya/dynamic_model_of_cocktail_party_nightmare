@@ -8,13 +8,15 @@ from read_simulation_output import read_data_per_simulation_per_bat
 from supporting_files.utilities import make_dir
 
 # FOCAL_BAT = 0
-NUM_COLORS = 2
-AZIMUTHS = [np.pi / 6]
+NUM_COLORS = 20
+AZIMUTHS = [np.pi, np.pi / 6]
 TIME_THRESHOLDS = [0.035]
+
 for TIME_THRESHOLD in TIME_THRESHOLDS:
     for AZIMUTH in AZIMUTHS:
-        for FOCAL_BAT in [0]:
-            OUTPUT_DIR = f"./dump_files/2bats_selfecho_vs_other/{FOCAL_BAT}/"
+        for FOCAL_BAT in [1, 7]:
+
+            OUTPUT_DIR = f"./dump_files/snr_20_bats_2/{FOCAL_BAT}/"
             received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
                 OUTPUT_DIR, "received"
             )
@@ -26,7 +28,7 @@ for TIME_THRESHOLD in TIME_THRESHOLDS:
             plt.figure(figsize=(60, 10))
             plt.style.use("dark_background")
             # print(received_sounds_sorted_by_time)
-            for frame in received_sounds_sorted_by_time[0:10]:
+            for frame in received_sounds_sorted_by_time[1:10]:
                 for sound_object in frame:
                     if (
                         sound_object["received_spl"] == 100
@@ -53,9 +55,8 @@ for TIME_THRESHOLD in TIME_THRESHOLDS:
                             and sound_object["emitter_id"] == FOCAL_BAT
                         )
                     ):
-                        # print(sound_object)
-                        continue
 
+                        continue
                     else:
 
                         if sound_object["type"] == "echo":
@@ -69,7 +70,6 @@ for TIME_THRESHOLD in TIME_THRESHOLDS:
                         else:
                             color = "red"
                             alpha = 0.5
-                        # print(sound_object)
                         if (
                             sound_object["time"] - sound_object["bat_last_call_time"]
                         ) < TIME_THRESHOLD:
@@ -81,19 +81,11 @@ for TIME_THRESHOLD in TIME_THRESHOLDS:
                                 alpha=alpha,
                             )
 
-                    # if (
-                    #     sound_object["time"] > 1.0
-                    #     and sound_object["time"] < 1.05
-                    #     and sound_object["emitter_id"] == 4
-                    #     and FOCAL_BAT == 0
-                    # ):
-                    #     print(sound_object)
-
             plt.ylabel("SPL")
             plt.xlabel("time")
             plt.xlim(0, 1)
             # plt.legend()
-            dir_to_store = "./dump_files/2bats_selfecho_vs_other/test/"
+            dir_to_store = "./dump_files/snr_20_bats_2/intensity_vs_time/"
             make_dir(dir_to_store)
             plt.savefig(
                 dir_to_store

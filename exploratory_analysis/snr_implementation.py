@@ -16,7 +16,9 @@ sim_time_step = 0.001
 sim_rounding = 3
 
 
-def parse_sound_info(sound_objects, time_threshold_post_call, focal_bat):
+def parse_sound_info(
+    sound_objects, time_threshold_post_call, focal_bat, include_direct_sounds
+):
     # we look at some time interval after interpulse interval.
     # then we get sound intensity and if direct or echo for every unique sound id
     track_unique_ids = []
@@ -32,15 +34,18 @@ def parse_sound_info(sound_objects, time_threshold_post_call, focal_bat):
         "bat_last_call_time",
     ]
     for sound in sound_objects:
+        is_sound_direct_sound = sound["type"] == "direct"
+        if not include_direct_sounds and is_sound_direct_sound:
+            continue
         emission_time_post_call = sound["time"] - sound["bat_last_call_time"]
         sound_in_ipi = emission_time_post_call > call_duration
         sound_within_given_threshold = (
             emission_time_post_call < time_threshold_post_call
         )
-        sound_is_not_self_call = (
-            sound["emitter_id"] != focal_bat and sound["type"] != "direct"
+        sound_is_self_call = (
+            sound["emitter_id"] == focal_bat and sound["type"] == "direct"
         )
-        if sound_in_ipi and sound_within_given_threshold and sound_is_not_self_call:
+        if sound_in_ipi and sound_within_given_threshold and not sound_is_self_call:
 
             if sound["sound_object_id"] not in track_unique_ids:
 
@@ -59,7 +64,7 @@ def parse_sound_info(sound_objects, time_threshold_post_call, focal_bat):
 
             else:
                 print(sound)
-                raise
+                raise ValueError
 
             store_serialized_sounds[index_in_output_list]["all_spl_values"].append(
                 sound["received_spl"]
@@ -169,7 +174,7 @@ def get_temporal_masking_function_based_on_sound(
             subset_timegap_bin = time_step + duration_of_sound
         else:
             print(time_step)
-            raise
+            raise ValueError
 
         subset_of_temporal_masking_df = temporal_masking_df[
             (temporal_masking_df["timegap_ms"] >= subset_timegap_bin)
@@ -213,8 +218,11 @@ def given_sound_objects_return_detected_sounds(
     dir_of_temporal_masking_fn_file,
     minimum_echo_detection_fraction,
     focal_bat,
+    include_direct_sounds,
 ):
-    parsed_sounds = parse_sound_info(sound_objects, time_threshold_post_call, focal_bat)
+    parsed_sounds = parse_sound_info(
+        sound_objects, time_threshold_post_call, focal_bat, include_direct_sounds
+    )
     heard_sounds = []
     for sound in parsed_sounds:
         if is_signal_heard(
@@ -240,6 +248,7 @@ if __name__ == "__main__":
         received_sounds_sorted_by_time[2],
         time_threshold_post_call=0.06,
         focal_bat=FOCAL_BAT,
+        include_direct_sounds=True,
     )
     # print([i["received_spl"] for i in parsed_sounds])
     # print([i["duration"] for i in parsed_sounds])
