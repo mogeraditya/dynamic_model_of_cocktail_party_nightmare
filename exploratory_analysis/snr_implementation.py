@@ -30,7 +30,7 @@ def parse_sounds(
     Args:
         sound_objects (list): contains all the sound objects exracted from output files
         time_threshold_post_call (float): time interval after call for which the bat listens
-        angle_threshold (float): :math:`\\pm` angle in degree of the bat's hearing field
+        angle_threshold (float): :math:`\\pm` angle in radians of the bat's hearing field
         focal_bat (int): id of the bat that is hearing the sounds
         include_direct_sounds (bool): False if direct sounds shouldn't be considered
                                     in snr calculations.
@@ -185,9 +185,7 @@ def generate_sound_profile(list_of_sounds, focal_sound_object):
     start_time_of_focal_sound = focal_sound_object["time"]
     ipi_start_time = focal_sound_object["bat_last_call_time"]
 
-    duration_before_call_to_consider = (
-        start_time_of_focal_sound - ipi_start_time + call_duration
-    )
+    duration_before_call_to_consider = start_time_of_focal_sound - ipi_start_time
 
     time_extent_of_temporal_masking_fn_file = [0.025, -0.001]
     start_of_time_axis = np.min(
@@ -335,7 +333,7 @@ def given_sound_objects_return_detected_sounds(
     Args:
         sound_objects (list): contains all the sound objects exracted from output files
         time_threshold_post_call (float): _description_
-        angle_threshold (float): :math:`\\pm` angle in degree of the bat's hearing field
+        angle_threshold (float): :math:`\\pm` angle in radians of the bat's hearing field
         dir_of_temporal_masking_fn_file (str): directory of temporal masking function file
         minimum_sound_detection_fraction (float): fraction of sound to masker ratio that
                                                 needs to be above masking tolerance for detection
@@ -359,7 +357,7 @@ def given_sound_objects_return_detected_sounds(
     for focal_sound in parsed_serialized_sounds:
         if is_signal_heard(
             focal_sound,
-            parsed_sounds,
+            parsed_serialized_sounds,
             dir_of_temporal_masking_fn_file,
             minimum_sound_detection_fraction,
         ):

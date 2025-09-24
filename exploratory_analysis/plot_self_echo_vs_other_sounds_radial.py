@@ -9,11 +9,11 @@ from supporting_files.utilities import make_dir
 
 plt.style.use("dark_background")
 FOCAL_BAT = 7
-NUM_COLORS = 20
+NUM_COLORS = 50
 
 
-for FOCAL_BAT in [1, 7]:
-    OUTPUT_DIR = f"./dump_files/snr_20_bats_2/{FOCAL_BAT}/"
+for FOCAL_BAT in [1, 27, 35]:
+    OUTPUT_DIR = f"./dump_files/snr_{NUM_COLORS}_bats/{FOCAL_BAT}/"
     received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
         OUTPUT_DIR, "received"
     )
@@ -23,7 +23,7 @@ for FOCAL_BAT in [1, 7]:
     cm = plt.get_cmap("gist_rainbow")
     # colors = plt.cm.tab10.colors
     interpulse_counter = 0
-    for i, frame in enumerate(received_sounds_sorted_by_time[1:10]):
+    for i, frame in enumerate(received_sounds_sorted_by_time[10:20]):
 
         fig, axs = plt.subplots(
             1,
@@ -85,10 +85,10 @@ for FOCAL_BAT in [1, 7]:
                 marker = "o"
 
             if sound_object["emitter_id"] == FOCAL_BAT:
-                color = "green"
+                color = cm(sound_object["emitter_id"] / NUM_COLORS)
                 alpha = 1
             else:
-                color = "red"
+                color = "grey"
                 alpha = 0.5
 
             axs.scatter(
@@ -96,14 +96,21 @@ for FOCAL_BAT in [1, 7]:
                     sound_object["incident_direction"]
                 ),
                 (sound_object["time"] - sound_object["bat_last_call_time"]),
-                color=cm(sound_object["emitter_id"] / NUM_COLORS),
+                color=color,
                 marker=marker,
                 alpha=alpha,
             )
             # print("areee")
-        dir_to_store = "./dump_files/snr_20_bats_2/plots_self_echo_vs_other_sounds_radial_transparent/"
+        dir_to_store = f"./dump_files/snr_{NUM_COLORS}_bats/radial/"
         make_dir(dir_to_store)
+        plt.scatter(
+            0,
+            0,
+            color=cm(FOCAL_BAT / NUM_COLORS),
+            label=f"focalbat={FOCAL_BAT}",
+        )
         plt.ylim(0, 0.04)
+        plt.legend()
         plt.savefig(
             dir_to_store + f"bat_{FOCAL_BAT}_interpulse_number_{i+1}.png",
             transparent=True,

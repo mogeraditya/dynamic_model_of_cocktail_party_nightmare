@@ -8,15 +8,15 @@ from read_simulation_output import read_data_per_simulation_per_bat
 from supporting_files.utilities import make_dir
 
 # FOCAL_BAT = 0
-NUM_COLORS = 20
-AZIMUTHS = [np.pi, np.pi / 6]
+NUM_COLORS = 50
+AZIMUTHS = [np.pi / 6]
 TIME_THRESHOLDS = [0.035]
 
 for TIME_THRESHOLD in TIME_THRESHOLDS:
     for AZIMUTH in AZIMUTHS:
-        for FOCAL_BAT in [1, 7]:
+        for FOCAL_BAT in [1, 27, 35]:
 
-            OUTPUT_DIR = f"./dump_files/snr_20_bats_2/{FOCAL_BAT}/"
+            OUTPUT_DIR = f"./dump_files/snr_{NUM_COLORS}_bats/{FOCAL_BAT}/"
             received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
                 OUTPUT_DIR, "received"
             )
@@ -28,7 +28,7 @@ for TIME_THRESHOLD in TIME_THRESHOLDS:
             plt.figure(figsize=(60, 10))
             plt.style.use("dark_background")
             # print(received_sounds_sorted_by_time)
-            for frame in received_sounds_sorted_by_time[1:10]:
+            for frame in received_sounds_sorted_by_time[10:20]:
                 for sound_object in frame:
                     if (
                         sound_object["received_spl"] == 100
@@ -83,9 +83,9 @@ for TIME_THRESHOLD in TIME_THRESHOLDS:
 
             plt.ylabel("SPL")
             plt.xlabel("time")
-            plt.xlim(0, 1)
+            plt.xlim(0.8, 2)
             # plt.legend()
-            dir_to_store = "./dump_files/snr_20_bats_2/intensity_vs_time/"
+            dir_to_store = "./dump_files/snr_{NUM_COLORS}_bats/intensity_vs_time/"
             make_dir(dir_to_store)
             plt.savefig(
                 dir_to_store

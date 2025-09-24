@@ -272,7 +272,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./dump_files/snr_20_bats_2/"
+    OUTPUT_DIR = r"./dump_files/snr_50_bats/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

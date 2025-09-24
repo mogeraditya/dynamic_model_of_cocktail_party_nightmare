@@ -113,6 +113,8 @@ class Bat:
             self.emitted_sounds.append(sound)
             self.emit_times.append(current_time)
             sound_objects.append(sound)
+
+            self.next_direction = self.direction
             self.time_since_directon_change = 0
             self.time_since_last_call = np.random.uniform(-0.01, 0.01)
             self.detections_for_directon_change = []
