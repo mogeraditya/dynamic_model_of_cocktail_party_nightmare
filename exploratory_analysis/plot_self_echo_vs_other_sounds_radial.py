@@ -13,7 +13,9 @@ NUM_COLORS = 50
 
 
 for FOCAL_BAT in [1, 27, 35]:
-    OUTPUT_DIR = f"./dump_files/snr_{NUM_COLORS}_bats/{FOCAL_BAT}/"
+    OUTPUT_DIR = (
+        f"./dump_files/snr_{NUM_COLORS}_bats_with_directional_calls/{FOCAL_BAT}/"
+    )
     received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
         OUTPUT_DIR, "received"
     )
@@ -101,7 +103,9 @@ for FOCAL_BAT in [1, 27, 35]:
                 alpha=alpha,
             )
             # print("areee")
-        dir_to_store = f"./dump_files/snr_{NUM_COLORS}_bats/radial/"
+        dir_to_store = (
+            f"./dump_files/snr_{NUM_COLORS}_bats_with_directional_calls/radial/"
+        )
         make_dir(dir_to_store)
         plt.scatter(
             0,

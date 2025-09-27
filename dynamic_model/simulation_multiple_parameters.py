@@ -68,11 +68,12 @@ def parallel_process_with_pool(param_dir, n_runs, data_storage_dir, max_workers=
 
 if __name__ == "__main__":
     # Directory containing your parameter files
-    PARAM_DIR = (
-        "./dynamic_model/paramsets/effect_time_delay_of_decision/store_paramsets/"
+    PARAM_DIR = "./dynamic_model/paramsets/effect_of_group_size/store_paramsets/"
+
+    N_RUNS = 5  # Number of iterations per parameter set
+    DATA_STORAGE_DIR = (
+        "/media/adityamoger/T7 Shield1/consistency_of_calls/"  # Base output directory
     )
-    N_RUNS = 100  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = "./POSTER/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing

@@ -167,7 +167,7 @@ class Bat:
                     self.position
                 )
                 call_directionality = call_directionality_factor(
-                    A=0, theta=angle_between_sound_and_bat
+                    A=7, theta=angle_between_sound_and_bat
                 )
 
                 distance_between_sound_and_bat = self.position.distance_to(sound.origin)

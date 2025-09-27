@@ -85,7 +85,7 @@ for TIME_THRESHOLD in TIME_THRESHOLDS:
             plt.xlabel("time")
             plt.xlim(0.8, 2)
             # plt.legend()
-            dir_to_store = "./dump_files/snr_{NUM_COLORS}_bats/intensity_vs_time/"
+            dir_to_store = f"./dump_files/snr_{NUM_COLORS}_bats/intensity_vs_time/"
             make_dir(dir_to_store)
             plt.savefig(
                 dir_to_store

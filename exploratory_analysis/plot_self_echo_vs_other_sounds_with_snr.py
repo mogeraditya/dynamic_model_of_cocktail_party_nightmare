@@ -18,7 +18,7 @@ INCLUDE_DIRECT_SOUNDS = True
 for TIME_THRESHOLD in TIME_THRESHOLDS:
     for AZIMUTH in AZIMUTHS:
         for FOCAL_BAT in [1, 27, 35]:
-            OUTPUT_DIR = f"./dump_files/snr_{NUM_COLORS}_bats/{FOCAL_BAT}/"
+            OUTPUT_DIR = f"./dump_files/snr_{NUM_COLORS}_bats_with_directional_calls/{FOCAL_BAT}/"
             received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
                 OUTPUT_DIR, "received"
             )
@@ -90,7 +90,7 @@ for TIME_THRESHOLD in TIME_THRESHOLDS:
             plt.ylabel("SPL")
             plt.xlabel("time")
             plt.xlim(0.8, 2)
-            dir_to_store = f"./dump_files/snr_{NUM_COLORS}_bats/intensity_vs_time_with_snr_direct_sounds_{INCLUDE_DIRECT_SOUNDS}/"
+            dir_to_store = f"./dump_files/snr_{NUM_COLORS}_bats_with_directional_calls/intensity_vs_time_with_snr_direct_sounds_{INCLUDE_DIRECT_SOUNDS}/"
             make_dir(dir_to_store)
             plt.savefig(
                 dir_to_store

@@ -13,13 +13,16 @@ plt.style.use("dark_background")
 FOCAL_BAT = 7
 NUM_COLORS = 50
 TEMPORAL_MASKING_DIR = "./exploratory_analysis/temporal_masking_fn.csv"
+DIRECTORY = (
+    f"./consistency_of_echoes/DATA_effect_of_group_size/{NUM_COLORS}/iteration_number_0"
+)
 INCLUDE_DIRECT_SOUNDS_ARR = [True]
 AZIMUTH_THRESHOLDS = [np.pi / 6, np.pi / 2, np.pi]
 
 for INCLUDE_DIRECT_SOUNDS in INCLUDE_DIRECT_SOUNDS_ARR:
     for AZIMUTH in AZIMUTH_THRESHOLDS:
         for FOCAL_BAT in [1, 27, 35]:
-            OUTPUT_DIR = f"./dump_files/snr_{NUM_COLORS}_bats/{FOCAL_BAT}/"
+            OUTPUT_DIR = DIRECTORY + f"/{FOCAL_BAT}/"
             received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
                 OUTPUT_DIR, "received"
             )
@@ -78,7 +81,10 @@ for INCLUDE_DIRECT_SOUNDS in INCLUDE_DIRECT_SOUNDS_ARR:
                         marker=marker,
                         alpha=alpha,
                     )
-                dir_to_store = f"./dump_files/snr_{NUM_COLORS}_bats/radial_with_snr_direct_sounds_{INCLUDE_DIRECT_SOUNDS}_angle_threshold_{np.round(np.degrees(AZIMUTH),1)}/"
+                dir_to_store = (
+                    DIRECTORY
+                    + f"/{FOCAL_BAT}/radial_with_snr_direct_sounds_{INCLUDE_DIRECT_SOUNDS}_angle_threshold_{np.round(np.degrees(AZIMUTH),1)}/"
+                )
                 make_dir(dir_to_store)
                 plt.scatter(
                     0,
@@ -92,6 +98,7 @@ for INCLUDE_DIRECT_SOUNDS in INCLUDE_DIRECT_SOUNDS_ARR:
                     dir_to_store + f"bat_{FOCAL_BAT}_interpulse_number_{i+1}.png",
                     transparent=True,
                 )
+
                 print(f"done for bat_{FOCAL_BAT}_interpulse_number_{i+1}")
                 plt.clf()
                 interpulse_counter += 1
