@@ -70,10 +70,8 @@ if __name__ == "__main__":
     # Directory containing your parameter files
     PARAM_DIR = "./dynamic_model/paramsets/effect_of_group_size/store_paramsets/"
 
-    N_RUNS = 5  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = (
-        "/media/adityamoger/T7 Shield1/consistency_of_calls/"  # Base output directory
-    )
+    N_RUNS = 1  # Number of iterations per parameter set
+    DATA_STORAGE_DIR = "/media/adityamoger/T7 Shield1/consistency_of_calls/no_call_directionality/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing

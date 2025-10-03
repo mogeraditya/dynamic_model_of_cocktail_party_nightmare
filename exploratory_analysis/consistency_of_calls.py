@@ -25,12 +25,12 @@ from supporting_files.utilities import make_dir
 plt.style.use("dark_background")
 
 FOCAL_BATS = [1, 20]
-NUM_COLORS = 50
+NUM_COLORS = 30
 TEMPORAL_MASKING_DIR = "./exploratory_analysis/temporal_masking_fn.csv"
-DIRECTORY = f"/media/adityamoger/T7 Shield1/consistency_of_calls/DATA_effect_of_group_size/{NUM_COLORS}/iteration_number_3/"
+DIRECTORY = f"/media/adityamoger/T7 Shield1/consistency_of_calls/no_call_directionality/DATA_effect_of_group_size/{NUM_COLORS}/iteration_number_0/"
 DIRECTORY_STORE_PLOTS = "./exploratory_analysis/plots/"
 INCLUDE_DIRECT_SOUNDS_ARR = [True]
-AZIMUTH_THRESHOLDS = [np.pi / 6, np.pi / 2, np.pi]
+AZIMUTH_THRESHOLDS = [np.pi]
 
 
 for INCLUDE_DIRECT_SOUNDS in INCLUDE_DIRECT_SOUNDS_ARR:
@@ -45,7 +45,7 @@ for INCLUDE_DIRECT_SOUNDS in INCLUDE_DIRECT_SOUNDS_ARR:
             received_sounds_sorted_by_time = read_data_per_simulation_per_bat(
                 OUTPUT_DIR, "received"
             )
-
+            print(received_sounds_sorted_by_time)
             cm = plt.get_cmap("gist_rainbow")
 
             # interpulse_counter = 0

@@ -6,7 +6,7 @@ from uuid import UUID
 import numpy as np
 import pandas as pd
 
-sys.path.append("./dynamic_model")
+sys.path.append("./dynamic_model/")
 import matplotlib.pyplot as plt
 from read_simulation_output import read_data_per_simulation_per_bat
 from supporting_files.utilities import make_dir
