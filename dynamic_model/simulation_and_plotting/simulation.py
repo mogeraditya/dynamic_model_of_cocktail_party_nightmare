@@ -23,7 +23,7 @@ class Simulation:
     """
 
     def __init__(self, parameters_df, output_dir):
-        # parameters_df = load_parameters(parameter_file_dir)
+
         Bat._id_counter = 0
         Obstacle._id_counter = 0
         self.parameters_df = parameters_df
@@ -92,7 +92,8 @@ class Simulation:
                     "sound_objects": [
                         self.serialize_sound(s)
                         for s in self.sound_objects
-                        if s.active and s.current_spl > 20
+                        if s.active
+                        and s.current_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
                     ],
                     "sound_objects_count": len(self.sound_objects),
                     "next_dir_angle": [
@@ -113,13 +114,12 @@ class Simulation:
             list_time_taken_for_each_loop.append(
                 current_loop_time - save_time_of_last_iter
             )
-            # print(current_loop_time-save_time_of_last_iter)
+
             save_time_of_last_iter = current_loop_time
             self.handle_data_storage_for_plotting(self.time_elapsed, False)
         self.handle_data_storage_for_plotting(self.time_elapsed, True)
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
-        # self.save_simulation_data()
         print("DATA SAVED")
 
     def handle_data_storage_for_plotting(self, current_time, is_end_of_code):
@@ -129,7 +129,6 @@ class Simulation:
         """
         history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
 
-        # filepath = os.path.join(self.output_dir, _dir_to_save)
         if len(self.history) > history_array_size_limit or is_end_of_code:
             with open(
                 self.dir_to_store + f"history_dump_{current_time:.3f}.pkl", "wb"
@@ -140,7 +139,6 @@ class Simulation:
         if is_end_of_code:
 
             self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
-        #     print(f"Saved simulation data to {filepath}")
 
     def handle_reflections(self, current_time):
         """Generates reflections of the sound objects.
@@ -153,12 +151,9 @@ class Simulation:
         new_echoes = []
 
         for sound in self.sound_objects:
-            if not sound.active or not isinstance(
-                sound, DirectSound
-            ):  # or sound.has_reflected :
+            if not sound.active or not isinstance(sound, DirectSound):
                 continue
 
-            # sound.update(current_time)
             reflection_point = None
             normal = None
             obstacle_id = None
@@ -200,8 +195,6 @@ class Simulation:
                     reflection_point_arr.append(reflection_point)
                     obstacle_id_arr.append(obstacle_id)
 
-                    # break
-
             # Check other bats
             for bat in self.bats:
                 if (
@@ -217,20 +210,17 @@ class Simulation:
                     reflection_point_arr.append(reflection_point)
                     obstacle_id_arr.append(obstacle_id)
 
-                    # break
-
             for i, reflection_point in enumerate(reflection_point_arr):
                 normal = normal_arr[i]
                 obstacle_id = obstacle_id_arr[i]
                 if obstacle_id not in sound.reflected_obstacles:
-                    # if reflection_point and normal and obstacle_id:
                     time_of_creation = creation_time_calculation(
                         sound, reflection_point
                     )
                     echo = sound.create_echo(
                         reflection_point, time_of_creation, normal, obstacle_id
                     )
-                    # print(echo)
+
                     if echo:
                         # Mark this obstacle as reflected for the original sound
                         echo.update(current_time)
@@ -238,7 +228,7 @@ class Simulation:
                         # Copy reflected obstacles to the echo
                         echo.reflected_obstacles.update(sound.reflected_obstacles)
                         new_echoes.append(echo)
-        # print(new_echoes)
+
         self.sound_objects.extend(new_echoes)
 
     def serialize_sound(self, sound):
@@ -259,7 +249,6 @@ class Simulation:
             "type": "direct" if isinstance(sound, DirectSound) else "echo",
             "status": sound.active,
         }
-        # print(data["type"])
         if not isinstance(sound, DirectSound):
             data.update(
                 {

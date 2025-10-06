@@ -29,7 +29,23 @@ class Obstacle:
 
     # TODO: use this and implement avoidance on collision
     def check_collision(self, point):
+        """checks if the given point is within the object
+
+        Args:
+            point (Vector): point to check
+
+        Returns:
+            Bool: True if the point is within the object
+        """
         return self.position.distance_to(point) <= self.radius
 
     def get_reflection_normal(self, point):
+        """the normal from a the point of reflection
+
+        Args:
+            point (Vector): point on the object
+
+        Returns:
+            Vector: normal vector from the point
+        """
         return (point - self.position).normalize()
