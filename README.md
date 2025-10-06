@@ -15,18 +15,18 @@ For detailed description of the parameters used in model, please refer to ./dyna
 
 ## How to run one instance of the simulation
 1. Initialize your parameters.
-    ./paramsets/ contains a set of example paramset files. Fill in your desired parameter values into the cells of the csv file. Be sure to stick to S.I. units while entering parameters. 
+    ./dynamic_model/paramsets/ contains a set of example paramset files. Fill in your desired parameter values into the cells of the csv file. Be sure to stick to S.I. units while entering parameters. 
 
-2. Change directories in the simulation.py file
+2. Change directories in the ./dynamic_model/simulation_and_plotting/simulation.py file
     change the OUTPUT_DIR (directory where the output is to be saved) and the PARAMETER_FILE_DIR (directory of the parameter file)
 
-3. Run the simulation.py file
+3. Run the ./dynamic_model/simulation_and_plotting/simulation.py file
     this runs one instance of the simulation. 
 
 4. Change directories in the plotter.py file
     change the OUTPUT_DIR (directory where the output of the simulation is saved) and SAVE_SIMULATION (False if animation need not be saved, else is the directory where the animation needs to be saved)
 
-5. Run plotter.py 
+5. Run ./dynamic_model/simulation_and_plotting/plotter.py 
     animation will pop out of a video after it is processed!
 ---
 

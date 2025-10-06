@@ -78,7 +78,7 @@ def setup_visualization(parameters_df, bats, obstacles):
             obstacle.radius,
             color="red",
             alpha=0.5,
-        )  # , label=f"Obstacle {obstacle.id}")
+        )
         ax.add_patch(obs_circle)
         obstacle_patches.append(obs_circle)
 
@@ -87,16 +87,15 @@ def setup_visualization(parameters_df, bats, obstacles):
     sound_artists = []
     detection_artists = []
     trajectory_lines = []
-    NUM_COLORS = 25
+    NUM_COLORS = len(bats)
     cm = plt.get_cmap("gist_rainbow")
-    # colors = plt.cm.tab30.colors
     for i, bat in enumerate(bats):
 
         # trajectory line place holders
         (trajectory_line,) = ax.plot(
             [],
             [],
-            color=cm(i / NUM_COLORS),  # colors[i % len(colors)],
+            color=cm(i / NUM_COLORS),
             linestyle="--",
             alpha=1,
             linewidth=1.5,
@@ -107,20 +106,11 @@ def setup_visualization(parameters_df, bats, obstacles):
         bat_circle = Circle(
             (bat.position.x, bat.position.y),
             bat.radius,
-            color=cm(i / NUM_COLORS),  # colors[i % len(colors)],
+            color=cm(i / NUM_COLORS),
             label=f"Bat {bat.id}",
-            # alpha=0.5,
-        )  # , label=f"Obstacle {obstacle.id}")
+        )
         ax.add_patch(bat_circle)
 
-        # (marker,) = ax.plot(
-        #     [],
-        #     [],
-        #     "o",
-        #     markersize=10,
-        #     color=colors[i % len(colors)],
-        #     label=f"Bat {bat.id}",
-        # )
         bat_markers.append(bat_circle)
 
         # direction arrow place holders
@@ -129,8 +119,8 @@ def setup_visualization(parameters_df, bats, obstacles):
             bat.position.y,
             0,
             0,  # Initial direction (0, 0)
-            width=0.3,  # Adjust arrow width as needed
-            color=cm(i / NUM_COLORS),  # colors[i % len(colors)],
+            width=0.3,  # adjust arrow width as needed here
+            color=cm(i / NUM_COLORS),
             alpha=0.8,
         )
         ax.add_patch(direction_arrow)
@@ -178,6 +168,8 @@ def visualize(output_dir, save_animation):
         return bat_markers + direction_arrows + trajectory_lines
 
     def animate(i):
+        NUM_COLORS = len(bats)
+        cm = plt.get_cmap("gist_rainbow")
         frame = history[i]
 
         for j, (x, y) in enumerate(frame["bat_positions"]):
@@ -205,62 +197,44 @@ def visualize(output_dir, save_animation):
             artist.remove()
         sound_artists.clear()
         detection_artists.clear()
-        plt.title(f"time step: {i}")
+        plt.title(f"time step: {frame["time"]:.3f}")
 
-        # colors = plt.cm.tab10.colors
-        # for sound in frame["sound_objects"]:
-        #     # print(sound)
-        #     if not sound["status"]:
-        #         continue
+        for sound in frame["sound_objects"]:
+            if not sound["status"]:
+                continue
 
-        #     emitter_color = colors[sound["emitter_id"] % len(colors)]
-        #     alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
+            emitter_color = cm(sound["emitter_id"] / NUM_COLORS)
+            alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
 
-        #     inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
-        #     outer = sound["radius"]
+            inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
+            outer = sound["radius"]
 
-        #     if inner < outer:
-        #         if sound["type"] == "direct":
-        #             linestyle = "-"
-        #             hatching_of_disk = "++"
-        #         else:
-        #             linestyle = "--"
-        #             alpha = 0.5 * alpha
-        #             hatching_of_disk = ".."
-        #         if inner == 0:
-        #             width_of_disk = sound["radius"]
-        #         else:
-        #             width_of_disk = parameters_df["SOUND_DISK_WIDTH"][0]
-        #         wedge = Wedge(
-        #             sound["origin"],
-        #             outer,
-        #             0,
-        #             360,
-        #             width=width_of_disk,
-        #             fill=False,
-        #             color=emitter_color,
-        #             alpha=alpha,
-        #             linestyle=linestyle,
-        #             hatch=hatching_of_disk,
-        #         )
-        #         ax.add_patch(wedge)
-        #         sound_artists.append(wedge)
-
-        # for bat_idx, detections in enumerate(frame["bat_detections"]):
-        #     for detection in detections:
-        #         if detection["type"] == "direct":
-        #             color = "green"
-        #         else:
-        #             color = colors[detection["emitter_id"] % len(colors)]
-
-        #         dx, dy = detection["position"]
-        #         marker = Circle((dx, dy), 0.05, color=color, alpha=0.7)
-        #         ax.add_patch(marker)
-        #         detection_artists.append(marker)
-
-        #         bat_x, bat_y = frame["bat_positions"][bat_idx]
-        #         (line,) = ax.plot([bat_x, dx], [bat_y, dy], color=color, alpha=0.2)
-        #         detection_artists.append(line)
+            if inner < outer:
+                if sound["type"] == "direct":
+                    linestyle = "-"
+                    hatching_of_disk = "++"
+                else:
+                    linestyle = "--"
+                    alpha = 0.5 * alpha
+                    hatching_of_disk = ".."
+                if inner == 0:
+                    width_of_disk = sound["radius"]
+                else:
+                    width_of_disk = parameters_df["SOUND_DISK_WIDTH"][0]
+                wedge = Wedge(
+                    sound["origin"],
+                    outer,
+                    0,
+                    360,
+                    width=width_of_disk,
+                    fill=False,
+                    color=emitter_color,
+                    alpha=alpha,
+                    linestyle=linestyle,
+                    hatch=hatching_of_disk,
+                )
+                ax.add_patch(wedge)
+                sound_artists.append(wedge)
 
         return (
             bat_markers
@@ -270,17 +244,6 @@ def visualize(output_dir, save_animation):
             + detection_artists
         )
 
-    # history, parameters_df, bats, obstacles = stitch_together_history_lists(output_dir)
-    # (
-    #     fig,
-    #     ax,
-    #     bat_markers,
-    #     direction_arrows,
-    #     trajectory_lines,
-    #     sound_artists,
-    #     detection_artists,
-    # ) = setup_visualization(parameters_df, bats, obstacles)
-    # trajectory_history = [[] for _ in range(len(bats))]
     ani = animation.FuncAnimation(
         fig,
         animate,
@@ -292,20 +255,12 @@ def visualize(output_dir, save_animation):
 
     handles, labels = ax.get_legend_handles_labels()
     print(labels)
-    # obstacle_patch = Patch(color="red", alpha=0.5, label="Obstacle")
-    # directsound_patch = Patch(hatch="++", label="DirectSound")
-    # echosound_patch = Patch(hatch="..", label="EchoSound")
 
-    # handles.append(directsound_patch)
-    # handles.append(echosound_patch)
-    # handles.append(obstacle_patch)
-    # DirectSound_patch = Patch(hatch="++", label='DirectSound')
-    # plt.legend()
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=handles)
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            save_animation + "/animation.mp4",
+            save_animation + "/animation with sound.mp4",
             writer=ffwriter,
         )
     plt.show()
@@ -313,17 +268,6 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/POSTER/make_video_for_poster/"  # r"./poster_videos/5_bats/data_for_plotting/"
+    OUTPUT_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/dump_files/30bats_selfecho_vs_other/data_for_plotting/"
     SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
-    # history, parameters_df, bats, obstacles = stitch_together_history_lists(OUTPUT_DIR)
-    # next_dir_data = [np.degrees(i["next_dir_angle"][0]) for i in history]
-    # dir_data = [np.degrees(i["current_dir_angle"][0]) for i in history]
-    # plt.plot(next_dir_data)
-    # plt.plot(dir_data)
-    # plt.show()
-
-# x = Circle((0, 0), 1)
-# print(x)
-# x.center = (, )
-# print(x)

@@ -17,14 +17,15 @@ simulation_parameters = load_parameters(
 
 # We will vary num_bats and generate multiple paramsets for different number of bats keeping everything else the same.
 
-group_sizes = [2]
+group_sizes = [30, 50]
 
 DIR_TO_STORE_PARAMSETS = (
     r"./dynamic_model/paramsets/effect_of_group_size/store_paramsets/"
 )
 make_dir(DIR_TO_STORE_PARAMSETS)
-simulation_parameters["ARENA_WIDTH"] = 5
-simulation_parameters["ARENA_HEIGHT"] = 7
+simulation_parameters["ARENA_WIDTH"] = 7
+simulation_parameters["ARENA_HEIGHT"] = 5
+simulation_parameters["SIM_DURATION"] = 20
 
 for group_size in group_sizes:
     simulation_parameters["NUM_BATS"] = group_size

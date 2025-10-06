@@ -5,6 +5,7 @@ import pickle
 
 import numpy as np
 import pandas as pd
+from supporting_files.vectors import Vector
 
 
 def make_dir(directory):
@@ -70,7 +71,7 @@ def call_directionality_factor(A, theta):
 
         float <=0: The amount of drop in dB which occurs when the call is measured off-axis.
     """
-    if A <= 0:
+    if A < 0:
         raise ValueError("A should be >0 ! ")
 
     call_dirn = A * (np.cos(theta) - 1)
@@ -111,3 +112,9 @@ def combine_pickle_files(directory_path):
                     combined_df = pd.concat([combined_df, content], ignore_index=True)
 
     return combined_df
+
+
+def make_vector(tuple):
+    # makes vector object
+    vectorized_tuple = Vector(x=tuple[0], y=tuple[1])
+    return vectorized_tuple

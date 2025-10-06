@@ -3,7 +3,9 @@
 import glob
 
 import numpy as np
-from supporting_files.utilities import convert_txt_to_int_or_float
+from supporting_files.utilities import convert_txt_to_int_or_float, make_vector
+
+# from supporting_files.vectors import Vector
 
 
 def read_data_per_simulation(output_dir):
@@ -36,16 +38,16 @@ def read_data_per_simulation(output_dir):
     dict_to_store_all_data_emitted = {}
     for i, folder_dir_per_bat in enumerate(list_of_folders_per_bat):
         # print(folder_dir_per_bat)
-        _array_to_dump_data_received = read_data_per_simulation_per_bat_received(
-            folder_dir_per_bat
+        _array_to_dump_data_received = read_data_per_simulation_per_bat(
+            folder_dir_per_bat, received_or_emitted="received"
         )
 
         dict_to_store_all_data_received[list_of_bats_in_simulation[i]] = (
             _array_to_dump_data_received
         )
 
-        _array_to_dump_data_emitted = read_data_per_simulation_per_bat_emitted(
-            folder_dir_per_bat
+        _array_to_dump_data_emitted = read_data_per_simulation_per_bat(
+            folder_dir_per_bat, received_or_emitted="emitted"
         )
         dict_to_store_all_data_emitted[list_of_bats_in_simulation[i]] = (
             _array_to_dump_data_emitted
@@ -54,7 +56,7 @@ def read_data_per_simulation(output_dir):
     return dict_to_store_all_data_emitted, dict_to_store_all_data_received
 
 
-def read_data_per_simulation_per_bat_received(folder_dir):
+def read_data_per_simulation_per_bat(folder_dir, received_or_emitted):
     """reads the files containing received sounds per bat
 
     Args:
@@ -63,27 +65,21 @@ def read_data_per_simulation_per_bat_received(folder_dir):
     Returns:
         list: array containing all the received data per bat
     """
-    list_of_files_per_bat = glob.glob(folder_dir + "/*_received_*.npy")
+    list_of_files_per_bat = np.sort(
+        glob.glob(folder_dir + f"/*_{received_or_emitted}_*.npy")
+    )
     _array_to_dump_data = []
+    keys_to_rebuild = [
+        "sound_direction",
+        "incident_direction",
+        "bat_direction",
+        "bat_position",
+    ]
     for file_dir in list_of_files_per_bat:
         data_per_timestep = np.load(file_dir, allow_pickle=True)
-        _array_to_dump_data.append(data_per_timestep)
-    return _array_to_dump_data
-
-
-def read_data_per_simulation_per_bat_emitted(folder_dir):
-    """reads the files containing emitted sounds per bat
-
-    Args:
-        folder_dir (string): directory per bat where emitted sounds are saved
-
-    Returns:
-        list: array containing all the emitted data per bat
-    """
-    list_of_files_per_bat = glob.glob(folder_dir + "/*_emitted_*.npy")
-    _array_to_dump_data = []
-    for file_dir in list_of_files_per_bat:
-        data_per_timestep = np.load(file_dir, allow_pickle=True)
+        for key in keys_to_rebuild:
+            for sound in data_per_timestep:
+                sound[key] = make_vector(sound[key])
         _array_to_dump_data.append(data_per_timestep)
     return _array_to_dump_data
 
