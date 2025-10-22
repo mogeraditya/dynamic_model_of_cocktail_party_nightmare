@@ -118,3 +118,20 @@ def make_vector(tuple):
     # makes vector object
     vectorized_tuple = Vector(x=tuple[0], y=tuple[1])
     return vectorized_tuple
+
+
+def str2bool(v):
+    return v.lower() in ("yes", "true", "True", "t", "1")
+
+
+def change_tuples_to_vector_in_sound(sound):
+    keys_to_rebuild = [
+        "sound_direction",
+        "incident_direction",
+        "bat_direction",
+        "bat_position",
+    ]
+    for key in keys_to_rebuild:
+        sound[key] = make_vector(sound[key])
+
+    return sound

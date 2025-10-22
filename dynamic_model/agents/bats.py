@@ -5,7 +5,10 @@ import random
 
 import numpy as np
 from agents.sounds import DirectSound
-from supporting_files.utilities import call_directionality_factor, make_dir
+from supporting_files.snr_implementation import (
+    given_sound_objects_return_detected_sounds,
+)
+from supporting_files.utilities import call_directionality_factor, make_dir, str2bool
 from supporting_files.vectors import Vector
 
 
@@ -24,7 +27,8 @@ class Bat:
         self.direction = Vector().random_direction()  # randomize start direction
 
         time_step_size = self.parameters_df["SIM_DURATION"][0]
-        self.rounding_based_on_time_step = len(str(time_step_size)) - 2
+        self.rounding_based_on_time_step = 3  # len(str(time_step_size))
+        # print(self.rounding_based_on_time_step)
 
         self.time_since_last_call = np.round(
             random.uniform(0, 1 / self.parameters_df["CALL_RATE"][0]),
@@ -47,6 +51,22 @@ class Bat:
         self.detections_for_directon_change = []
         self.time_since_directon_change = -np.inf
         self.next_direction = self.direction
+
+        self.implement_snr = str2bool(self.parameters_df["IMPLEMENT_SNR"][0])
+
+        self.hearing_angle_threshold = np.radians(
+            self.parameters_df["HEARING_ANGLE_THRESHOLD"][0]
+        )
+        # self.temporal_masking_file_dir
+        self.min_sound_detection_fraction = self.parameters_df[
+            "MINIMUM_SOUND_DETECTION_FRACTION"
+        ][0]
+        self.include_direct_sounds_in_response = str2bool(
+            self.parameters_df["INCLUDE_DIRECT_SOUNDS_IN_RESPONSE"][0]
+        )
+        self.temporal_masking_file_dir = (
+            "./dynamic_model/supporting_files/temporal_masking_fn.csv"
+        )
 
     # TODO: dont allow movement through obstacles/ other bats
     def update(self, current_time, sound_objects):
@@ -335,12 +355,14 @@ class Bat:
                     effect_strength = (
                         (max_spl - spl_threshold_for_repulsions) / 5
                     ) * np.pi
+                    # print(f"Repulsion: {max_spl} dB")
 
                 else:
                     next_direction = max_spl_sound_vector.normalize()
                     effect_strength = (
                         (max_spl - spl_threshold_for_attractions) / 5
                     ) * np.pi
+                    # print(f"Attraction: {max_spl} dB")
 
             else:
                 # Random direction change occasionally
@@ -375,8 +397,21 @@ class Bat:
         )
 
         if self.time_since_directon_change >= dir_change_time_interval:
+            if self.implement_snr:
+                heard_sounds = given_sound_objects_return_detected_sounds(
+                    self.detections_for_directon_change,
+                    dir_change_time_interval,
+                    self.hearing_angle_threshold,
+                    self.temporal_masking_file_dir,
+                    self.min_sound_detection_fraction,
+                    self.id,
+                    self.include_direct_sounds_in_response,
+                )
+            else:
+                heard_sounds = self.detections_for_directon_change
             self.next_direction = self.decide_next_direction(
-                self.detections_for_directon_change
+                heard_sounds
+                # self.detections_for_directon_change
             ).normalize()
             self.detections_for_directon_change = []
             self.time_since_directon_change = -np.inf

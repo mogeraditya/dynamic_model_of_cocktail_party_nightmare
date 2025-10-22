@@ -166,9 +166,7 @@ class DirectSound(EchoSound):
 
         object_type = reflected_from[0:4]
         if object_type == "wall":
-            reflection_loss = 20 * math.log10(
-                self.parameters_df["REFLECTION_LOSS_WALL"][0]
-            )
+            reflection_loss = self.parameters_df["REFLECTION_LOSS_WALL"][0]
         else:
             reflection_loss = self.parameters_df["REFLECTION_LOSS"][0]
 

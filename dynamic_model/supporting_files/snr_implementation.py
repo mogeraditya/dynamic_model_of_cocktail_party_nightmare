@@ -1,15 +1,10 @@
 # you have a list of sound objects
 # first filtering is include direct sounds or not
-import sys
-from uuid import UUID
-
 import numpy as np
 import pandas as pd
 
-sys.path.append("./dynamic_model/")
-import matplotlib.pyplot as plt
-from read_simulation_output import read_data_per_simulation_per_bat
-from supporting_files.utilities import make_dir
+# from read_simulation_output import read_data_per_simulation_per_bat
+from supporting_files.utilities import change_tuples_to_vector_in_sound
 
 call_duration = 0.005
 sim_time_step = 0.001
@@ -41,6 +36,8 @@ def parse_sounds(
 
     parsed_sounds = []
     for sound in sound_objects:
+        sound = change_tuples_to_vector_in_sound(sound)
+
         is_sound_direct_sound = sound["type"] == "direct"
         if not include_direct_sounds and is_sound_direct_sound:
             continue
@@ -90,6 +87,7 @@ def serialize_sound_info(parsed_sound_objects):
     store_serialized_sounds = []
 
     info_to_copy_from_sound = [
+        "origin",
         "emitter_id",
         "bat_direction",
         "incident_direction",
