@@ -27,7 +27,7 @@ class Simulation:
         Bat._id_counter = 0
         Obstacle._id_counter = 0
         self.parameters_df = parameters_df
-        self.output_dir = output_dir
+        self.output_dir = output_dir + "/"
         self.dir_to_store = self.output_dir + "/data_for_plotting/"
 
         os.makedirs(self.output_dir, exist_ok=True)
@@ -261,7 +261,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./dump_files/trying_sim_with_snr/"
+    OUTPUT_DIR = r"./dump_files/5_bats_5_Sec_with_snr/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

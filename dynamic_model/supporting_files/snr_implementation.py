@@ -166,6 +166,16 @@ def find_sum_of_db(list_of_spls):
     return np.round(sum_of_spls_in_db, sim_rounding)
 
 
+def sound_within_time_interval(sound, global_time_interval):
+    is_sound_inside_time_interval = False
+    if (
+        sound["time"] >= global_time_interval[0]
+        and sound["time"] < global_time_interval[1]
+    ):
+        is_sound_inside_time_interval = True
+    return is_sound_inside_time_interval
+
+
 def generate_sound_profile(list_of_sounds, focal_sound_object):
     """given a focal sound and list of all sounds, generate focal_sound_to_masker_ratio
     computes both the focal_sound profile and masker sound profiles.
@@ -186,12 +196,18 @@ def generate_sound_profile(list_of_sounds, focal_sound_object):
     duration_before_call_to_consider = start_time_of_focal_sound - ipi_start_time
 
     time_extent_of_temporal_masking_fn_file = [0.025, -0.001]
+
     start_of_time_axis = np.min(
         [time_extent_of_temporal_masking_fn_file[0], duration_before_call_to_consider]
     )
     end_of_time_axis = (
         -focal_sound_object["duration"] + time_extent_of_temporal_masking_fn_file[1]
     )
+
+    time_extent_of_masking_global_time = [
+        start_time_of_focal_sound - start_of_time_axis,
+        start_time_of_focal_sound - end_of_time_axis,
+    ]
 
     time_axis_given_sound = np.round(
         np.arange(
@@ -205,7 +221,12 @@ def generate_sound_profile(list_of_sounds, focal_sound_object):
     matrix_with_spls = np.zeros(shape=(len(time_axis_given_sound), len(list_of_sounds)))
 
     for i, sound in enumerate(list_of_sounds):
-        if sound["sound_object_id"] != focal_sound_object["sound_object_id"]:
+        is_sound_not_focal_sound = (
+            sound["sound_object_id"] != focal_sound_object["sound_object_id"]
+        )
+        if is_sound_not_focal_sound and sound_within_time_interval(
+            sound, time_extent_of_masking_global_time
+        ):
             time_of_sound_wrt_focal_sound = np.round(
                 sound["time"] - focal_sound_object["time"], sim_rounding
             )

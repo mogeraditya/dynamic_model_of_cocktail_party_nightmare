@@ -272,17 +272,17 @@ class Bat:
 
         if self.time_since_last_cleanup == 0:
             dir_to_store = self.output_dir + "/" + str(self.id)
-            make_dir(dir_to_store)
-            np.save(
-                dir_to_store
-                + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time:.4f}.npy",
-                self.received_sounds,
-            )
-            np.save(
-                dir_to_store
-                + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time:.4f}.npy",
-                self.emitted_sounds,
-            )
+            # make_dir(dir_to_store)
+            # np.save(
+            #     dir_to_store
+            #     + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time:.4f}.npy",
+            #     self.received_sounds,
+            # )
+            # np.save(
+            #     dir_to_store
+            #     + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time:.4f}.npy",
+            #     self.emitted_sounds,
+            # )
             self.time_since_last_cleanup = -np.inf
             self.emitted_sounds = []
             self.received_sounds = []

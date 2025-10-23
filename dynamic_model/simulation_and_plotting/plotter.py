@@ -268,6 +268,6 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/dump_files/trying_sim_with_snr/data_for_plotting"
-    SAVE_ANIMATION = False  # OUTPUT_DIR
+    OUTPUT_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/dump_files/5_bats_5_Sec_with_snr/data_for_plotting"
+    SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)

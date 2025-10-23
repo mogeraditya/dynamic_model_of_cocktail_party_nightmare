@@ -21,7 +21,7 @@ def run_one_instance_of_simulation(
     output_dir = (
         data_storage_dir
         + parameter_df["OUTPUT_DIR_FOR_SIMULATION"][0]
-        + f"/iteration_number_{simulation_id}/"
+        + f"iteration_number_{simulation_id}"
     )
     make_dir(output_dir)
     print(output_dir)
@@ -68,11 +68,13 @@ def parallel_process_with_pool(param_dir, n_runs, data_storage_dir, max_workers=
 
 if __name__ == "__main__":
     # Directory containing your parameter files
-    PARAM_DIR = "./dynamic_model/paramsets/effect_time_delay_decision/store_paramsets/"
+    PARAM_DIR = (
+        "./dynamic_model/paramsets/effect_time_delay_of_decision/store_paramsets/"
+    )
 
     N_RUNS = 100  # Number of iterations per parameter set
     DATA_STORAGE_DIR = (
-        "/media/adityamoger/T7 Shield/dir_store_snr/"  # Base output directory
+        r"/media/adityamoger/T7 Shield/dir_store_snr/"  # Base output directory
     )
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
