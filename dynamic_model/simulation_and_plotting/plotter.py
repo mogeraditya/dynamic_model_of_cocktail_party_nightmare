@@ -268,6 +268,6 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/25_bats_0_2_post_call_interval/data_for_plotting"
+    OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/25_bats_0_35_post_call_interval/data_for_plotting"
     SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)

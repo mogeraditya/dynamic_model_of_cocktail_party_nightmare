@@ -226,3 +226,34 @@ def convert_detected_sounds_into_grids(heard_sounds, parameters_df, allocentric_
         store_grid = convert_matrix_to_one_hot(store_grid).copy()
 
     return store_grid, spatial_grid_r, spatial_grid_theta
+
+
+def given_time_and_angle_return_direction(
+    time_delay_of_activated_cell,
+    angle_of_activated_cell,
+    parameters_df,
+    bat_direction,
+    allocentric_axis_y,
+):
+    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"][0]
+    time_delay_threshold_for_repulsion = parameters_df[
+        "TIME_DELAY_THRESHOLD_FOR_REPULSION"
+    ][0]
+
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
+    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
+
+    angle_of_next_direction = angle_of_activated_cell + angular_resolution / 2
+    corrected_time_delay = time_delay_of_activated_cell + radial_resolution / 2
+
+    if spatial_reference_frame == "allocentric":
+        angle_between_self_and_allocentric_axis = bat_direction.angle_between(
+            allocentric_axis_y
+        )
+        angle_of_next_direction += angle_between_self_and_allocentric_axis
+
+    if corrected_time_delay <= time_delay_threshold_for_repulsion:
+        angle_of_next_direction += np.pi
+
+    next_direction = bat_direction.rotate(angle_of_next_direction)
+    return next_direction.normalize()

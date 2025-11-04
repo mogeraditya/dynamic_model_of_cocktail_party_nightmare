@@ -6,12 +6,11 @@ import sys
 from datetime import datetime
 
 import numpy as np
-import pandas as pd
 
 sys.path.append("./dynamic_model")
-from agents.bats_copy import Bat
+from agents.bats import Bat
 from agents.obstacles import Obstacle
-from agents.sounds import DirectSound, EchoSound
+from agents.sounds import DirectSound
 from supporting_files.utilities import creation_time_calculation, load_parameters
 from supporting_files.vectors import Vector
 
