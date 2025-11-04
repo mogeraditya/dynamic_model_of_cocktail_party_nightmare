@@ -72,7 +72,7 @@ if __name__ == "__main__":
         "./dynamic_model/paramsets/effect_time_delay_of_decision/store_paramsets/"
     )
 
-    N_RUNS = 100  # Number of iterations per parameter set
+    N_RUNS = 50  # Number of iterations per parameter set
     DATA_STORAGE_DIR = (
         r"/media/adityamoger/T7 Shield/dir_store_snr/"  # Base output directory
     )

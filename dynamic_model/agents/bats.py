@@ -27,8 +27,8 @@ class Bat:
         self.direction = Vector().random_direction()  # randomize start direction
 
         time_step_size = self.parameters_df["SIM_DURATION"][0]
-        self.rounding_based_on_time_step = 3  # len(str(time_step_size))
-        # print(self.rounding_based_on_time_step)
+        # find the number of decimal places to set rounding equal to time step size
+        self.rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
 
         self.time_since_last_call = np.round(
             random.uniform(0, 1 / self.parameters_df["CALL_RATE"][0]),
@@ -68,7 +68,6 @@ class Bat:
             "./dynamic_model/supporting_files/temporal_masking_fn.csv"
         )
 
-    # TODO: dont allow movement through obstacles/ other bats
     def update(self, current_time, sound_objects):
         """Function to update bats with time.
         This function handles movement update of bat each time step.
@@ -148,7 +147,7 @@ class Bat:
             self.detections_for_directon_change = []
             self.time_since_last_cleanup = 0
 
-    def given_sound_objects_return_detected(
+    def given_sound_objects_return_sounds_at_bat_position(
         self, current_time, sound_objects, detect_self_call
     ):
         """given sounds generate list of sounds that a bat can hear
@@ -255,7 +254,7 @@ class Bat:
             sound_objects (list): _description_
         """
         self.received_sounds.extend(
-            self.given_sound_objects_return_detected(
+            self.given_sound_objects_return_sounds_at_bat_position(
                 current_time, sound_objects, detect_self_call=True
             )
         )
@@ -272,17 +271,17 @@ class Bat:
 
         if self.time_since_last_cleanup == 0:
             dir_to_store = self.output_dir + "/" + str(self.id)
-            # make_dir(dir_to_store)
-            # np.save(
-            #     dir_to_store
-            #     + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time:.4f}.npy",
-            #     self.received_sounds,
-            # )
-            # np.save(
-            #     dir_to_store
-            #     + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time:.4f}.npy",
-            #     self.emitted_sounds,
-            # )
+            make_dir(dir_to_store)
+            np.save(
+                dir_to_store
+                + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time:.4f}.npy",
+                self.received_sounds,
+            )
+            np.save(
+                dir_to_store
+                + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time:.4f}.npy",
+                self.emitted_sounds,
+            )
             self.time_since_last_cleanup = -np.inf
             self.emitted_sounds = []
             self.received_sounds = []
@@ -389,18 +388,20 @@ class Bat:
             sound_objects (list): list containing detected sounds
         """
         self.time_since_directon_change += self.parameters_df["TIME_STEP"][0]
-        dir_change_time_interval = self.parameters_df["TIME_DELAY_FOR_DIR_CHANGE"][0]
+        direction_change_time_interval = self.parameters_df[
+            "TIME_DELAY_FOR_DIRECTION_CHANGE"
+        ][0]
         self.detections_for_directon_change.extend(
-            self.given_sound_objects_return_detected(
+            self.given_sound_objects_return_sounds_at_bat_position(
                 current_time, sound_objects, detect_self_call=False
             )
         )
 
-        if self.time_since_directon_change >= dir_change_time_interval:
+        if self.time_since_directon_change >= direction_change_time_interval:
             if self.implement_snr:
                 heard_sounds = given_sound_objects_return_detected_sounds(
                     self.detections_for_directon_change,
-                    dir_change_time_interval,
+                    direction_change_time_interval,
                     self.hearing_angle_threshold,
                     self.temporal_masking_file_dir,
                     self.min_sound_detection_fraction,

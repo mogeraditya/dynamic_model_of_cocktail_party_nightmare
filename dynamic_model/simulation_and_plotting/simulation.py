@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.append("./dynamic_model")
-from agents.bats import Bat
+from agents.bats_copy import Bat
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound, EchoSound
 from supporting_files.utilities import creation_time_calculation, load_parameters
@@ -261,8 +261,10 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./dump_files/5_bats_5_Sec_with_snr/"
-    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
+    OUTPUT_DIR = (
+        r"./consistency_of_calls_movement_rule_data/25_bats_0_35_post_call_interval/"
+    )
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()
