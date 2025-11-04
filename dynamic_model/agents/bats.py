@@ -331,17 +331,18 @@ class Bat:
 
     def decide_next_direction(self, detected_sound_objects):
         """decide next direction of bat based on sound"""
-        behaviour_rule_to_use = self.parameters_df["BEHAVIOUR_RULE"][0]
-        if behaviour_rule_to_use == "consistency":
-            next_direction = decide_next_direction_based_on_consistency(
-                self, detected_sound_objects
-            )
-        if behaviour_rule_to_use == "loudest_sound":
-            next_direction = decide_next_direction_based_on_loudest_sound(
-                self, detected_sound_objects
-            )
-        else:
-            raise ValueError("unsupported behaviour rule")
+        # behaviour_rule_to_use = self.parameters_df["BEHAVIOUR_RULE"][0]
+        # print(behaviour_rule_to_use)
+        # if behaviour_rule_to_use == "consistency":
+        next_direction = decide_next_direction_based_on_consistency(
+            self, detected_sound_objects
+        )
+        # if behaviour_rule_to_use == "loudest_sound":
+        #     next_direction = decide_next_direction_based_on_loudest_sound(
+        #         self, detected_sound_objects
+        #     )
+        # else:
+        #     raise ValueError("unsupported behaviour rule")
         return next_direction.normalize()
 
     def update_directon(self, current_time, sound_objects):
