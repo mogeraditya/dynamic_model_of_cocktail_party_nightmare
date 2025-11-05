@@ -40,10 +40,11 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
 
     if cell_index_to_respond_to is None:
         next_direction = self.direction
+        response_type = None
     else:
         time_delay_of_activated_cell = grid_row_labels[cell_index_to_respond_to[0]]
         angle_of_activated_cell = grid_column_labels[cell_index_to_respond_to[1]]
-        next_direction = given_time_and_angle_return_direction(
+        next_direction, response_type = given_time_and_angle_return_direction(
             time_delay_of_activated_cell,
             angle_of_activated_cell,
             self.parameters_df,
@@ -51,7 +52,7 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
             self.allocentric_axis_y,
         )
 
-    return next_direction
+    return next_direction.normalize(), response_type
 
 
 def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):

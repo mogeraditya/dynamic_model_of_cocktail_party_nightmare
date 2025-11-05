@@ -6,9 +6,9 @@ import pandas as pd
 # from read_simulation_output import read_data_per_simulation_per_bat
 from supporting_files.utilities import change_tuples_to_vector_in_sound
 
-call_duration = 0.005
-sim_time_step = 0.001
-sim_rounding = 3
+# call_duration = 0.005
+# sim_time_step = 0.0005
+# sim_rounding = 4
 
 
 def parse_sounds(
@@ -17,6 +17,7 @@ def parse_sounds(
     angle_threshold,
     focal_bat,
     include_direct_sounds,
+    call_duration,
 ):
     """Given a list of sound_objects, parse the sound objects.
     Parsing is done to ensure, sounds are within bats hearing field :math:`\\pm` angle_threshold
@@ -68,7 +69,7 @@ def parse_sounds(
     return parsed_sounds
 
 
-def serialize_sound_info(parsed_sound_objects):
+def serialize_sound_info(parsed_sound_objects, sim_time_step, sim_rounding):
     """Sound objects are condensed to go from individual points
     at every timestep to one extended object.
 
@@ -147,7 +148,7 @@ def serialize_sound_info(parsed_sound_objects):
     return store_serialized_sounds
 
 
-def find_sum_of_db(list_of_spls):
+def find_sum_of_db(list_of_spls, sim_rounding):
     """Computes the sum of all the spls in a given list.
 
     Args:
@@ -176,7 +177,7 @@ def sound_within_time_interval(sound, global_time_interval):
     return is_sound_inside_time_interval
 
 
-def create_total_masking_profile(list_of_sounds):
+def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
     start_time_of_ipi = list_of_sounds[0]["bat_last_call_time"]
     end_time_of_ipi = np.max([i["time"] + i["duration"] for i in list_of_sounds])
     time_axis_of_ipi = np.arange(start_time_of_ipi, end_time_of_ipi, sim_time_step)
@@ -199,18 +200,22 @@ def create_total_masking_profile(list_of_sounds):
             matrix_to_store_spls[index_to_put_spl, i] = sound["all_spl_values"][j]
         # print(sound["all_spl_values"], matrix_to_store_spls[:, i])
 
-    total_profile = np.array([find_sum_of_db(i) for i in matrix_to_store_spls])
+    total_profile = np.array(
+        [find_sum_of_db(i, sim_rounding) for i in matrix_to_store_spls]
+    )
     # print(matrix_to_store_spls)
     # print(time_axis_of_ipi)
     return np.array(time_axis_of_ipi), total_profile
 
 
-def filter_sounds_based_on_total_profile(list_of_sounds):
+def filter_sounds_based_on_total_profile(list_of_sounds, sim_time_step, sim_rounding):
     filtered_list_of_sounds = []
-    time_axis_of_ipi, total_profile = create_total_masking_profile(list_of_sounds)
+    time_axis_of_ipi, total_profile = create_total_masking_profile(
+        list_of_sounds, sim_time_step, sim_rounding
+    )
     intensity_threshold_based_on_total_profile = total_profile - 34
     # print(total_profile)
-    for i, sound in enumerate(list_of_sounds):
+    for sound in list_of_sounds:
         sound_detection_time = np.round(sound["time"], sim_rounding)
         index_based_on_time = np.where(time_axis_of_ipi == sound_detection_time)[0]
         # print(index_based_on_time, sound_detection_time, time_axis_of_ipi)
@@ -229,7 +234,11 @@ def filter_sounds_based_on_total_profile(list_of_sounds):
 
 
 def generate_sound_profile(
-    list_of_sounds, focal_sound_object, time_extent_of_temporal_masking_fn_file
+    list_of_sounds,
+    focal_sound_object,
+    time_extent_of_temporal_masking_fn_file,
+    sim_time_step,
+    sim_rounding,
 ):
     """given a focal sound and list of all sounds, generate focal_sound_to_masker_ratio
     computes both the focal_sound profile and masker sound profiles.
@@ -297,7 +306,9 @@ def generate_sound_profile(
                 index_to_put_spl = np.where(time_axis_given_sound == time_step)[0]
                 matrix_with_spls[index_to_put_spl, i] = sound["all_spl_values"][j]
 
-    masker_profile = np.array([find_sum_of_db(i) for i in matrix_with_spls])
+    masker_profile = np.array(
+        [find_sum_of_db(i, sim_rounding) for i in matrix_with_spls]
+    )
     focal_sound_profile = (
         np.ones(shape=(len(time_axis_given_sound))) * focal_sound_object["received_spl"]
     )
@@ -307,7 +318,10 @@ def generate_sound_profile(
 
 
 def get_temporal_masking_function_based_on_sound(
-    time_axis_given_sound, dir_of_temporal_masking_fn_file, duration_of_sound
+    time_axis_given_sound,
+    dir_of_temporal_masking_fn_file,
+    duration_of_sound,
+    sim_time_step,
 ):
     """
 
@@ -351,6 +365,8 @@ def is_signal_heard(
     parsed_sounds,
     dir_of_temporal_masking_fn_file,
     minimum_sound_detection_fraction,
+    sim_time_step,
+    sim_rounding,
 ):
     """given sound and list of potentially masking sound, return if sound is heard or not
     if the sound to masker profile is atleast minimum_sound_detection_fraction
@@ -373,10 +389,17 @@ def is_signal_heard(
         np.min(temporal_masking_df["timegap_ms"]),
     ]
     focal_sound_masker_ratio, time_axis_given_sound = generate_sound_profile(
-        parsed_sounds, focal_sound, time_extent_of_temporal_masking_fn_file
+        parsed_sounds,
+        focal_sound,
+        time_extent_of_temporal_masking_fn_file,
+        sim_time_step,
+        sim_rounding,
     )
     temporal_masking_thresholds = get_temporal_masking_function_based_on_sound(
-        time_axis_given_sound, dir_of_temporal_masking_fn_file, focal_sound["duration"]
+        time_axis_given_sound,
+        dir_of_temporal_masking_fn_file,
+        focal_sound["duration"],
+        sim_time_step,
     )
     count_total = 0
     count_focal_sound_greater_masking_threshold = 0
@@ -405,6 +428,9 @@ def given_sound_objects_return_detected_sounds(
     minimum_sound_detection_fraction,
     focal_bat,
     include_direct_sounds,
+    call_duration,
+    sim_time_step,
+    sim_rounding,
 ):
     """given list of sounds, returns the list of sounds that are detected.
     if the sound to masker profile is atleast minimum_sound_detection_fraction
@@ -431,11 +457,14 @@ def given_sound_objects_return_detected_sounds(
         angle_threshold,
         focal_bat,
         include_direct_sounds,
+        call_duration,
     )
-    parsed_serialized_sounds = serialize_sound_info(parsed_sounds)
+    parsed_serialized_sounds = serialize_sound_info(
+        parsed_sounds, sim_time_step, sim_rounding
+    )
     # print(len(parsed_serialized_sounds))
     parsed_serialized_sounds = filter_sounds_based_on_total_profile(
-        parsed_serialized_sounds
+        parsed_serialized_sounds, sim_time_step, sim_rounding
     )
     # print(len(parsed_serialized_sounds))
 
@@ -446,6 +475,8 @@ def given_sound_objects_return_detected_sounds(
             parsed_serialized_sounds,
             dir_of_temporal_masking_fn_file,
             minimum_sound_detection_fraction,
+            sim_time_step,
+            sim_rounding,
         ):
             heard_sounds.append(focal_sound)
 

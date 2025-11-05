@@ -254,6 +254,9 @@ def given_time_and_angle_return_direction(
 
     if corrected_time_delay <= time_delay_threshold_for_repulsion:
         angle_of_next_direction += np.pi
+        response_type = "repulsion"
+    else:
+        response_type = "attraction"
 
     next_direction = bat_direction.rotate(angle_of_next_direction)
-    return next_direction.normalize()
+    return next_direction.normalize(), response_type

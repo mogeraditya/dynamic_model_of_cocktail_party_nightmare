@@ -170,7 +170,17 @@ class TestingSoundPropagation(unittest.TestCase):
         spl_by_model = [np.round(i.current_spl, 1) for i in sound_objects]
         self.assertTrue((expected_spls == spl_by_model))
 
-    def test_directionality()
+    def test_directionality(self):
+        parameter_df_w_modified_directionality = self.parameters_df.copy()
+        parameter_df_w_modified_directionality["CALL_DIRECTIONALITY"][0] = 7
+        sound = DirectSound(
+            parameters_df=self.parameters_df,
+            origin=self.sound_start_point,
+            creation_time=self.creation_time,
+            emitter_id=self.emitter_id,
+            direction_vector=Vector(0, 1),
+        )
+
 
 if __name__ == "__main__":
 

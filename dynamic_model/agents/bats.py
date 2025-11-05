@@ -12,7 +12,7 @@ from supporting_files.bats_response_to_sound import (
 from supporting_files.snr_implementation import (
     given_sound_objects_return_detected_sounds,
 )
-from supporting_files.utilities import call_directionality_factor, make_dir, str2bool
+from supporting_files.utilities import make_dir, str2bool
 from supporting_files.vectors import Vector
 
 
@@ -74,6 +74,9 @@ class Bat:
             "./dynamic_model/supporting_files/temporal_masking_fn.csv"
         )
         self.memory_window_to_store_grids = []
+
+        self.responding_to_direction = (np.nan, np.nan)
+        self.response_type = None
 
     def update(self, current_time, sound_objects):
         """Function to update bats with time.
@@ -154,6 +157,46 @@ class Bat:
             self.detections_for_directon_change = []
             self.time_since_last_cleanup = 0
 
+    def convert_sound_to_dictionary(self, sound, current_time, received_spl):
+        """converts a given sound to dictionary
+        inorder to save only necessary information
+
+        Args:
+            sound (EchoSound): sound to convert
+            current_time (float): simulation time
+            received_spl (float): spl at the focal bat after sound directionaility
+                        and spreading
+
+        Returns:
+            dictionary: dictionary version of the sound object
+        """
+        incident_direction = sound.origin - self.position
+        sound_type = "direct" if isinstance(sound, DirectSound) else "echo"
+
+        dictionary = {
+            "time": current_time,
+            "origin": (sound.origin.x, sound.origin.y),
+            "distance_from_bat": sound.origin.distance_to(self.position),
+            "received_spl": received_spl,
+            "emitter_id": sound.emitter_id,
+            "type": sound_type,
+            "reflection_count": getattr(sound, "reflection_count", 0),
+            "reflected_from": sound.reflected_from,
+            "sound_object_id": sound.id,
+            "sound_direction": (
+                sound.direction_vector.x,
+                sound.direction_vector.y,
+            ),
+            "incident_direction": (
+                incident_direction.x,
+                incident_direction.y,
+            ),
+            "bat_direction": (self.direction.x, self.direction.y),
+            "bat_position": (self.position.x, self.position.y),
+            "bat_last_call_time": self.emit_times[-1],
+        }
+        return dictionary
+
     def given_sound_objects_return_sounds_at_bat_position(
         self, current_time, sound_objects, detect_self_call
     ):
@@ -169,84 +212,34 @@ class Bat:
         """
         array_of_sound_detections = []
         for sound in sound_objects:
+            sound.update(current_time)
 
-            # if sound isnt active, i.e., outside arena or too quiet
-            if not sound.active:
-                continue
-
-            # dont detect self call
-            if (
+            is_sound_active = sound.active
+            is_sound_self_call = (
                 sound.emitter_id == self.id
                 and isinstance(sound, DirectSound)
                 and not detect_self_call
+            )
+            is_sound_reflected_from_self = sound.reflected_from == f"bat_{self.id}"
+
+            if (
+                not is_sound_active
+                or is_sound_self_call
+                or is_sound_reflected_from_self
             ):
-                continue
-            # sound.update(current_time)
-
-            # if sound cant be heard by bat
-            if sound.current_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
-                continue
-
-            # sounds that are generated after reflect off of you, dont detect
-            if sound.reflected_from == f"bat_{self.id}":
-                # print(sound)
                 continue
 
             # sound can only be detected if bat is inside the sound wave
             if sound.contains_point(self.position):
-                sound_type = "direct" if isinstance(sound, DirectSound) else "echo"
-
-                # compute spl with call directionality, set A to directionality
-                angle_between_sound_and_bat = sound.direction_vector.angle_between(
-                    self.position
-                )
-                call_directionality = call_directionality_factor(
-                    A=self.parameters_df["CALL_DIRECTIONALITY"][0],
-                    theta=angle_between_sound_and_bat,
+                received_spl = sound.spl_at_receiver(self.position)
+                is_sound_audible = (
+                    received_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
                 )
 
-                distance_between_sound_and_bat = self.position.distance_to(sound.origin)
-
-                if distance_between_sound_and_bat == 0:
-                    spl_corrected_for_width = sound.initial_spl
-                else:
-                    distance_effect = 20 * math.log10(
-                        distance_between_sound_and_bat / 1
-                    )
-                    spl_corrected_for_width = (
-                        sound.initial_spl
-                        - distance_effect
-                        - (
-                            self.parameters_df["AIR_ABSORPTION"][0]
-                            * distance_between_sound_and_bat
-                        )
-                    )
-
-                # store only necessary things of sound object
-                incident_direction = sound.origin - self.position
+                if not is_sound_audible:
+                    continue
                 array_of_sound_detections.append(
-                    {
-                        "time": current_time,
-                        "origin": (sound.origin.x, sound.origin.y),
-                        "distance_from_bat": sound.origin.distance_to(self.position),
-                        "received_spl": spl_corrected_for_width + call_directionality,
-                        "emitter_id": sound.emitter_id,
-                        "type": sound_type,
-                        "reflection_count": getattr(sound, "reflection_count", 0),
-                        "reflected_from": sound.reflected_from,
-                        "sound_object_id": sound.id,
-                        "sound_direction": (
-                            sound.direction_vector.x,
-                            sound.direction_vector.y,
-                        ),
-                        "incident_direction": (
-                            incident_direction.x,
-                            incident_direction.y,
-                        ),
-                        "bat_direction": (self.direction.x, self.direction.y),
-                        "bat_position": (self.position.x, self.position.y),
-                        "bat_last_call_time": self.emit_times[-1],
-                    }
+                    self.convert_sound_to_dictionary(sound, current_time, received_spl)
                 )
         return array_of_sound_detections
 
@@ -331,19 +324,23 @@ class Bat:
 
     def decide_next_direction(self, detected_sound_objects):
         """decide next direction of bat based on sound"""
-        # behaviour_rule_to_use = self.parameters_df["BEHAVIOUR_RULE"][0]
-        # print(behaviour_rule_to_use)
-        # if behaviour_rule_to_use == "consistency":
-        next_direction = decide_next_direction_based_on_consistency(
-            self, detected_sound_objects
-        )
-        # if behaviour_rule_to_use == "loudest_sound":
-        #     next_direction = decide_next_direction_based_on_loudest_sound(
-        #         self, detected_sound_objects
-        #     )
-        # else:
-        #     raise ValueError("unsupported behaviour rule")
-        return next_direction.normalize()
+        behaviour_rule_to_use = self.parameters_df["BEHAVIOUR_RULE"][0]
+
+        if behaviour_rule_to_use == "consistency":
+            next_direction, response_type = decide_next_direction_based_on_consistency(
+                self, detected_sound_objects
+            )
+        elif behaviour_rule_to_use == "loudest_sound":
+            next_direction, response_type = (
+                decide_next_direction_based_on_loudest_sound(
+                    self, detected_sound_objects
+                )
+            )
+        else:
+            print(behaviour_rule_to_use)
+            print(behaviour_rule_to_use == "consistency")
+            raise ValueError("unsupported behaviour rule")
+        return next_direction.normalize(), response_type
 
     def update_directon(self, current_time, sound_objects):
         """rotate bat according to fix angular speed
@@ -362,7 +359,11 @@ class Bat:
             )
         )
 
-        if self.time_since_directon_change >= direction_change_time_interval:
+        if (
+            self.time_since_directon_change >= direction_change_time_interval
+            and len(self.detections_for_directon_change) != 0
+        ):
+
             if self.implement_snr:
                 heard_sounds = given_sound_objects_return_detected_sounds(
                     self.detections_for_directon_change,
@@ -372,16 +373,25 @@ class Bat:
                     self.min_sound_detection_fraction,
                     self.id,
                     self.include_direct_sounds_in_response,
+                    self.parameters_df["CALL_DURATION"][0],
+                    self.parameters_df["TIME_STEP"][0],
+                    self.rounding_based_on_time_step,
                 )
             else:
                 heard_sounds = self.detections_for_directon_change
 
-            self.next_direction = self.decide_next_direction(
+            self.next_direction, self.response_type = self.decide_next_direction(
                 heard_sounds
-                # self.detections_for_directon_change
-            ).normalize()
+            )
             self.detections_for_directon_change = []
             self.time_since_directon_change = -np.inf
+            if self.next_direction != self.direction.normalize():
+                self.responding_to_direction = (
+                    self.next_direction.x,
+                    self.next_direction.y,
+                )
+            else:
+                self.responding_to_direction = (np.nan, np.nan)
 
         rotation_speed = self.parameters_df["BAT_ROTATION_SPEED"][0]
         rotation_speed_scaled_by_time_step = (

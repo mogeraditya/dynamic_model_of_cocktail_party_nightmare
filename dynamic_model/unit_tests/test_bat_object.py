@@ -38,12 +38,14 @@ class TestingBatObject(unittest.TestCase):
             origin=Vector(-sound_disk_width + 0.0001, 0),
             creation_time=self.creation_time,
             emitter_id="sound1",
+            direction_vector=self.bat.direction,
         )
         sound2 = DirectSound(
             parameters_df=self.parameters_df,
             origin=Vector(-3 * sound_disk_width + 0.0001, 0),
             creation_time=self.creation_time,
             emitter_id="sound2",
+            direction_vector=self.bat.direction,
         )
 
         times_to_inspect = np.arange(0, 0.025, 0.0025)

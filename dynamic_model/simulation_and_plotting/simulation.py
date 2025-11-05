@@ -102,6 +102,10 @@ class Simulation:
                     "current_dir_angle": [
                         bat.direction.angle_between(Vector(1, 0)) for bat in self.bats
                     ],
+                    "bat_response_vector": [
+                        bat.responding_to_direction for bat in self.bats
+                    ],
+                    "response_type": [bat.response_type for bat in self.bats],
                 }
             )
 
@@ -260,9 +264,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = (
-        r"./consistency_of_calls_movement_rule_data/1_bats_20_post_call_interval/"
-    )
+    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/1_bats_20_post_call_interval_smaller_time_step/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
