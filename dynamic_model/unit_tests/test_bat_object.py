@@ -1,4 +1,4 @@
-"""unit test to test sound propagation"""
+"""unit test to test bat objects"""
 
 import math
 import os
