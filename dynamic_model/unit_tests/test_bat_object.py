@@ -32,12 +32,7 @@ class TestBatObject(unittest.TestCase):
         return super().setUp()
 
     def test_bat_initialization(self):
-        """check the initialization of self.bat objects.
-
-        Args:
-            self.mock_parameters (DataFrame): dataframe containing self.bat parameters.
-            self.bat (Bat): Bat object with id 0
-        """
+        """check the initialization of self.bat objects."""
 
         self.assertTrue(self.bat.id == 0)
         self.assertTrue(isinstance(self.bat.position, Vector))
@@ -49,11 +44,7 @@ class TestBatObject(unittest.TestCase):
         self.assertTrue(len(self.bat.received_sounds) == 0)
 
     def test_self_id_counter(self):
-        """check if id counter works as intend
-
-        Args:
-            self.mock_parameters (DataFrame): dataframe containing self.bat parameters.
-        """
+        """check if id counter works as intend"""
         with tempfile.TemporaryDirectory() as temp_dir:
             Bat._id_counter = 0
             bat0 = Bat(self.mock_parameters, temp_dir)
@@ -63,11 +54,7 @@ class TestBatObject(unittest.TestCase):
             self.assertTrue(bat1.id == 1)
 
     def test_update_movement(self):
-        """check if movement step is working as intended.
-
-        Args:
-            self.bat (Bat): Bat object to test
-        """
+        """check if movement step is working as intended."""
         initial_position = Vector(self.bat.position.x, self.bat.position.y)
         initial_direction = Vector(self.bat.direction.x, self.bat.direction.y)
         self.bat.update_movement()
@@ -82,11 +69,7 @@ class TestBatObject(unittest.TestCase):
         self.assertAlmostEqual(self.bat.position.y, expected_position.y)
 
     def test_update_movement_boundary_bounce(self):
-        """Test self.bat bounces off walls and all correctly
-
-        Args:
-            self.bat (Bat): Bat object to test
-        """
+        """Test self.bat bounces off walls and all correctly"""
         # make the self.bat hit the left wall
         self.bat.position = Vector(0, 1)
         self.bat.direction = Vector(-1, 0)
@@ -101,11 +84,7 @@ class TestBatObject(unittest.TestCase):
         )  # next direction equal to current direction
 
     def test_emit_sounds_creation(self):
-        """check if sound emitted wgen time threshold crosses.
-
-        Args:
-            self.bat (Bat): Bat object to test
-        """
+        """check if sound emitted wgen time threshold crosses."""
         current_time = 1.0
         sound_objects = []
 
@@ -125,11 +104,7 @@ class TestBatObject(unittest.TestCase):
         )  # there should be noise ideally
 
     def test_emit_sounds_no_emission(self):
-        """no sound should be emitted when call interval not reached
-
-        Args:
-            self.bat (Bat): Bat object to test
-        """
+        """no sound should be emitted when call interval not reached"""
         current_time = 1.0
         sound_objects = []
         initial_emit_count = len(self.bat.emitted_sounds)
@@ -146,11 +121,7 @@ class TestBatObject(unittest.TestCase):
         self.assertTrue(len(sound_objects) == 0)
 
     def test_convert_sound_to_dictionary(self):
-        """check if sound serailized properly
-
-        Args:
-            self.bat (Bat): Bat object to test
-        """
+        """check if sound serailized properly"""
 
         mock_sound = Mock()
         mock_sound.origin = Vector(10, 10)
@@ -194,11 +165,7 @@ class TestBatObject(unittest.TestCase):
         self.assertTrue(result["type"] == "direct")
 
     def test_sound_detection(self):
-        """Test the sound detection
-
-        Args:
-            self.bat (Bat): Bat object to test
-        """
+        """Test the sound detection"""
 
         origin = Vector(0, 0)
         creation_time = 0
@@ -251,11 +218,7 @@ class TestBatObject(unittest.TestCase):
         self.assertTrue(array_with_booleans == expected_output)
 
     def test_generate_direction_vector_given_sound(self):
-        """Test direction vector generation from sound,
-
-        Args:
-            self.bat (Bat): Bat object to test
-        """
+        """Test direction vector generation from sound,"""
         sound_dict = {"received_spl": 80.0, "origin": (20, 30)}
 
         self.bat.position = Vector(10, 10)
