@@ -244,6 +244,13 @@ class TestBatObject(unittest.TestCase):
         self.assertAlmostEqual(self.bat.direction.y, target_direction.y)
         self.assertAlmostEqual(self.bat.direction.magnitude(), 1.0)
 
+        new_target_direction = Vector(0, -1)
+        self.bat.rotate_towards_given_degree(new_target_direction, rotation_rate)
+        self.assertTrue(self.bat.direction != initial_direction)
+        self.assertNotAlmostEqual(self.bat.direction.x, new_target_direction.x)
+        self.assertNotAlmostEqual(self.bat.direction.y, new_target_direction.y)
+        self.assertAlmostEqual(self.bat.direction.magnitude(), 1.0)
+
     def test_decide_next_direction_unsupported_rule(self):
         """Test error handling for unsupported behavior rule"""
         self.mock_parameters["BEHAVIOUR_RULE"] = ["quiztopher komban"]
