@@ -8,7 +8,6 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
-# Add the path to your modules
 sys.path.append("./dynamic_model")
 
 from agents.bats import Bat
