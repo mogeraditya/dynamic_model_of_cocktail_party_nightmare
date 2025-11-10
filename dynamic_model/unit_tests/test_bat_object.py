@@ -19,7 +19,6 @@ from supporting_files.vectors import Vector
 Bat._id_counter = 0
 print(os.getcwd())
 DIR_PARAMS = "./dynamic_model/unit_tests/params_unittest/test_bat_object.csv"
-OUTPUT_DIR = "./dynamic_model/unit_tests/detection_files/"
 
 
 class TestBatObject(unittest.TestCase):
