@@ -296,16 +296,16 @@ def visualize(output_dir, save_animation):
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            save_animation + "/animation_no_sound.mp4",
+            save_animation + "/animation.mp4",
             writer=ffwriter,
         )
-    # plt.show()
-    plt.clf()
+    plt.show()
+    # plt.clf()
 
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/1_bats_20_post_call_interval_smaller_time_step/data_for_plotting"
+    OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/try/data_for_plotting"
     SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 

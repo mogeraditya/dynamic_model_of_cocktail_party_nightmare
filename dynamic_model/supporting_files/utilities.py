@@ -166,12 +166,16 @@ def given_matrix_find_cell_to_respond_to(matrix, threshold_for_activation):
         find_all_elements_with_min_row_index = [
             i for i in short_list_of_cells if i[0] == minimum_row_index
         ]
-        pick_element_at_random = np.random.choice(
-            range(len(find_all_elements_with_min_row_index))
+        pick_middle_element = int(
+            np.floor(len(find_all_elements_with_min_row_index) / 2)
         )
-        output_cell_number = find_all_elements_with_min_row_index[
-            pick_element_at_random
-        ]
+        # pick_element_at_random = np.random.choice(
+        #     range(len(find_all_elements_with_min_row_index))
+        # )
+        # output_cell_number = find_all_elements_with_min_row_index[
+        #     pick_element_at_random
+        # ]
+        output_cell_number = find_all_elements_with_min_row_index[pick_middle_element]
         return output_cell_number
 
 

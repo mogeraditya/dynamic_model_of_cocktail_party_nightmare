@@ -264,7 +264,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/1_bats_20_post_call_interval_smaller_time_step/"
+    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/try/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

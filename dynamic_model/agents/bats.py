@@ -379,19 +379,22 @@ class Bat:
                 )
             else:
                 heard_sounds = self.detections_for_directon_change
-
-            self.next_direction, self.response_type = self.decide_next_direction(
-                heard_sounds
-            )
-            self.detections_for_directon_change = []
-            self.time_since_directon_change = -np.inf
-            if self.next_direction != self.direction.normalize():
-                self.responding_to_direction = (
-                    self.next_direction.x,
-                    self.next_direction.y,
-                )
-            else:
+            if len(heard_sounds) == 0:
+                self.next_direction = self.direction
                 self.responding_to_direction = (np.nan, np.nan)
+            else:
+                self.next_direction, self.response_type = self.decide_next_direction(
+                    heard_sounds
+                )
+                self.detections_for_directon_change = []
+                self.time_since_directon_change = -np.inf
+                if self.next_direction != self.direction.normalize():
+                    self.responding_to_direction = (
+                        self.next_direction.x,
+                        self.next_direction.y,
+                    )
+                else:
+                    self.responding_to_direction = (np.nan, np.nan)
 
         rotation_speed = self.parameters_df["BAT_ROTATION_SPEED"][0]
         rotation_speed_scaled_by_time_step = (
