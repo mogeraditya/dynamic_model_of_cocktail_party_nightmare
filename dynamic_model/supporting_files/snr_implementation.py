@@ -178,6 +178,7 @@ def sound_within_time_interval(sound, global_time_interval):
 
 
 def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
+
     start_time_of_ipi = list_of_sounds[0]["bat_last_call_time"]
     end_time_of_ipi = np.max([i["time"] + i["duration"] for i in list_of_sounds])
     time_axis_of_ipi = np.arange(start_time_of_ipi, end_time_of_ipi, sim_time_step)
@@ -463,6 +464,8 @@ def given_sound_objects_return_detected_sounds(
         parsed_sounds, sim_time_step, sim_rounding
     )
     # print(len(parsed_serialized_sounds))
+    if len(parsed_serialized_sounds) == 0:
+        return []
     parsed_serialized_sounds = filter_sounds_based_on_total_profile(
         parsed_serialized_sounds, sim_time_step, sim_rounding
     )

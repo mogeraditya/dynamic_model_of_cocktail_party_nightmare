@@ -133,6 +133,8 @@ def change_tuples_to_vector_in_sound(sound):
         "bat_position",
     ]
     for key in keys_to_rebuild:
+        if isinstance(sound[key], Vector):
+            continue
         sound[key] = make_vector(sound[key])
 
     return sound
