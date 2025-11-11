@@ -88,12 +88,36 @@ class EchoSound:
             0, self.current_radius - self.parameters_df["SOUND_DISK_WIDTH"][0]
         )
 
-    def __repr__(self):
-        return (
-            f"EchoSound(origin={self.origin}, radius={self.current_radius:.2f}, "
-            f"spl={self.current_spl:.1f}dB, reflections={self.reflection_count}, "
-            f"emitter={self.emitter_id}, parent={self.parent_creation_time}), creation_time={self.creation_time}"
+    def sound_directionality(self, angle_between_sound_and_receiver):
+        sound_directionality = call_directionality_factor(
+            A=self.parameters_df["CALL_DIRECTIONALITY"][0],
+            theta=angle_between_sound_and_receiver,
         )
+        return sound_directionality
+
+    def spl_at_receiver(self, receiver_position):
+        angle_between_sound_and_receiver = self.direction_vector.angle_between(
+            receiver_position
+        )
+        sound_directionality = self.sound_directionality(
+            angle_between_sound_and_receiver
+        )
+
+        distance_between_sound_and_receiver = receiver_position.distance_to(self.origin)
+
+        if distance_between_sound_and_receiver == 0:
+            spl_corrected_for_width = self.initial_spl
+        else:
+            distance_effect = 20 * math.log10(distance_between_sound_and_receiver / 1)
+            spl_corrected_for_width = (
+                self.initial_spl
+                - distance_effect
+                - (
+                    self.parameters_df["AIR_ABSORPTION"][0]
+                    * distance_between_sound_and_receiver
+                )
+            )
+        return spl_corrected_for_width + sound_directionality
 
     def check_if_sound_outside_arena(self):
         """Checks if sound is outside the bounds of the arena.
@@ -109,6 +133,13 @@ class EchoSound:
             return True
         else:
             return False
+
+    def __repr__(self):
+        return (
+            f"EchoSound(origin={self.origin}, radius={self.current_radius:.2f}, "
+            f"spl={self.current_spl:.1f}dB, reflections={self.reflection_count}, "
+            f"emitter={self.emitter_id}, parent={self.parent_creation_time}), creation_time={self.creation_time}"
+        )
 
 
 class DirectSound(EchoSound):
@@ -166,13 +197,12 @@ class DirectSound(EchoSound):
 
         object_type = reflected_from[0:4]
         if object_type == "wall":
-            reflection_loss = 20 * math.log10(
-                self.parameters_df["REFLECTION_LOSS_WALL"][0]
-            )
+            reflection_loss = self.parameters_df["REFLECTION_LOSS_WALL"][0]
         else:
             reflection_loss = self.parameters_df["REFLECTION_LOSS"][0]
 
         distance_between_sound_and_echo = self.origin.distance_to(point)
+        # print(distance_between_sound_and_echo)
         distance_effect_for_echoes = 20 * math.log10(
             distance_between_sound_and_echo / 1
         )
@@ -189,11 +219,11 @@ class DirectSound(EchoSound):
         if reflected_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
             return None
 
-        if reflected_spl > spl_corrected_for_width:
-            print(self.current_spl)
-            print(
-                f"reflected spl {reflected_spl}, self spl {self.current_spl}, spl corrected {spl_corrected_for_width}, reflection_loss {reflection_loss}, call directionality {call_directionality}"
-            )
+        # if reflected_spl > spl_corrected_for_width:
+        #     print(self.current_spl)
+        #     print(
+        #         f"reflected spl {reflected_spl}, self spl {self.current_spl}, spl corrected {spl_corrected_for_width}, reflection_loss {reflection_loss}, call directionality {call_directionality}"
+        #     )
 
         echo = EchoSound(
             parameters_df=self.parameters_df,

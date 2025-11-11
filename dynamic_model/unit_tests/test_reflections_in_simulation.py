@@ -42,6 +42,7 @@ class TestReflections(unittest.TestCase):
             origin=Vector(-sound_disk_width, 0),
             creation_time=self.creation_time,
             emitter_id="sound1",
+            direction_vector=self.bat.direction,
         )
         times_to_inspect = np.arange(0, 0.015, 0.0025)
         array_with_booleans = []

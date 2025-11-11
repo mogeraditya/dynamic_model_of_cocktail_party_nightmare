@@ -6,12 +6,11 @@ import sys
 from datetime import datetime
 
 import numpy as np
-import pandas as pd
 
 sys.path.append("./dynamic_model")
 from agents.bats import Bat
 from agents.obstacles import Obstacle
-from agents.sounds import DirectSound, EchoSound
+from agents.sounds import DirectSound
 from supporting_files.utilities import creation_time_calculation, load_parameters
 from supporting_files.vectors import Vector
 
@@ -27,7 +26,7 @@ class Simulation:
         Bat._id_counter = 0
         Obstacle._id_counter = 0
         self.parameters_df = parameters_df
-        self.output_dir = output_dir
+        self.output_dir = output_dir + "/"
         self.dir_to_store = self.output_dir + "/data_for_plotting/"
 
         os.makedirs(self.output_dir, exist_ok=True)
@@ -103,6 +102,10 @@ class Simulation:
                     "current_dir_angle": [
                         bat.direction.angle_between(Vector(1, 0)) for bat in self.bats
                     ],
+                    "bat_response_vector": [
+                        bat.responding_to_direction for bat in self.bats
+                    ],
+                    "response_type": [bat.response_type for bat in self.bats],
                 }
             )
 
@@ -261,8 +264,8 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./dump_files/snr_50_bats_with_directional_calls/"
-    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/paramset_for_trial_run.csv"
+    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/try/"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()

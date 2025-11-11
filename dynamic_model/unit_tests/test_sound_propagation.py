@@ -99,24 +99,10 @@ class TestingSoundPropagation(unittest.TestCase):
         sound.update(time_passed)
         object_spl = sound.current_spl
 
-        # sound = DirectSound(
-        #     parameters_df=self.parameters_df,
-        #     origin=self.sound_start_point,
-        #     creation_time=self.creation_time,
-        #     emitter_id=self.emitter_id,
-        # )
-        # sound.initial_spl = 100
-        # sound.current_spl = 100
-        # times = np.arange(0, 0.01, 0.0005)
-        # for time in times:
-        #     sound.update(time)
-        #     print(sound.current_spl)
-        #     print(sound.current_radius)
-
         self.assertEqual(object_spl, calculated_spl)
 
     def test_reflection_loss(self):
-
+        """Test reflection loss"""
         sound = DirectSound(
             parameters_df=self.parameters_df,
             origin=self.sound_start_point,
@@ -141,36 +127,34 @@ class TestingSoundPropagation(unittest.TestCase):
                 reflection_point = obstacle.position + normal * obstacle.radius
                 obstacle_id = f"obstacle_{obstacle.id}"
 
-            time_of_creation = creation_time_calculation(sound, reflection_point)
-            echo = sound.create_echo(
-                reflection_point, time_of_creation, normal, obstacle_id
-            )
-            print(echo)
-            if echo:
+                time_of_creation = creation_time_calculation(sound, reflection_point)
+                echo = sound.create_echo(
+                    reflection_point, time_of_creation, normal, obstacle_id
+                )
+                print(echo)
+                if echo:
 
-                # Mark this obstacle as reflected for the original sound
-                echo.update(time_passed)
-                sound.reflected_obstacles.add(obstacle_id)
-                # Copy reflected obstacles to the echo
-                echo.reflected_obstacles.update(sound.reflected_obstacles)
+                    # Mark this obstacle as reflected for the original sound
+                    echo.update(time_passed)
+                    sound.reflected_obstacles.add(obstacle_id)
+                    # Copy reflected obstacles to the echo
+                    echo.reflected_obstacles.update(sound.reflected_obstacles)
 
-        # print(new_echoes)
         sound_objects.append(echo)
-        # print(sound_objects)
-        # hand calculated spls
-        expected_spls = [93.6, 69.6]
+        expected_spls = [93.6, 90.1]
         spl_by_model = [np.round(i.current_spl, 1) for i in sound_objects]
+
         self.assertTrue((expected_spls == spl_by_model))
 
         new_time = 0.008
         for sounds in sound_objects:
             sounds.update(new_time)
-        print(sound_objects)
-        expected_spls = [88.5, 68.3]
+        # print(sound_objects)
+        expected_spls = [88.5, 68.0]
         spl_by_model = [np.round(i.current_spl, 1) for i in sound_objects]
+
         self.assertTrue((expected_spls == spl_by_model))
 
-    def test_directionality()
 
 if __name__ == "__main__":
 
