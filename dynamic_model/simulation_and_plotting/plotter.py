@@ -22,8 +22,29 @@ def stitch_together_history_lists(history_output_dir):
     Returns:
         list: list with all the merged lists from pickle files.
     """
+    # list_of_dict_files = glob.glob(history_output_dir + "/history_dump_*.pkl")
+    # list_of_dict_files = np.sort(list_of_dict_files)
+    # list_containing_data_from_all_pickle_files = []
+    # for pickle_file in list_of_dict_files:
+    #     with open(pickle_file, "rb") as f:
+    #         _list_containing_subset = pickle.load(f)
+    #         list_containing_data_from_all_pickle_files.extend(_list_containing_subset)
+
+    # parameter_file = glob.glob(history_output_dir + "/parameters_used.pkl")[0]
+    # parameter_df = pd.read_pickle(parameter_file)
+    # with open(history_output_dir + "/bats_initial.pkl", "rb") as f:
+    #     bats_initial_positions = pickle.load(f)
+    # with open(history_output_dir + "/obstacles_initial.pkl", "rb") as f:
+    #     obstacles_initial_positions = pickle.load(f)
+    # return (
+    #     list_containing_data_from_all_pickle_files,
+    #     parameter_df,
+    #     bats_initial_positions,
+    #     obstacles_initial_positions,
+    # )
     list_of_dict_files = glob.glob(history_output_dir + "/history_dump_*.pkl")
     list_of_dict_files = np.sort(list_of_dict_files)
+    # print(list_of_dict_files)
     list_containing_data_from_all_pickle_files = []
     for pickle_file in list_of_dict_files:
         with open(pickle_file, "rb") as f:
@@ -36,6 +57,16 @@ def stitch_together_history_lists(history_output_dir):
         bats_initial_positions = pickle.load(f)
     with open(history_output_dir + "/obstacles_initial.pkl", "rb") as f:
         obstacles_initial_positions = pickle.load(f)
+    times = [i["time"] for i in list_containing_data_from_all_pickle_files]
+    sorting_indices = np.argsort(times)
+    list_containing_data_from_all_pickle_files = np.array(
+        list_containing_data_from_all_pickle_files
+    )
+    list_containing_data_from_all_pickle_files = (
+        list_containing_data_from_all_pickle_files[sorting_indices]
+    )
+    # print(len(list_containing_data_from_all_pickle_files))
+    # print(times)
     return (
         list_containing_data_from_all_pickle_files,
         parameter_df,
@@ -305,7 +336,7 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/try/data_for_plotting"
+    OUTPUT_DIR = ".//media/adityamoger/T7 Shield/dir_store_snr/NVG_effect_of_consistency_metric/3_out_of_5/iteration_number_0/data_for_plotting"
     SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 

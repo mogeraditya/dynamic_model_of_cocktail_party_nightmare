@@ -33,11 +33,12 @@ class Simulation:
         os.makedirs(self.dir_to_store, exist_ok=True)
 
         self.bats = [
-            Bat(self.parameters_df, self.output_dir)
+            Bat(self.parameters_df, self.output_dir, store_hearing=True)
             for _ in range(int(self.parameters_df["NUM_BATS"][0]))
         ]
+        obstacle_position = "random"
         self.obstacles = [
-            Obstacle(self.parameters_df)
+            Obstacle(self.parameters_df, obstacle_position)
             for _ in range(int(self.parameters_df["OBSTACLE_COUNT"][0]))
         ]
         self.sound_objects = []  # Contains both DirectSound and EchoSound
@@ -47,16 +48,16 @@ class Simulation:
 
         self.handles = []
 
-        with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
-            pickle.dump(self.bats, f)
-        with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
-            pickle.dump(self.obstacles, f)
-
     def run(self):
         """Runs one instance of the simulation.
         After parsing the parameter file, it runs one instance of the simulation
         for those sets of parameters.
         """
+        with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
+            pickle.dump(self.bats, f)
+        with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
+            pickle.dump(self.obstacles, f)
+
         num_steps = int(
             self.parameters_df["SIM_DURATION"][0] / self.parameters_df["TIME_STEP"][0]
         )
@@ -64,6 +65,7 @@ class Simulation:
         list_time_taken_for_each_loop = []
         save_time_of_last_iter = start_timing
         for step in range(num_steps):
+            # print(self.obstacles[0].position.x)
             self.time_elapsed = step * self.parameters_df["TIME_STEP"][0]
 
             for sound in self.sound_objects:
