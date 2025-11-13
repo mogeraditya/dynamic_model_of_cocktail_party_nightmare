@@ -23,7 +23,7 @@ class Bat:
         self.id = Bat._id_counter
         Bat._id_counter += 1
 
-        self.parameters_df = parameters_df
+        self.parameters_df = parameters_df.copy()
         self.position = Vector(
             random.uniform(1, self.parameters_df["ARENA_WIDTH"][0] - 1),
             random.uniform(1, self.parameters_df["ARENA_HEIGHT"][0] - 1),
