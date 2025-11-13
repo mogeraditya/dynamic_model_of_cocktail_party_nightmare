@@ -12,14 +12,14 @@ from supporting_files.bats_response_to_sound import (
 from supporting_files.snr_implementation import (
     given_sound_objects_return_detected_sounds,
 )
-from supporting_files.utilities import make_dir, str2bool
+from supporting_files.utilities import call_directionality_factor, make_dir, str2bool
 from supporting_files.vectors import Vector
 
 
 class Bat:
     _id_counter = 0
 
-    def __init__(self, parameters_df, output_dir, store_hearing):
+    def __init__(self, parameters_df, output_dir, store_hearing=False):
         self.id = Bat._id_counter
         Bat._id_counter += 1
 
@@ -35,9 +35,9 @@ class Bat:
         # find the number of decimal places to set rounding equal to time step size
         # print(time_step_size)
         self.rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
-
+        self.call_rate = self.parameters_df["CALL_RATE"][0]
         self.time_since_last_call = np.round(
-            random.uniform(0, 1 / self.parameters_df["CALL_RATE"][0]),
+            random.uniform(0, 1 / self.call_rate),
             self.rounding_based_on_time_step,
         )
 
@@ -136,7 +136,7 @@ class Bat:
             sound_objects (list): List containing all active sounds in the simulation
         """
         self.time_since_last_call += self.parameters_df["TIME_STEP"][0]
-        call_interval = 1.0 / self.parameters_df["CALL_RATE"][0]
+        call_interval = 1.0 / self.call_rate
 
         if self.time_since_last_call >= call_interval:
             sound = DirectSound(
@@ -234,6 +234,16 @@ class Bat:
             # sound can only be detected if bat is inside the sound wave
             if sound.contains_point(self.position):
                 received_spl = sound.spl_at_receiver(self.position)
+
+                angle_between_sound_and_bat = sound.direction_vector.angle_between(
+                    self.position
+                )
+                hearing_directionality = call_directionality_factor(
+                    A=self.parameters_df["HEARING_DIRECTIONALITY"][0],
+                    theta=angle_between_sound_and_bat,
+                )
+
+                received_spl += hearing_directionality
                 is_sound_audible = (
                     received_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
                 )
@@ -431,6 +441,21 @@ class Bat:
             rotated_vector = current_direction.rotate(rotation_angle)
 
             self.direction = rotated_vector.normalize()
+
+    # def aditya(self)
+
+    # def update_call_rate(self):
+    #     change_call_rate = str2bool(self.parameters_df["ENABLE_ADAPTIVE_CALL_RATE"][0])
+    #     call_rate_method = self.parameters_df["ADAPTIVE_CALL_RATE_METHOD"][0]
+    #     if change_call_rate:
+    #         if call_rate_method == "aditya":
+    #             self.aditya()
+    #         elif call_rate_method == "thejasvi":
+    #             self.thejasvi()
+    #         else:
+    #             raise ValueError("not supported adaptive call rate method")
+    #     else:
+    #         self.
 
     def __repr__(self):
         return f"Bat(id={self.id}, position={self.position})"

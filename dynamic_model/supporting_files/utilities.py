@@ -156,28 +156,52 @@ def given_matrix_find_cell_to_respond_to(matrix, threshold_for_activation):
     # cell_to_respond_to =
     num_rows, num_columns = matrix.shape
     short_list_of_cells = []
+    short_listed_thresholds = []
     for i in range(num_rows):
         for j in range(num_columns):
             if matrix[i, j] >= threshold_for_activation:
                 short_list_of_cells.append([i, j])
+                short_listed_thresholds.append(matrix[i, j])
+
     short_list_of_cells = np.array(short_list_of_cells)
+    short_listed_thresholds = np.array(short_listed_thresholds)
     if len(short_list_of_cells) == 0:
         return None
     else:
+        np.random.shuffle(short_list_of_cells)
         minimum_row_index = np.min(short_list_of_cells[:, 0])
-        find_all_elements_with_min_row_index = [
-            i for i in short_list_of_cells if i[0] == minimum_row_index
-        ]
-        pick_middle_element = int(
-            np.floor(len(find_all_elements_with_min_row_index) / 2)
-        )
+        # find_all_elements_with_min_row_index = [
+        #     i for i in short_list_of_cells if i[0] == minimum_row_index
+        # ]
+        # find_all_thresholds_with_min_row_index = [
+        #     threshold
+        #     for i, threshold in enumerate(short_listed_thresholds)
+        #     if short_list_of_cells[i] in find_all_elements_with_min_row_index
+        # ]
+        find_all_elements_with_min_row_index = []
+        find_all_thresholds_with_min_row_index = []
+        for i, matrix_index in enumerate(short_list_of_cells):
+            if matrix_index[0] == minimum_row_index:
+                find_all_elements_with_min_row_index.append(matrix_index)
+                find_all_thresholds_with_min_row_index.append(
+                    short_listed_thresholds[i]
+                )
+        # pick_middle_element = int(
+        #     np.floor(len(find_all_elements_with_min_row_index) / 2)
+        # )
         # pick_element_at_random = np.random.choice(
         #     range(len(find_all_elements_with_min_row_index))
         # )
         # output_cell_number = find_all_elements_with_min_row_index[
         #     pick_element_at_random
         # ]
-        output_cell_number = find_all_elements_with_min_row_index[pick_middle_element]
+        # output_cell_number = find_all_elements_with_min_row_index[pick_middle_element]
+        output_cell_number = find_all_elements_with_min_row_index[
+            np.argsort(find_all_thresholds_with_min_row_index)[-1]
+        ]
+        print(
+            find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index
+        )
         return output_cell_number
 
 

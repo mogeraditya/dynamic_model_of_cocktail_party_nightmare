@@ -66,6 +66,7 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
         0
     ]
     spl_threshold_for_repulsions = self.parameters_df["SPL_THRESHOLD_FOR_REPULSION"][0]
+    response_type = "random"
     if len(detected_sound_objects) != 0:
         max_spl = np.max([i["received_spl"] for i in detected_sound_objects])
 
@@ -82,6 +83,7 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
             if max_spl > spl_threshold_for_repulsions:
                 next_direction = max_spl_sound_vector.rotate(np.pi).normalize()
                 effect_strength = ((max_spl - spl_threshold_for_repulsions) / 5) * np.pi
+                response_type = "repulsion"
                 # print(f"Repulsion: {max_spl} dB")
 
             else:
@@ -89,6 +91,7 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
                 effect_strength = (
                     (max_spl - spl_threshold_for_attractions) / 5
                 ) * np.pi
+                response_type = "attraction"
                 # print(f"Attraction: {max_spl} dB")
 
         else:
@@ -106,4 +109,4 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
     elif self.direction.angle_between(next_direction) < -cap_directon_change:
         next_direction = self.direction.rotate(-cap_directon_change)
 
-    return next_direction
+    return next_direction, response_type

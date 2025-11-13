@@ -336,7 +336,9 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = ".//media/adityamoger/T7 Shield/dir_store_snr/NVG_effect_of_consistency_metric/3_out_of_5/iteration_number_0/data_for_plotting"
+    OUTPUT_DIR = (
+        r"./consistency_of_calls_movement_rule_data/trial_nvg2/data_for_plotting"
+    )
     SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 

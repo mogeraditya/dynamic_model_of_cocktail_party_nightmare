@@ -68,13 +68,11 @@ def parallel_process_with_pool(param_dir, n_runs, data_storage_dir, max_workers=
 
 if __name__ == "__main__":
     # Directory containing your parameter files
-    PARAM_DIR = (
-        "./dynamic_model/paramsets/effect_time_delay_of_decision/store_paramsets/"
-    )
+    PARAM_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/dynamic_model/paramsets/effect_of_lot_of_shit/store_paramsets/"
 
     N_RUNS = 50  # Number of iterations per parameter set
     DATA_STORAGE_DIR = (
-        r"/media/adityamoger/T7 Shield/dir_store_snr/"  # Base output directory
+        r"/media/adityamoger/T7 Shield/dir_store_nvg/"  # Base output directory
     )
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
