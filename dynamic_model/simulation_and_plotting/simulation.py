@@ -7,6 +7,8 @@ from datetime import datetime
 
 import numpy as np
 
+# from supporting_files.store_history import CompactHistoryManager
+
 sys.path.append("./dynamic_model")
 from agents.bats import Bat
 from agents.obstacles import Obstacle
@@ -33,7 +35,7 @@ class Simulation:
         os.makedirs(self.dir_to_store, exist_ok=True)
 
         self.bats = [
-            Bat(self.parameters_df, self.output_dir, store_hearing=True)
+            Bat(self.parameters_df, self.output_dir, store_hearing=False)
             for _ in range(int(self.parameters_df["NUM_BATS"][0]))
         ]
         obstacle_position = "random"
@@ -47,6 +49,7 @@ class Simulation:
         self.history = []
 
         self.handles = []
+        # self.history_manager = CompactHistoryManager()
 
     def run(self):
         """Runs one instance of the simulation.
@@ -110,6 +113,7 @@ class Simulation:
                     "response_type": [bat.response_type for bat in self.bats],
                 }
             )
+            # self.history_manager.add_frame(self.time_elapsed, self.bats)
 
             self.sound_objects = [
                 s for s in self.sound_objects if s.active and s.current_spl > 20
@@ -144,6 +148,46 @@ class Simulation:
         if is_end_of_code:
 
             self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
+
+    # def handle_data_storage_for_plotting(self, current_time, is_end_of_code):
+    #     """Generates files for data used for plotting.
+    #     Periodically the history list is cleared to ensure
+    #     RAM doesnt get used up.
+    #     """
+    #     history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
+
+    #     if len(self.history) > history_array_size_limit or is_end_of_code:
+    #         # Save current batch as compressed numpy file instead of pickle
+    #         filename = self.dir_to_store + f"history_dump_{current_time:.3f}.npz"
+
+    #         # Convert history to compact numpy format
+    #         times = []
+    #         positions = []
+
+    #         for frame in self.history:
+    #             times.append(frame["time"])
+    #             frame_positions = []
+    #             for bat_pos in frame["bat_positions"]:
+    #                 frame_positions.extend([bat_pos[0], bat_pos[1]])
+    #             positions.append(frame_positions)
+
+    #         # Save as compressed numpy
+    #         times_array = np.array(times, dtype="f4")
+    #         max_bats = max(len(frame) // 2 for frame in positions) if positions else 0
+    #         positions_array = np.full(
+    #             (len(positions), max_bats * 2), np.nan, dtype="f4"
+    #         )
+
+    #         for i, frame in enumerate(positions):
+    #             positions_array[i, : len(frame)] = frame
+
+    #         np.savez_compressed(filename, times=times_array, positions=positions_array)
+
+    #         # Clear history
+    #         self.history = []
+
+    #     if is_end_of_code:
+    #         self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
 
     def handle_reflections(self, current_time):
         """Generates reflections of the sound objects.
@@ -266,7 +310,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/trial_nvg2/"
+    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/trial_nvg_slower_turning/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

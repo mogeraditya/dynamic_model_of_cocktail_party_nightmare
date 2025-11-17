@@ -336,9 +336,7 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = (
-        r"./consistency_of_calls_movement_rule_data/trial_nvg2/data_for_plotting"
-    )
+    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/trial_nvg_slower_turning/data_for_plotting"
     SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 

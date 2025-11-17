@@ -199,9 +199,9 @@ def given_matrix_find_cell_to_respond_to(matrix, threshold_for_activation):
         output_cell_number = find_all_elements_with_min_row_index[
             np.argsort(find_all_thresholds_with_min_row_index)[-1]
         ]
-        print(
-            find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index
-        )
+        # print(
+        #     find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index
+        # )
         return output_cell_number
 
 
@@ -290,3 +290,27 @@ def given_time_and_angle_return_direction(
 
     next_direction = bat_direction.rotate(angle_of_next_direction)
     return next_direction.normalize(), response_type
+
+
+def load_history_dump(filename):
+    data = np.load(filename)
+    times = data["times"]
+    bat_counts = data["bat_counts"]
+    positions_flat = data["positions"]
+
+    reconstructed_history = []
+    pos_index = 0
+
+    for i, n_bats in enumerate(bat_counts):
+        frame_positions = []
+        for bat_idx in range(n_bats):
+            x = positions_flat[pos_index]
+            y = positions_flat[pos_index + 1]
+            frame_positions.append((x, y))
+            pos_index += 2
+
+        reconstructed_history.append(
+            {"time": float(times[i]), "bat_positions": frame_positions}
+        )
+
+    return reconstructed_history

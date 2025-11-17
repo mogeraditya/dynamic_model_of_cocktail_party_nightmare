@@ -19,7 +19,7 @@ from supporting_files.vectors import Vector
 class Bat:
     _id_counter = 0
 
-    def __init__(self, parameters_df, output_dir, store_hearing=False):
+    def __init__(self, parameters_df, output_dir, store_hearing):
         self.id = Bat._id_counter
         Bat._id_counter += 1
 
@@ -96,8 +96,8 @@ class Bat:
         self.position_history.append((current_time, (self.position.x, self.position.y)))
 
         self.emit_sounds(current_time, sound_objects)
-        if self.id == 0 and self.time_since_directon_change == 0:
-            print(current_time)
+        # if self.id == 0 and self.time_since_directon_change == 0:
+        #     print(current_time)
 
         self.update_directon(current_time, sound_objects)
         self.cleanup_sounds(current_time)
@@ -282,8 +282,9 @@ class Bat:
 
         if self.time_since_last_cleanup == 0:
             dir_to_store = self.output_dir + "/" + str(self.id)
-            make_dir(dir_to_store)
+
             if self.store_hearing:
+                make_dir(dir_to_store)
                 np.save(
                     dir_to_store
                     + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time:.4f}.npy",
