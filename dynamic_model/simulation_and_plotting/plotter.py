@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Arrow, Circle, Patch, Rectangle, Wedge
 
+plt.style.use("dark_background")
 sys.path.append("./dynamic_model")
 plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
 
@@ -156,21 +157,21 @@ def setup_visualization(parameters_df, bats, obstacles):
             alpha=0.8,
         )
 
-        next_direction_arrow = Arrow(
-            bat.position.x,
-            bat.position.y,
-            0,
-            0,  # Initial direction (0, 0)
-            width=0.3,  # adjust arrow width as needed here
-            color="white",
-            ec=cm(i / NUM_COLORS),
-            alpha=0.8,
-        )
+        # next_direction_arrow = Arrow(
+        #     bat.position.x,
+        #     bat.position.y,
+        #     0,
+        #     0,  # Initial direction (0, 0)
+        #     width=0.3,  # adjust arrow width as needed here
+        #     color="white",
+        #     ec=cm(i / NUM_COLORS),
+        #     alpha=0.8,
+        # )
 
         ax.add_patch(direction_arrow)
         direction_arrows.append(direction_arrow)
-        ax.add_patch(next_direction_arrow)
-        next_direction_arrows.append(next_direction_arrow)
+        # ax.add_patch(next_direction_arrow)
+        # next_direction_arrows.append(next_direction_arrow)
 
     return [
         fig,
@@ -211,8 +212,8 @@ def visualize(output_dir, save_animation):
             marker.center = (np.nan, np.nan)
         for arrow in direction_arrows:
             arrow.set_data(x=np.nan, y=np.nan, dx=0, dy=0)
-        for arrow in next_direction_arrows:
-            arrow.set_data(x=np.nan, y=np.nan, dx=0, dy=0)
+        # for arrow in next_direction_arrows:
+        #     arrow.set_data(x=np.nan, y=np.nan, dx=0, dy=0)
         for line in trajectory_lines:
             line.set_data([], [])
         return bat_markers + direction_arrows + trajectory_lines
@@ -241,10 +242,10 @@ def visualize(output_dir, save_animation):
                     fcolor = "white"
                 else:
                     fcolor = "grey"
-                next_direction_arrows[j].set_data(
-                    x=x, y=y, dx=dx * scale, dy=dy * scale
-                )
-                next_direction_arrows[j].set(fc=fcolor)
+                # next_direction_arrows[j].set_data(
+                #     x=x, y=y, dx=dx * scale, dy=dy * scale
+                # )
+                # next_direction_arrows[j].set(fc=fcolor)
             trajectory_history[j].append((x, y))
 
             # Keep only the last 400 positions
@@ -265,47 +266,47 @@ def visualize(output_dir, save_animation):
         detection_artists.clear()
         plt.title(f"time step: {frame["time"]:.5f}")
 
-        # for sound in frame["sound_objects"]:
-        #     if not sound["status"]:
-        #         continue
+        for sound in frame["sound_objects"]:
+            if not sound["status"]:
+                continue
 
-        #     emitter_color = cm(sound["emitter_id"] / NUM_COLORS)
-        #     alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
+            emitter_color = cm(sound["emitter_id"] / NUM_COLORS)
+            alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
 
-        #     inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
-        #     outer = sound["radius"]
+            inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
+            outer = sound["radius"]
 
-        #     if inner < outer:
-        #         if sound["type"] == "direct":
-        #             linestyle = "-"
-        #             hatching_of_disk = "++"
-        #         else:
-        #             linestyle = "--"
-        #             alpha = 0.5 * alpha
-        #             hatching_of_disk = ".."
-        #         if inner == 0:
-        #             width_of_disk = sound["radius"]
-        #         else:
-        #             width_of_disk = parameters_df["SOUND_DISK_WIDTH"][0]
-        #         wedge = Wedge(
-        #             sound["origin"],
-        #             outer,
-        #             0,
-        #             360,
-        #             width=width_of_disk,
-        #             fill=False,
-        #             color=emitter_color,
-        #             alpha=alpha,
-        #             linestyle=linestyle,
-        #             hatch=hatching_of_disk,
-        #         )
-        #         ax.add_patch(wedge)
-        #         sound_artists.append(wedge)
+            if inner < outer:
+                if sound["type"] == "direct":
+                    linestyle = "-"
+                    hatching_of_disk = "++"
+                else:
+                    linestyle = "--"
+                    alpha = 0.5 * alpha
+                    hatching_of_disk = ".."
+                if inner == 0:
+                    width_of_disk = sound["radius"]
+                else:
+                    width_of_disk = parameters_df["SOUND_DISK_WIDTH"][0]
+                wedge = Wedge(
+                    sound["origin"],
+                    outer,
+                    0,
+                    360,
+                    width=width_of_disk,
+                    fill=False,
+                    color=emitter_color,
+                    alpha=alpha,
+                    linestyle=linestyle,
+                    hatch=hatching_of_disk,
+                )
+                ax.add_patch(wedge)
+                sound_artists.append(wedge)
 
         return (
             bat_markers
             + direction_arrows
-            + next_direction_arrows
+            # + next_direction_arrows
             + trajectory_lines
             + sound_artists
             + detection_artists
@@ -327,7 +328,7 @@ def visualize(output_dir, save_animation):
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            save_animation + "/animation.mp4",
+            save_animation + "/animation_with_sounds.mp4",
             writer=ffwriter,
         )
     plt.show()
@@ -336,8 +337,9 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/trial_nvg_slower_turning/data_for_plotting"
-    SAVE_ANIMATION = False  # OUTPUT_DIR
+    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/data_for_nvg_video/data_for_plotting"
+
+    SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 
     # OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/25_bats_0_35_post_call_interval/data_for_plotting"

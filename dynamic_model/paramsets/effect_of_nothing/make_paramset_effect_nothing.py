@@ -36,12 +36,12 @@ for group_size in group_sizes:
     simulation_parameters["NUM_BATS"] = group_size
     # simulation_parameters["CALL_RATE"] = call_rate
     simulation_parameters["OUTPUT_DIR_FOR_SIMULATION"] = (
-        f"/DATA_effect_of_lot_of_shit/group_size_{group_size}_random/"
+        f"/DATA_effect_of_nothing/group_size_{group_size}_random/"
     )
     # simulation_parameters["VARYING_PARAM"] = ["NUM_BATS", "CALL_RATE"]
     simulation_parameters["VARYING_PARAM_1"] = "NUM_BATS"
-    # simulation_parameters["VARYING_PARAM_2"] = ""
-    # simulation_parameters["VARYING_PARAM_3"] = "BEHAVIOUR_RULE"
+    simulation_parameters["VARYING_PARAM_2"] = ""
+    simulation_parameters["VARYING_PARAM_3"] = "BEHAVIOUR_RULE"
 
     simulation_parameters.to_csv(
         DIR_TO_STORE_PARAMSETS + f"paramset_w_group_size_{group_size}_random.csv"
