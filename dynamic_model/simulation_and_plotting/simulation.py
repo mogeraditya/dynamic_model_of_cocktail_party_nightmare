@@ -11,6 +11,7 @@ import numpy as np
 
 sys.path.append("./dynamic_model")
 from agents.bats import Bat
+from agents.make_walls import make_walls
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
 from supporting_files.utilities import creation_time_calculation, load_parameters
@@ -35,14 +36,17 @@ class Simulation:
         os.makedirs(self.dir_to_store, exist_ok=True)
 
         self.bats = [
-            Bat(self.parameters_df, self.output_dir, store_hearing=False)
+            Bat(self.parameters_df, self.output_dir, store_hearing=True)
             for _ in range(int(self.parameters_df["NUM_BATS"][0]))
         ]
         obstacle_position = "random"
+        obstacle_radius = self.parameters_df["OBSTACLE_RADIUS"][0]
         self.obstacles = [
-            Obstacle(self.parameters_df, obstacle_position)
+            Obstacle(self.parameters_df, obstacle_position, obstacle_radius)
             for _ in range(int(self.parameters_df["OBSTACLE_COUNT"][0]))
         ]
+        wall_objects = make_walls(self.parameters_df)
+        self.obstacles.extend(wall_objects)
         self.sound_objects = []  # Contains both DirectSound and EchoSound
 
         self.time_elapsed = 0.0
@@ -310,7 +314,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/data_for_nvg_video"
+    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/bat_5_test"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

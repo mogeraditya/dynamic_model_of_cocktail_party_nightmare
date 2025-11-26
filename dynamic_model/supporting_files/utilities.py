@@ -152,7 +152,9 @@ def convert_matrix_to_one_hot(matrix):
     return one_hot_matrix
 
 
-def given_matrix_find_cell_to_respond_to(matrix, threshold_for_activation):
+def given_matrix_find_cell_to_respond_to(
+    matrix, threshold_for_activation, previous_output_cell
+):
     # cell_to_respond_to =
     num_rows, num_columns = matrix.shape
     short_list_of_cells = []
@@ -162,12 +164,13 @@ def given_matrix_find_cell_to_respond_to(matrix, threshold_for_activation):
             if matrix[i, j] >= threshold_for_activation:
                 short_list_of_cells.append([i, j])
                 short_listed_thresholds.append(matrix[i, j])
-
+    # print(matrix)
     short_list_of_cells = np.array(short_list_of_cells)
     short_listed_thresholds = np.array(short_listed_thresholds)
     if len(short_list_of_cells) == 0:
-        return None
+        return [np.nan, np.nan]
     else:
+
         np.random.shuffle(short_list_of_cells)
         minimum_row_index = np.min(short_list_of_cells[:, 0])
         # find_all_elements_with_min_row_index = [
@@ -196,12 +199,22 @@ def given_matrix_find_cell_to_respond_to(matrix, threshold_for_activation):
         #     pick_element_at_random
         # ]
         # output_cell_number = find_all_elements_with_min_row_index[pick_middle_element]
+        is_previous_cell_repeated = any(
+            all(item in sublist for item in previous_output_cell)
+            for sublist in find_all_elements_with_min_row_index
+        )
+
+        if is_previous_cell_repeated:
+            # print(previous_output_cell)
+            return previous_output_cell
+
         output_cell_number = find_all_elements_with_min_row_index[
             np.argsort(find_all_thresholds_with_min_row_index)[-1]
         ]
         # print(
         #     find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index
         # )
+
         return output_cell_number
 
 

@@ -4,6 +4,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 sys.path.append("./dynamic_model")

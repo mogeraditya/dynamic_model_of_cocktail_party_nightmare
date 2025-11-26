@@ -25,8 +25,8 @@ class Bat:
 
         self.parameters_df = parameters_df.copy()
         self.position = Vector(
-            random.uniform(1, self.parameters_df["ARENA_WIDTH"][0] - 1),
-            random.uniform(1, self.parameters_df["ARENA_HEIGHT"][0] - 1),
+            random.uniform(2, self.parameters_df["ARENA_WIDTH"][0] - 2),
+            random.uniform(2, self.parameters_df["ARENA_HEIGHT"][0] - 2),
         )
 
         self.direction = Vector().random_direction()  # randomize start direction
@@ -79,6 +79,7 @@ class Bat:
 
         self.responding_to_direction = (np.nan, np.nan)
         self.response_type = None
+        self.cell_index_to_respond_to = [np.nan, np.nan]
 
     def update(self, current_time, sound_objects):
         """Function to update bats with time.
@@ -96,8 +97,8 @@ class Bat:
         self.position_history.append((current_time, (self.position.x, self.position.y)))
 
         self.emit_sounds(current_time, sound_objects)
-        # if self.id == 0 and self.time_since_directon_change == 0:
-        #     print(current_time)
+        if self.id == 0 and self.time_since_directon_change == 0:
+            print(current_time)
 
         self.update_directon(current_time, sound_objects)
         self.cleanup_sounds(current_time)

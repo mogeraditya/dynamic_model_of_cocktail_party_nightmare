@@ -35,10 +35,12 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     sum_grids_in_memory = np.sum(grids_to_consider_for_direction_change, axis=0)
 
     cell_index_to_respond_to = given_matrix_find_cell_to_respond_to(
-        sum_grids_in_memory, number_of_consistent_ipis_for_behaviour
+        sum_grids_in_memory,
+        number_of_consistent_ipis_for_behaviour,
+        self.cell_index_to_respond_to,
     )
-
-    if cell_index_to_respond_to is None:
+    self.cell_index_to_respond_to = cell_index_to_respond_to
+    if np.isnan(cell_index_to_respond_to[0]):
         next_direction = self.direction
         response_type = None
     else:

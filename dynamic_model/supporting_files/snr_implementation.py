@@ -177,35 +177,73 @@ def sound_within_time_interval(sound, global_time_interval):
     return is_sound_inside_time_interval
 
 
+# def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
+
+#     start_time_of_ipi = list_of_sounds[0]["bat_last_call_time"]
+#     end_time_of_ipi = np.max([i["time"] + i["duration"] for i in list_of_sounds])
+#     time_axis_of_ipi = np.arange(start_time_of_ipi, end_time_of_ipi, sim_time_step)
+#     time_axis_of_ipi = np.round(time_axis_of_ipi, sim_rounding)
+#     matrix_to_store_spls = np.zeros(
+#         shape=(len(time_axis_of_ipi), len(list_of_sounds))
+#     ).copy()
+
+#     for i, sound in enumerate(list_of_sounds):
+#         sound_detection_time = np.round(sound["time"], sim_rounding)
+#         sound_duration = np.round(sound["duration"], sim_rounding)
+#         time_intervals_of_sound = np.arange(
+#             sound_detection_time,
+#             sound_detection_time + sound_duration - sim_time_step / 2,
+#             sim_time_step,
+#         )
+#         # print(time_intervals_of_sound, sound_duration, time_axis_of_ipi)
+#         for j, time in enumerate(time_intervals_of_sound):
+#             index_to_put_spl = np.where(time_axis_of_ipi == time)[0]
+#             matrix_to_store_spls[index_to_put_spl, i] = sound["all_spl_values"][j]
+#         # print(sound["all_spl_values"], matrix_to_store_spls[:, i])
+
+#     total_profile = np.array(
+#         [find_sum_of_db(i, sim_rounding) for i in matrix_to_store_spls]
+#     )
+#     # print(matrix_to_store_spls)
+#     # print(time_axis_of_ipi)
+#     return np.array(time_axis_of_ipi), total_profile
+
+
 def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
 
     start_time_of_ipi = list_of_sounds[0]["bat_last_call_time"]
-    end_time_of_ipi = np.max([i["time"] + i["duration"] for i in list_of_sounds])
-    time_axis_of_ipi = np.arange(start_time_of_ipi, end_time_of_ipi, sim_time_step)
+    end_time_of_ipi = np.max([i["time"] for i in list_of_sounds])
+    time_axis_of_ipi = np.arange(
+        start_time_of_ipi, end_time_of_ipi + sim_time_step / 2, sim_time_step
+    )
     time_axis_of_ipi = np.round(time_axis_of_ipi, sim_rounding)
-    matrix_to_store_spls = np.zeros(
-        shape=(len(time_axis_of_ipi), len(list_of_sounds))
-    ).copy()
-
+    matrix_to_store_spls = np.zeros(shape=(len(time_axis_of_ipi))).copy()
+    # print(matrix_to_store_spls)
     for i, sound in enumerate(list_of_sounds):
         sound_detection_time = np.round(sound["time"], sim_rounding)
-        sound_duration = np.round(sound["duration"], sim_rounding)
-        time_intervals_of_sound = np.arange(
-            sound_detection_time,
-            sound_detection_time + sound_duration - sim_time_step / 2,
-            sim_time_step,
-        )
+        # sound_duration = np.round(sound["duration"], sim_rounding)
         # print(time_intervals_of_sound, sound_duration, time_axis_of_ipi)
-        for j, time in enumerate(time_intervals_of_sound):
-            index_to_put_spl = np.where(time_axis_of_ipi == time)[0]
-            matrix_to_store_spls[index_to_put_spl, i] = sound["all_spl_values"][j]
+
+        index_to_put_spl = np.where(time_axis_of_ipi == sound_detection_time)[0]
+        # print(index_to_put_spl)
+        # print(matrix_to_store_spls[index_to_put_spl])
+        if matrix_to_store_spls[index_to_put_spl] == 0:
+            matrix_to_store_spls[index_to_put_spl] = sound["received_spl"]
+        else:
+            matrix_to_store_spls[index_to_put_spl] = find_sum_of_db(
+                [sound["received_spl"], matrix_to_store_spls[index_to_put_spl]],
+                sim_rounding,
+            )
+
         # print(sound["all_spl_values"], matrix_to_store_spls[:, i])
 
-    total_profile = np.array(
-        [find_sum_of_db(i, sim_rounding) for i in matrix_to_store_spls]
-    )
+    # total_profile = np.array(
+    #     [find_sum_of_db(i, sim_rounding) for i in matrix_to_store_spls]
+    # )
+    total_profile = matrix_to_store_spls
     # print(matrix_to_store_spls)
     # print(time_axis_of_ipi)
+    # print(list_of_sounds)
     return np.array(time_axis_of_ipi), total_profile
 
 
@@ -227,6 +265,7 @@ def filter_sounds_based_on_total_profile(list_of_sounds, sim_time_step, sim_roun
             sound_detection_intensity
             > intensity_threshold_based_on_total_profile[index_based_on_time]
         )
+        # print(sound_detection_intensity, intensity_threshold_based_on_total_profile)
         # print(is_intensity_above_threshold, index_based_on_time)
         if is_intensity_above_threshold:
             filtered_list_of_sounds.append(sound)
@@ -297,14 +336,18 @@ def generate_sound_profile(
                 sound["time"] - focal_sound_object["time"], sim_rounding
             )
 
-            time_intervals_to_add_intensity = np.arange(
-                time_of_sound_wrt_focal_sound,
-                time_of_sound_wrt_focal_sound + sound["duration"] - sim_time_step / 2,
-                sim_time_step,
+            time_intervals_to_add_intensity = (
+                sound["occurance_times"] - focal_sound_object["time"]
             )
+            # np.arange(
+            #     time_of_sound_wrt_focal_sound,
+            #     time_of_sound_wrt_focal_sound + sound["duration"] + sim_time_step / 2,
+            #     sim_time_step,
+            # )
 
             for j, time_step in enumerate(time_intervals_to_add_intensity):
                 index_to_put_spl = np.where(time_axis_given_sound == time_step)[0]
+
                 matrix_with_spls[index_to_put_spl, i] = sound["all_spl_values"][j]
 
     masker_profile = np.array(
@@ -460,15 +503,18 @@ def given_sound_objects_return_detected_sounds(
         include_direct_sounds,
         call_duration,
     )
-    parsed_serialized_sounds = serialize_sound_info(
+    if len(parsed_sounds) == 0:
+        return []
+    parsed_serialized_sounds = filter_sounds_based_on_total_profile(
         parsed_sounds, sim_time_step, sim_rounding
+    )
+    parsed_serialized_sounds = serialize_sound_info(
+        parsed_serialized_sounds, sim_time_step, sim_rounding
     )
     # print(len(parsed_serialized_sounds))
     if len(parsed_serialized_sounds) == 0:
         return []
-    parsed_serialized_sounds = filter_sounds_based_on_total_profile(
-        parsed_serialized_sounds, sim_time_step, sim_rounding
-    )
+
     # print(len(parsed_serialized_sounds))
 
     heard_sounds = []
