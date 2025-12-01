@@ -81,6 +81,9 @@ class Bat:
         self.response_type = None
         self.cell_index_to_respond_to = [np.nan, np.nan]
 
+        # self.reaction_state = None
+        # self.reaction_time = -np.inf
+
     def update(self, current_time, sound_objects):
         """Function to update bats with time.
         This function handles movement update of bat each time step.
@@ -152,7 +155,10 @@ class Bat:
             sound_objects.append(sound)
 
             self.next_direction = self.direction
+            # if self.reaction_state is None:
             self.time_since_directon_change = 0
+            # else:
+            #     self.time_since_directon_change = -np.inf
             self.time_since_last_call = np.random.uniform(
                 -self.parameters_df["NOISE_IN_CALL_RATE"][0],
                 self.parameters_df["NOISE_IN_CALL_RATE"][0],
@@ -365,6 +371,7 @@ class Bat:
             sound_objects (list): list containing detected sounds
         """
         self.time_since_directon_change += self.parameters_df["TIME_STEP"][0]
+        # self.reaction_time += self.parameters_df["TIME_STEP"][0]
         direction_change_time_interval = self.parameters_df[
             "TIME_DELAY_FOR_DIRECTION_CHANGE"
         ][0]
@@ -403,6 +410,8 @@ class Bat:
                 )
                 self.detections_for_directon_change = []
                 self.time_since_directon_change = -np.inf
+                # self.reaction_time = 0
+                # self.reaction_state = "responding"
                 if self.next_direction != self.direction.normalize():
                     self.responding_to_direction = (
                         self.next_direction.x,
@@ -411,6 +420,10 @@ class Bat:
                 else:
                     self.responding_to_direction = (np.nan, np.nan)
 
+        # if self.reaction_time >= self.parameters_df["REACTION_TIME"][0]:
+        #     print("aaa")
+        #     self.reaction_state = None
+        #     self.reaction_time = -np.inf
         rotation_speed = self.parameters_df["BAT_ROTATION_SPEED"][0]
         rotation_speed_scaled_by_time_step = (
             rotation_speed * self.parameters_df["TIME_STEP"][0]

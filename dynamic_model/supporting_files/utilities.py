@@ -153,7 +153,7 @@ def convert_matrix_to_one_hot(matrix):
 
 
 def given_matrix_find_cell_to_respond_to(
-    matrix, threshold_for_activation, previous_output_cell
+    matrix, threshold_for_activation  # , previous_output_cell
 ):
     # cell_to_respond_to =
     num_rows, num_columns = matrix.shape
@@ -199,14 +199,14 @@ def given_matrix_find_cell_to_respond_to(
         #     pick_element_at_random
         # ]
         # output_cell_number = find_all_elements_with_min_row_index[pick_middle_element]
-        is_previous_cell_repeated = any(
-            all(item in sublist for item in previous_output_cell)
-            for sublist in find_all_elements_with_min_row_index
-        )
+        # is_previous_cell_repeated = any(
+        #     all(item in sublist for item in previous_output_cell)
+        #     for sublist in find_all_elements_with_min_row_index
+        # )
 
-        if is_previous_cell_repeated:
-            # print(previous_output_cell)
-            return previous_output_cell
+        # if is_previous_cell_repeated:
+        #     # print(previous_output_cell)
+        #     return previous_output_cell
 
         output_cell_number = find_all_elements_with_min_row_index[
             np.argsort(find_all_thresholds_with_min_row_index)[-1]
