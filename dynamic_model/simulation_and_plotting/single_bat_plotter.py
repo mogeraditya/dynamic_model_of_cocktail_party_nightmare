@@ -15,9 +15,18 @@ sys.path.append("./analysis_of_data/")
 sys.path.append("./exploratory_analysis/")
 sys.path.append("./dynamic_model/")
 
-
+from convert_heard_sounds_to_matrix import (
+    convert_into_grids,
+    convert_into_grids_time_series,
+    convert_matrix_for_plotting_nicer,
+    generate_heard_sounds_array,
+    generate_matrix_array,
+)
 from read_simulation_output import read_data_per_simulation_per_bat
 from snr_implementation import parse_sounds, serialize_sound_info
+from supporting_files.supporting_functions_for_consistency import (
+    given_parameters_df_return_grid_matrix_zeros,
+)
 
 plt.style.use("dark_background")
 sys.path.append("./dynamic_model")
@@ -90,28 +99,6 @@ def plot_grid_matrix_into_radial_time_series(
     axs.set_theta_zero_location("N")
     axs.set_theta_direction(-1)
     return im, masker_im
-
-
-def convert_matrix_for_plotting_nicer(
-    list_of_matrix, rows, columns, increase_resolution_by
-):  #:( plot nice banane ke liye
-    angular_resolution = columns[1] - columns[0]
-    new_angular_resolution = angular_resolution / increase_resolution_by
-    new_column_labels = np.arange(-np.pi, np.pi, new_angular_resolution)
-
-    # print(new_matrix.shape)
-    new_list_of_matrix = []
-    for matrix in list_of_matrix:
-        new_matrix = np.zeros(shape=(len(rows), len(new_column_labels) - 1)).copy()
-        for i in range(new_matrix.shape[0]):
-            for j in range(new_matrix.shape[1]):
-                index_in_old_matrix = i, j // increase_resolution_by
-                # print(index_in_old_matrix)
-                # print(new_matrix)
-                new_matrix[i, j] = matrix[index_in_old_matrix]
-        new_list_of_matrix.append(new_matrix)
-
-    return new_list_of_matrix, new_angular_resolution
 
 
 def setup_visualization(parameters_df, bats, obstacles):
@@ -226,70 +213,6 @@ def setup_visualization(parameters_df, bats, obstacles):
     ]
 
 
-# def acoustic_scene(
-#     heard_sounds_array, time_series_of_call_emission, fig, ax, focal_bat, parameters_df
-# ):
-
-#     grid_data, rows, columns = convert_into_grids(
-#         heard_sounds_array, focal_bat, parameters_df
-#     )
-#     grid_data_time_series, rows, columns = convert_into_grids_time_series(
-#         heard_sounds_array,
-#         focal_bat,
-#         parameters_df,
-#         time_series_of_call_emission,
-#     )
-
-#     spatial_grid_r = rows
-
-#     new_grid_data, new_angular_resolution = convert_matrix_for_plotting_nicer(
-#         grid_data, rows, columns, 10
-#     )
-#     new_grid_data_time_series = np.array(
-#         [
-#             convert_matrix_for_plotting_nicer(i, rows, columns, 10)[0]
-#             for i in grid_data_time_series
-#         ]
-#     )
-#     new_spatial_grid_theta = np.arange(
-#         -np.pi + new_angular_resolution / 2, np.pi, new_angular_resolution
-#     )
-
-#     ax[1].set_title("self echoes")
-
-#     ax[1].tick_params("y", rotation=30)
-
-#     im0, masker_im0 = plot_grid_matrix_into_radial_time_series(
-#         new_grid_data_time_series[0, 0],
-#         spatial_grid_r,
-#         new_spatial_grid_theta,
-#         fig_and_ax=(fig, ax[1]),
-#         cmin=1,
-#         cmax=np.max(new_grid_data_time_series[:, 0]),
-#     )
-
-#     ipi_counter = plt.figtext(
-#         0.01, 0.6, f"interpulse interval number : {0}", fontsize=30, ha="left", va="top"
-#     )
-
-#     def animate_scene(t):
-#         # fig.suptitle(f"frame: {t}")
-#         ipi_counter.set_text(f"interpulse interval number : {t}")
-#         masker_matrix0 = np.ma.masked_where(
-#             new_grid_data_time_series[t, 0].T == 0, new_grid_data_time_series[t, 0].T
-#         )
-#         im0.set_array(new_grid_data_time_series[t, 0].T)
-#         masker_im0.set_array(masker_matrix0)
-
-#     ani = animation.FuncAnimation(fig, animate_scene, frames=len(heard_sounds_array))
-#     ffwriter = animation.FFMpegWriter(fps=10)
-#     ani.save(
-#         f"35_ms_self_echoes_animation_w_colorbar_focal_bat_{FOCAL_BAT}_azimuth_threshold_{np.round(AZIMUTH,2)}_test.mp4",
-#         writer=ffwriter,
-#     )
-#     plt.clf()
-
-
 def visualize(output_dir, save_animation):
     """Saves animation as an mp4 file and then also plays it.
 
@@ -311,24 +234,16 @@ def visualize(output_dir, save_animation):
     # ax[1].set_projection("polar")
     trajectory_history = [[] for _ in range(len(bat_markers))]
 
-    heard_sounds_array, time_series_of_call_emission = generate_heard_sounds_array(
-        output_dir, 0, parameters_df
-    )
     focal_bat = 0
-    grid_data, rows, columns = convert_into_grids(
-        heard_sounds_array, focal_bat, parameters_df
-    )
-    grid_data_time_series, rows, columns = convert_into_grids_time_series(
-        heard_sounds_array,
-        focal_bat,
-        parameters_df,
-        time_series_of_call_emission,
-    )
-
+    grid_data_time_series = generate_matrix_array(output_dir, focal_bat, parameters_df)[
+        0
+    ]
+    rows, columns = given_parameters_df_return_grid_matrix_zeros(parameters_df)[1:3]
     spatial_grid_r = rows
-
+    print(len(grid_data_time_series))
+    print(len(history))
     new_grid_data, new_angular_resolution = convert_matrix_for_plotting_nicer(
-        grid_data, rows, columns, 10
+        grid_data_time_series[0], rows, columns, 10
     )
     new_grid_data_time_series = np.array(
         [
@@ -498,13 +413,20 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/bat_1_testing/"
+    OUTPUT_DIR = (
+        r"./consistency_of_calls_movement_rule_data/bat_1_testing_matrix_storage/"
+    )
 
     SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 
     # OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/25_bats_0_35_post_call_interval/data_for_plotting"
     # SAVE_ANIMATION = OUTPUT_DIR
+    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
+    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
+    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
+    # SAVE_ANIMATION = OUTPUT_DIR
+    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
     # visualize(OUTPUT_DIR, SAVE_ANIMATION)
     # visualize(OUTPUT_DIR, SAVE_ANIMATION)
     # visualize(OUTPUT_DIR, SAVE_ANIMATION)

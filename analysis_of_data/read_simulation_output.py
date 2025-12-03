@@ -76,14 +76,28 @@ def read_data_per_simulation_per_bat(folder_dir, received_or_emitted):
         "bat_position",
     ]
     emission_times = []
+    counter = 0
     for file_dir in list_of_files_per_bat:
-        emission_times.append(float(file_dir[-10:-4]))
+        emission_times.append(float(file_dir[-12:-4]))
         data_per_timestep = np.load(file_dir, allow_pickle=True)
-        for key in keys_to_rebuild:
-            for sound in data_per_timestep:
-                sound[key] = make_vector(sound[key])
-        _array_to_dump_data.append(data_per_timestep)
-    print(emission_times)
+        if received_or_emitted in ["received", "emitted"]:
+            for key in keys_to_rebuild:
+                for sound in data_per_timestep:
+                    sound[key] = make_vector(sound[key])
+            _array_to_dump_data.append(data_per_timestep)
+        else:
+            _array_to_dump_data.extend(data_per_timestep)
+
+        while counter < 100:
+            print(data_per_timestep.shape, file_dir)
+            break
+        counter += 1
+
+    # print(emission_times)
+    # print(_array_to_dump_data[0:10])
+    print(len(_array_to_dump_data))
+    # print([i.shape for i in _array_to_dump_data])
+    # raise ValueError
     return _array_to_dump_data, emission_times
 
 

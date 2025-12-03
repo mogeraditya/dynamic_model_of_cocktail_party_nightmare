@@ -1,5 +1,5 @@
 import numpy as np
-from supporting_files.utilities import (
+from supporting_files.supporting_functions_for_consistency import (
     convert_detected_sounds_into_grids,
     given_matrix_find_cell_to_respond_to,
     given_time_and_angle_return_direction,
@@ -33,6 +33,9 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
 
     grids_to_consider_for_direction_change = self.memory_window_to_store_grids.copy()
     sum_grids_in_memory = np.sum(grids_to_consider_for_direction_change, axis=0)
+
+    self.memory_window_sum_matrix = sum_grids_in_memory.copy()
+    self.ipi_matrix = grids_to_consider_for_direction_change[-1]
 
     cell_index_to_respond_to = given_matrix_find_cell_to_respond_to(
         sum_grids_in_memory,

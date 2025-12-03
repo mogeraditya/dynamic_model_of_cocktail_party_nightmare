@@ -51,7 +51,10 @@ class Simulation:
 
         self.time_elapsed = 0.0
         self.history = []
-
+        time_step_size = self.parameters_df["TIME_STEP"][0]
+        # find the number of decimal places to set rounding equal to time step size
+        # print(time_step_size)
+        self.rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
         self.handles = []
         # self.history_manager = CompactHistoryManager()
 
@@ -85,7 +88,10 @@ class Simulation:
 
             self.history.append(
                 {
-                    "time": self.time_elapsed,
+                    "time": np.round(
+                        self.time_elapsed, self.rounding_based_on_time_step
+                    ),
+                    "bat_ipi_counters": [len(bat.emit_times) for bat in self.bats],
                     "bat_positions": [
                         (bat.position.x, bat.position.y) for bat in self.bats
                     ],
@@ -115,6 +121,10 @@ class Simulation:
                         bat.responding_to_direction for bat in self.bats
                     ],
                     "response_type": [bat.response_type for bat in self.bats],
+                    "bat_ipi_matrix": [bat.ipi_matrix for bat in self.bats],
+                    "bat_sum_matrix": [
+                        bat.memory_window_sum_matrix for bat in self.bats
+                    ],
                 }
             )
             # self.history_manager.add_frame(self.time_elapsed, self.bats)
@@ -238,7 +248,7 @@ class Simulation:
             for obstacle in self.obstacles:
                 if (
                     sound.contains_point(obstacle.position)
-                    and f"obstacle_{obstacle.id}" not in sound.reflected_obstacles
+                    and f"wall_{obstacle.id}" not in sound.reflected_obstacles
                 ):
                     normal = obstacle.get_reflection_normal(sound.origin)
                     reflection_point = obstacle.position + normal * obstacle.radius
@@ -314,7 +324,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/bat_1_testing"
+    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/bat_5_20_secs/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

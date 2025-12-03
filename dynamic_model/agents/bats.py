@@ -12,6 +12,9 @@ from supporting_files.bats_response_to_sound import (
 from supporting_files.snr_implementation import (
     given_sound_objects_return_detected_sounds,
 )
+from supporting_files.supporting_functions_for_consistency import (
+    given_parameters_df_return_grid_matrix_zeros,
+)
 from supporting_files.utilities import call_directionality_factor, make_dir, str2bool
 from supporting_files.vectors import Vector
 
@@ -30,7 +33,7 @@ class Bat:
         )
 
         self.direction = Vector().random_direction()  # randomize start direction
-        self.allocentric_axis_y = self.direction
+        self.allocentric_axis_y = Vector(0, 1)  # self.direction
         time_step_size = self.parameters_df["TIME_STEP"][0]
         # find the number of decimal places to set rounding equal to time step size
         # print(time_step_size)
@@ -83,6 +86,14 @@ class Bat:
 
         # self.reaction_state = None
         # self.reaction_time = -np.inf
+        self.ipi_matrix = given_parameters_df_return_grid_matrix_zeros(
+            self.parameters_df
+        )[0]
+        self.memory_window_sum_matrix = self.ipi_matrix.copy()
+        # print(self.ipi_matrix)
+
+        self.ipi_matrix_timeseries = []
+        self.memory_window_to_store_grids_timeseries = []
 
     def update(self, current_time, sound_objects):
         """Function to update bats with time.
@@ -102,6 +113,9 @@ class Bat:
         self.emit_sounds(current_time, sound_objects)
         if self.id == 0 and self.time_since_directon_change == 0:
             print(current_time)
+            # if current_time < 0.5:
+            #     print(self.ipi_matrix)
+            # print(self.ipi_matrix_timeseries)
 
         self.update_directon(current_time, sound_objects)
         self.cleanup_sounds(current_time)
@@ -276,6 +290,10 @@ class Bat:
                 current_time, sound_objects, detect_self_call=True
             )
         )
+        self.ipi_matrix_timeseries.append(self.ipi_matrix)
+        self.memory_window_to_store_grids_timeseries.append(
+            self.memory_window_to_store_grids
+        )
 
     def cleanup_sounds(self, current_time):
         """Stores the detections into a .npy file.
@@ -292,19 +310,32 @@ class Bat:
 
             if self.store_hearing:
                 make_dir(dir_to_store)
+                current_time_str = f"{current_time:.4f}".zfill(9)
                 np.save(
                     dir_to_store
-                    + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time:.4f}.npy",
+                    + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time_str}.npy",
                     self.received_sounds,
                 )
                 np.save(
                     dir_to_store
-                    + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time:.4f}.npy",
+                    + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time_str}.npy",
                     self.emitted_sounds,
+                )
+                np.save(
+                    dir_to_store
+                    + f"/bat_{self.id}_ipi_matrix_snapshot_at_time_{current_time_str}.npy",
+                    self.ipi_matrix_timeseries,
+                )
+                np.save(
+                    dir_to_store
+                    + f"/bat_{self.id}_sum_matrix_snapshot_at_time_{current_time_str}.npy",
+                    self.memory_window_to_store_grids_timeseries,
                 )
             self.time_since_last_cleanup = -np.inf
             self.emitted_sounds = []
             self.received_sounds = []
+            self.ipi_matrix_timeseries = []
+            self.memory_window_to_store_grids_timeseries = []
 
     def get_detections_at_time(self, current_time):
         """
@@ -419,7 +450,15 @@ class Bat:
                     )
                 else:
                     self.responding_to_direction = (np.nan, np.nan)
-
+        elif (
+            self.time_since_directon_change >= direction_change_time_interval
+            and len(self.detections_for_directon_change) != 0
+        ):
+            self.ipi_matrix = given_parameters_df_return_grid_matrix_zeros(
+                self.parameters_df
+            )[0]
+            self.memory_window_sum_matrix = self.ipi_matrix.copy()
+            # print("oh this part running rrn")
         # if self.reaction_time >= self.parameters_df["REACTION_TIME"][0]:
         #     print("aaa")
         #     self.reaction_state = None
