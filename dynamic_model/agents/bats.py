@@ -56,7 +56,7 @@ class Bat:
         # Clean up activates after every some steps to clear memory from RAM and store it on drive.
         self.time_since_last_cleanup = self.time_since_last_call
         self.output_dir = output_dir
-        self.speed = self.parameters_df["BAT_SPEED"][0]
+        self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
         self.radius = self.parameters_df["BAT_RADIUS"][0]
 
         self.detections_for_directon_change = []
@@ -416,7 +416,7 @@ class Bat:
             self.time_since_directon_change >= direction_change_time_interval
             and len(self.detections_for_directon_change) != 0
         ):
-
+            print(len(self.detections_for_directon_change))
             if self.implement_snr:
                 heard_sounds = given_sound_objects_return_detected_sounds(
                     self.detections_for_directon_change,
@@ -432,24 +432,29 @@ class Bat:
                 )
             else:
                 heard_sounds = self.detections_for_directon_change
+
             if len(heard_sounds) == 0:
-                self.next_direction = self.generate_random_direction()
-                self.responding_to_direction = (np.nan, np.nan)
+                self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
             else:
-                self.next_direction, self.response_type = self.decide_next_direction(
-                    heard_sounds
+                self.speed = self.parameters_df["BAT_SPEED"][0]
+
+            self.next_direction, self.response_type = self.decide_next_direction(
+                heard_sounds
+            )
+            self.detections_for_directon_change = []
+            self.time_since_directon_change = -np.inf
+            # self.reaction_time = 0
+            # self.reaction_state = "responding"
+            if self.next_direction != self.direction.normalize():
+                self.responding_to_direction = (
+                    self.next_direction.x,
+                    self.next_direction.y,
                 )
-                self.detections_for_directon_change = []
-                self.time_since_directon_change = -np.inf
-                # self.reaction_time = 0
-                # self.reaction_state = "responding"
-                if self.next_direction != self.direction.normalize():
-                    self.responding_to_direction = (
-                        self.next_direction.x,
-                        self.next_direction.y,
-                    )
-                else:
-                    self.responding_to_direction = (np.nan, np.nan)
+            else:
+                self.responding_to_direction = (np.nan, np.nan)
+
+            if self.response_type == "attraction":
+                self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
         elif (
             self.time_since_directon_change >= direction_change_time_interval
             and len(self.detections_for_directon_change) != 0

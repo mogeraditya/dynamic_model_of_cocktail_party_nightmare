@@ -71,34 +71,59 @@ def stitch_together_history_lists(history_output_dir):
     )
 
     return (
-        list_containing_data_from_all_pickle_files[::10],
+        list_containing_data_from_all_pickle_files[::30],
         parameter_df,
         bats_initial_positions,
         obstacles_initial_positions,
     )
 
 
+# def plot_grid_matrix_into_radial_time_series(
+#     grid_matrix, spatial_grid_r, spatial_grid_theta, fig_and_ax, cmin, cmax
+# ):
+#     # FOCAL_BAT, INCLUDE_DIRECT_SOUNDS, AZIMUTH  = param
+#     r, theta = np.meshgrid(spatial_grid_r, spatial_grid_theta)
+#     z = grid_matrix.T.copy()
+#     fig, axs = fig_and_ax
+
+#     masking_matrix = np.ma.masked_where(z == 0, z)
+
+#     cmap = mpl.cm.get_cmap("autumn").copy()
+#     cmap.set_bad(color="black")
+#     im = axs.pcolormesh(theta, r, z, cmap=cmap)
+#     masker_im = axs.pcolormesh(theta, r, masking_matrix, cmap=cmap)
+#     im.set_clim(cmin, cmax)
+#     fig.colorbar(im)
+
+#     axs.set_thetagrids(range(0, 360, int(360 / 12)))
+#     axs.set_theta_zero_location("N")
+#     # axs.set_theta_direction()
+#     return im, masker_im
+
+
 def plot_grid_matrix_into_radial_time_series(
     grid_matrix, spatial_grid_r, spatial_grid_theta, fig_and_ax, cmin, cmax
 ):
-    # FOCAL_BAT, INCLUDE_DIRECT_SOUNDS, AZIMUTH  = param
     r, theta = np.meshgrid(spatial_grid_r, spatial_grid_theta)
     z = grid_matrix.T.copy()
     fig, axs = fig_and_ax
 
-    masking_matrix = np.ma.masked_where(z == 0, z)
+    masked_z = np.ma.masked_where(z == 0, z)
 
-    cmap = mpl.cm.get_cmap("autumn").copy()
-    cmap.set_bad(color="black")
-    im = axs.pcolormesh(theta, r, z, cmap=cmap)
-    masker_im = axs.pcolormesh(theta, r, masking_matrix, cmap=cmap)
+    # Black to Blue to Cyan/Electric Blue
+    colors = ["black", "red", "orange", "green", "green", "green"]
+    cmap = mpl.colors.LinearSegmentedColormap.from_list(
+        "black_to_cyan", colors, N=(cmax - cmin + 1)
+    )
+    cmap.set_bad(color="black", alpha=0)
+
+    im = axs.pcolormesh(theta, r, masked_z, cmap=cmap, shading="auto")
     im.set_clim(cmin, cmax)
     fig.colorbar(im)
-
     axs.set_thetagrids(range(0, 360, int(360 / 12)))
     axs.set_theta_zero_location("N")
-    axs.set_theta_direction(-1)
-    return im, masker_im
+
+    return im
 
 
 def setup_visualization(parameters_df, bats, obstacles):
@@ -113,9 +138,11 @@ def setup_visualization(parameters_df, bats, obstacles):
         list: contains ax[0]es, figure, markers and artists to build the animation on.
     """
 
-    fig, ax = plt.subplots(figsize=(10, 7), nrows=1, ncols=2)
+    fig, ax = plt.subplots(figsize=(20, 10), nrows=1, ncols=3)
     ax[1].remove()
-    ax[1] = fig.add_subplot(122, projection="polar")
+    ax[2].remove()
+    ax[1] = fig.add_subplot(132, projection="polar")
+    ax[2] = fig.add_subplot(133, projection="polar")
     ax[0].set_xlim(0, parameters_df["ARENA_WIDTH"][0])
     ax[0].set_ylim(0, parameters_df["ARENA_HEIGHT"][0])
     ax[0].set_aspect("equal")
@@ -231,46 +258,65 @@ def visualize(output_dir, save_animation):
         sound_artists,
         detection_artists,
     ) = setup_visualization(parameters_df, bats, obstacles)
-    # ax[1].set_projection("polar")
+
     trajectory_history = [[] for _ in range(len(bat_markers))]
 
     focal_bat = 0
-    grid_data_time_series = generate_matrix_array(output_dir, focal_bat, parameters_df)[
-        0
-    ]
+    grid_data_time_series = [frame["bat_ipi_matrix"] for frame in history]
+    grid_data_time_series_sum = [frame["bat_sum_matrix"] for frame in history]
     rows, columns = given_parameters_df_return_grid_matrix_zeros(parameters_df)[1:3]
     spatial_grid_r = rows
-    print(len(grid_data_time_series))
-    print(len(history))
-    new_grid_data, new_angular_resolution = convert_matrix_for_plotting_nicer(
-        grid_data_time_series[0], rows, columns, 10
-    )
+
+    new_angular_resolution = convert_matrix_for_plotting_nicer(
+        grid_data_time_series[0], rows, columns, 10, focal_bat
+    )[1]
     new_grid_data_time_series = np.array(
         [
-            convert_matrix_for_plotting_nicer(i, rows, columns, 10)[0]
+            convert_matrix_for_plotting_nicer(i, rows, columns, 10, focal_bat)[0]
             for i in grid_data_time_series
         ]
-    )[::10]
+    )
+    new_grid_data_time_series_sum = np.array(
+        [
+            convert_matrix_for_plotting_nicer(i, rows, columns, 10, focal_bat)[0]
+            for i in grid_data_time_series_sum
+        ]
+    )
 
     new_spatial_grid_theta = np.arange(
         -np.pi + new_angular_resolution / 2, np.pi, new_angular_resolution
     )
 
-    ax[1].set_title("self echoes")
+    ax[1].set_title("sound activations in each ipi")
+    ax[2].set_title("responses in 5 ipi")
 
     ax[1].tick_params("y", rotation=30)
+    ax[2].tick_params("y", rotation=30)
 
-    im0, masker_im0 = plot_grid_matrix_into_radial_time_series(
+    im0 = plot_grid_matrix_into_radial_time_series(
         new_grid_data_time_series[0, 0],
         spatial_grid_r,
         new_spatial_grid_theta,
         fig_and_ax=(fig, ax[1]),
-        cmin=1,
-        cmax=np.max(new_grid_data_time_series[:, 0]),
+        cmin=0,
+        cmax=1,
+    )
+    im1 = plot_grid_matrix_into_radial_time_series(
+        new_grid_data_time_series_sum[0, 0],
+        spatial_grid_r,
+        new_spatial_grid_theta,
+        fig_and_ax=(fig, ax[2]),
+        cmin=0,
+        cmax=5,
     )
 
-    ipi_counter = plt.figtext(
-        0.01, 0.6, f"interpulse interval number : {0}", fontsize=30, ha="left", va="top"
+    ipi_counter_plot = plt.figtext(
+        0.01,
+        0.8,
+        f"interpulse interval number : {0}",
+        fontsize=25,
+        ha="left",
+        va="top",
     )
 
     def init():
@@ -282,6 +328,7 @@ def visualize(output_dir, save_animation):
             arrow.set_data(x=np.nan, y=np.nan, dx=0, dy=0)
         for line in trajectory_lines:
             line.set_data([], [])
+
         return bat_markers + direction_arrows + trajectory_lines
 
     def animate(i):
@@ -331,53 +378,14 @@ def visualize(output_dir, save_animation):
 
         sound_artists.clear()
         detection_artists.clear()
-        plt.title(f"time step: {frame["time"]:.5f}")
+        ax[0].set_title(f"time step: {frame["time"]:.5f}")
 
-        ipi_counter.set_text(f"interpulse interval number : {i}")
-        masker_matrix0 = np.ma.masked_where(
-            new_grid_data_time_series[i, 0].T == 0, new_grid_data_time_series[i, 0].T
+        ipi_counter_plot.set_text(
+            f"interpulse interval number : {frame["bat_ipi_counters"][focal_bat]}"
         )
-        # print(new_grid_data_time_series[i, 0].T)
-        # print(new_grid_data_time_series[5000])
+
         im0.set_array(new_grid_data_time_series[i, 0].T)
-        masker_im0.set_array(masker_matrix0)
-
-        # for sound in frame["sound_objects"]:
-        #     if not sound["status"]:
-        #         continue
-
-        #     emitter_color = cm(sound["emitter_id"] / NUM_COLORS)
-        #     alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
-
-        #     inner = max[0](0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
-        #     outer = sound["radius"]
-
-        #     if inner < outer:
-        #         if sound["type"] == "direct":
-        #             linestyle = "-"
-        #             hatching_of_disk = "++"
-        #         else:
-        #             linestyle = "--"
-        #             alpha = 0.5 * alpha
-        #             hatching_of_disk = ".."
-        #         if inner == 0:
-        #             width_of_disk = sound["radius"]
-        #         else:
-        #             width_of_disk = parameters_df["SOUND_DISK_WIDTH"][0]
-        #         wedge = Wedge(
-        #             sound["origin"],
-        #             outer,
-        #             0,
-        #             360,
-        #             width=width_of_disk,
-        #             fill=False,
-        #             color=emitter_color,
-        #             alpha=alpha,
-        #             linestyle=linestyle,
-        #             hatch=hatching_of_disk,
-        #         )
-        #         ax[0].add_patch(wedge)
-        #         sound_artists.append(wedge)
+        im1.set_array(new_grid_data_time_series_sum[i, 0].T)
 
         return (
             bat_markers
@@ -396,7 +404,7 @@ def visualize(output_dir, save_animation):
         blit=False,
         interval=parameters_df["FRAME_RATE"][0] * 0.00001,
     )
-
+    print(len(history), len(grid_data_time_series))
     handles, labels = ax[0].get_legend_handles_labels()
     print(labels)
 
@@ -414,19 +422,8 @@ def visualize(output_dir, save_animation):
 if __name__ == "__main__":
     print(os.getcwd())
     OUTPUT_DIR = (
-        r"./consistency_of_calls_movement_rule_data/bat_1_testing_matrix_storage/"
+        # r"./chain_experiment/3_of_5_position_0/"
+        r"./consistency_of_calls_movement_rule_data/bat_1_fun_stuff_4/"
     )
-
-    SAVE_ANIMATION = False  # OUTPUT_DIR
+    SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
-
-    # OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/25_bats_0_35_post_call_interval/data_for_plotting"
-    # SAVE_ANIMATION = OUTPUT_DIR
-    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
-    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
-    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
-    # SAVE_ANIMATION = OUTPUT_DIR
-    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
-    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
-    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
-    # visualize(OUTPUT_DIR, SAVE_ANIMATION)

@@ -40,6 +40,7 @@ class Modified_Simulation(Simulation):
             Obstacle(
                 self.parameters_df,
                 (obstacle_locations["x"][i], obstacle_locations["y"][i]),
+                0.02,
             )
             for i in range(int(num_obstacles))
         ]
@@ -55,15 +56,15 @@ class Modified_Simulation(Simulation):
         initial_release_point = make_vector(initial_release_point)
         self.bats[0].position = initial_release_point
         self.bats[0].direction = Vector(
-            random.uniform(-1, 0),
-            random.uniform(-1, 1),
+            random.uniform(1, 0),
+            random.uniform(-0.5, 0.5),
         ).normalize()
         # self.bats[0].id = 0
 
 
 if __name__ == "__main__":
 
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/2_of_5/"
+    OUTPUT_DIR = r"./chain_experiment/3_of_5_position_0/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     bat_locations_dir = "./behaviour_analysis_for_nvg/bat_start_positions.csv"
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     sim = Modified_Simulation(
         PARAMETER_DF,
         OUTPUT_DIR,
-        (bat_locations["x"][2], bat_locations["y"][2]),
+        (bat_locations["x"][0], bat_locations["y"][0]),
         obstacle_locations,
     )
     sim.run()
