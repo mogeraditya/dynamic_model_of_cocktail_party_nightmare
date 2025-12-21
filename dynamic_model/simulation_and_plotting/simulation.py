@@ -1,5 +1,6 @@
 """Contains the code that describes a Simulation object. Runs one instance, given parameters."""
 
+import json
 import os
 import pickle
 import sys
@@ -7,10 +8,15 @@ from datetime import datetime
 
 import numpy as np
 
-sys.path.append("./dynamic_model")
+# from supporting_files.store_history import CompactHistoryManager
+
+sys.path.append("./dynamic_model/")
 from agents.bats import Bat
+from agents.make_walls import make_walls
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
+
+# from simulation_and_plotting.single_bat_plotter import visualize
 from supporting_files.utilities import creation_time_calculation, load_parameters
 from supporting_files.vectors import Vector
 
@@ -33,30 +39,38 @@ class Simulation:
         os.makedirs(self.dir_to_store, exist_ok=True)
 
         self.bats = [
-            Bat(self.parameters_df, self.output_dir)
+            Bat(self.parameters_df, self.output_dir, store_hearing=True)
             for _ in range(int(self.parameters_df["NUM_BATS"][0]))
         ]
+        obstacle_position = "random"
+        obstacle_radius = self.parameters_df["OBSTACLE_RADIUS"][0]
         self.obstacles = [
-            Obstacle(self.parameters_df)
+            Obstacle(self.parameters_df, obstacle_position, obstacle_radius)
             for _ in range(int(self.parameters_df["OBSTACLE_COUNT"][0]))
         ]
+        wall_objects = make_walls(self.parameters_df)
+        self.obstacles.extend(wall_objects)
         self.sound_objects = []  # Contains both DirectSound and EchoSound
 
         self.time_elapsed = 0.0
         self.history = []
-
+        time_step_size = self.parameters_df["TIME_STEP"][0]
+        # find the number of decimal places to set rounding equal to time step size
+        # print(time_step_size)
+        self.rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
         self.handles = []
-
-        with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
-            pickle.dump(self.bats, f)
-        with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
-            pickle.dump(self.obstacles, f)
+        # self.history_manager = CompactHistoryManager()
 
     def run(self):
         """Runs one instance of the simulation.
         After parsing the parameter file, it runs one instance of the simulation
         for those sets of parameters.
         """
+        with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
+            pickle.dump(self.bats, f)
+        with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
+            pickle.dump(self.obstacles, f)
+
         num_steps = int(
             self.parameters_df["SIM_DURATION"][0] / self.parameters_df["TIME_STEP"][0]
         )
@@ -64,6 +78,7 @@ class Simulation:
         list_time_taken_for_each_loop = []
         save_time_of_last_iter = start_timing
         for step in range(num_steps):
+            # print(self.obstacles[0].position.x)
             self.time_elapsed = step * self.parameters_df["TIME_STEP"][0]
 
             for sound in self.sound_objects:
@@ -76,7 +91,10 @@ class Simulation:
 
             self.history.append(
                 {
-                    "time": self.time_elapsed,
+                    "time": np.round(
+                        self.time_elapsed, self.rounding_based_on_time_step
+                    ),
+                    "bat_ipi_counters": [len(bat.emit_times) for bat in self.bats],
                     "bat_positions": [
                         (bat.position.x, bat.position.y) for bat in self.bats
                     ],
@@ -106,8 +124,13 @@ class Simulation:
                         bat.responding_to_direction for bat in self.bats
                     ],
                     "response_type": [bat.response_type for bat in self.bats],
+                    "bat_ipi_matrix": [bat.ipi_matrix for bat in self.bats],
+                    "bat_sum_matrix": [
+                        bat.memory_window_sum_matrix for bat in self.bats
+                    ],
                 }
             )
+            # self.history_manager.add_frame(self.time_elapsed, self.bats)
 
             self.sound_objects = [
                 s for s in self.sound_objects if s.active and s.current_spl > 20
@@ -120,12 +143,14 @@ class Simulation:
 
             save_time_of_last_iter = current_loop_time
             self.handle_data_storage_for_plotting(self.time_elapsed, False)
+            self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
         self.handle_data_storage_for_plotting(self.time_elapsed, True)
+        self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
         print("DATA SAVED")
 
-    def handle_data_storage_for_plotting(self, current_time, is_end_of_code):
+    def handle_data_storage_for_plotting_pickle(self, current_time, is_end_of_code):
         """Generates files for data used for plotting.
         Periodically the history list is cleared to ensure
         RAM doesnt get used up.
@@ -140,8 +165,54 @@ class Simulation:
             self.history = []
 
         if is_end_of_code:
+            with open(
+                self.dir_to_store + "/parameters_used.json", "w", encoding="utf-8"
+            ) as fp:
+                json.dump(self.parameters_df, fp)
+            # self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
 
-            self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
+    def handle_data_storage_for_plotting(self, current_time, is_end_of_code):
+        """Generates files for data used for plotting.
+        Periodically the history list is cleared to ensure
+        RAM doesnt get used up.
+        """
+        history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
+
+        if len(self.history) > history_array_size_limit or is_end_of_code:
+            # Save current batch as compressed numpy file instead of pickle
+            filename = self.dir_to_store + f"history_dump_{current_time:.3f}.npz"
+
+            # Convert history to compact numpy format
+            times = []
+            positions = []
+
+            for frame in self.history:
+                times.append(frame["time"])
+                frame_positions = []
+                for bat_pos in frame["bat_positions"]:
+                    frame_positions.extend([bat_pos[0], bat_pos[1]])
+                positions.append(frame_positions)
+
+            # Save as compressed numpy
+            times_array = np.array(times, dtype="f4")
+            max_bats = max(len(frame) // 2 for frame in positions) if positions else 0
+            positions_array = np.full(
+                (len(positions), max_bats * 2), np.nan, dtype="f4"
+            )
+
+            for i, frame in enumerate(positions):
+                positions_array[i, : len(frame)] = frame
+
+            np.savez_compressed(filename, times=times_array, positions=positions_array)
+
+            # Clear history
+            # self.history = []
+
+        if is_end_of_code:
+            with open(
+                self.dir_to_store + "/parameters_used.json", "w", encoding="utf-8"
+            ) as fp:
+                json.dump(self.parameters_df, fp)
 
     def handle_reflections(self, current_time):
         """Generates reflections of the sound objects.
@@ -188,7 +259,7 @@ class Simulation:
             for obstacle in self.obstacles:
                 if (
                     sound.contains_point(obstacle.position)
-                    and f"obstacle_{obstacle.id}" not in sound.reflected_obstacles
+                    and f"wall_{obstacle.id}" not in sound.reflected_obstacles
                 ):
                     normal = obstacle.get_reflection_normal(sound.origin)
                     reflection_point = obstacle.position + normal * obstacle.radius
@@ -204,6 +275,7 @@ class Simulation:
                     sound.contains_point(bat.position)
                     and sound.emitter_id != bat.id
                     and f"bat_{bat.id}" not in sound.reflected_obstacles
+                    and bat.is_bat_reflective_to_sound
                 ):
                     normal = (sound.origin - bat.position).normalize()
                     reflection_point = bat.position + normal * bat.radius
@@ -264,8 +336,10 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/try/"
-    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
+    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/sciphy_17/"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()
+    # SAVE_ANIMATION = OUTPUT_DIR
+    # visualize(OUTPUT_DIR, SAVE_ANIMATION)

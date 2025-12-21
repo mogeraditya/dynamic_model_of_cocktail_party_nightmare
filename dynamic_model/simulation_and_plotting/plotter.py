@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Arrow, Circle, Patch, Rectangle, Wedge
 
+plt.style.use("dark_background")
 sys.path.append("./dynamic_model")
 plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
 
@@ -22,8 +23,29 @@ def stitch_together_history_lists(history_output_dir):
     Returns:
         list: list with all the merged lists from pickle files.
     """
+    # list_of_dict_files = glob.glob(history_output_dir + "/history_dump_*.pkl")
+    # list_of_dict_files = np.sort(list_of_dict_files)
+    # list_containing_data_from_all_pickle_files = []
+    # for pickle_file in list_of_dict_files:
+    #     with open(pickle_file, "rb") as f:
+    #         _list_containing_subset = pickle.load(f)
+    #         list_containing_data_from_all_pickle_files.extend(_list_containing_subset)
+
+    # parameter_file = glob.glob(history_output_dir + "/parameters_used.pkl")[0]
+    # parameter_df = pd.read_pickle(parameter_file)
+    # with open(history_output_dir + "/bats_initial.pkl", "rb") as f:
+    #     bats_initial_positions = pickle.load(f)
+    # with open(history_output_dir + "/obstacles_initial.pkl", "rb") as f:
+    #     obstacles_initial_positions = pickle.load(f)
+    # return (
+    #     list_containing_data_from_all_pickle_files,
+    #     parameter_df,
+    #     bats_initial_positions,
+    #     obstacles_initial_positions,
+    # )
     list_of_dict_files = glob.glob(history_output_dir + "/history_dump_*.pkl")
     list_of_dict_files = np.sort(list_of_dict_files)
+    # print(list_of_dict_files)
     list_containing_data_from_all_pickle_files = []
     for pickle_file in list_of_dict_files:
         with open(pickle_file, "rb") as f:
@@ -36,8 +58,18 @@ def stitch_together_history_lists(history_output_dir):
         bats_initial_positions = pickle.load(f)
     with open(history_output_dir + "/obstacles_initial.pkl", "rb") as f:
         obstacles_initial_positions = pickle.load(f)
+    times = [i["time"] for i in list_containing_data_from_all_pickle_files]
+    sorting_indices = np.argsort(times)
+    list_containing_data_from_all_pickle_files = np.array(
+        list_containing_data_from_all_pickle_files
+    )
+    list_containing_data_from_all_pickle_files = (
+        list_containing_data_from_all_pickle_files[sorting_indices]
+    )
+    # print(len(list_containing_data_from_all_pickle_files))
+    # print(times)
     return (
-        list_containing_data_from_all_pickle_files,
+        list_containing_data_from_all_pickle_files[::10],
         parameter_df,
         bats_initial_positions,
         obstacles_initial_positions,
@@ -274,7 +306,7 @@ def visualize(output_dir, save_animation):
         return (
             bat_markers
             + direction_arrows
-            + next_direction_arrows
+            # + next_direction_arrows
             + trajectory_lines
             + sound_artists
             + detection_artists
@@ -296,7 +328,7 @@ def visualize(output_dir, save_animation):
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            save_animation + "/animation.mp4",
+            save_animation + "/animation_slower.mp4",
             writer=ffwriter,
         )
     plt.show()
@@ -305,8 +337,11 @@ def visualize(output_dir, save_animation):
 
 if __name__ == "__main__":
     print(os.getcwd())
-    OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/try/data_for_plotting"
-    SAVE_ANIMATION = False  # OUTPUT_DIR
+    OUTPUT_DIR = (
+        r"./consistency_of_calls_movement_rule_data/bat_1_testing/data_for_plotting"
+    )
+
+    SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION)
 
     # OUTPUT_DIR = "./consistency_of_calls_movement_rule_data/25_bats_0_35_post_call_interval/data_for_plotting"

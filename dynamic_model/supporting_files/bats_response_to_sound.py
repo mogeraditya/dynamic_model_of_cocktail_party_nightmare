@@ -1,7 +1,8 @@
 import numpy as np
-from supporting_files.utilities import (
+from supporting_files.supporting_functions_for_consistency import (
     convert_detected_sounds_into_grids,
-    given_matrix_find_cell_to_respond_to,
+    given_matrix_find_cell_to_respond_to_absence,
+    given_matrix_find_cell_to_respond_to_presence,
     given_time_and_angle_return_direction,
 )
 
@@ -34,13 +35,35 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     grids_to_consider_for_direction_change = self.memory_window_to_store_grids.copy()
     sum_grids_in_memory = np.sum(grids_to_consider_for_direction_change, axis=0)
 
-    cell_index_to_respond_to = given_matrix_find_cell_to_respond_to(
-        sum_grids_in_memory, number_of_consistent_ipis_for_behaviour
-    )
+    self.memory_window_sum_matrix = sum_grids_in_memory.copy()
+    self.ipi_matrix = grids_to_consider_for_direction_change[-1]
 
-    if cell_index_to_respond_to is None:
+    # absence presence implementation ---------------------------------------------------------
+    controller_type = self.parameters_df["CONTROLLER_TYPE"][0]
+    if controller_type == "presence":
+        cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_presence(
+            sum_grids_in_memory,
+            number_of_consistent_ipis_for_behaviour,
+            self.cell_index_to_respond_to,
+        )
+    elif controller_type == "absence":
+        cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_absence(
+            sum_grids_in_memory,
+            number_of_consistent_ipis_for_behaviour,
+            self.parameters_df,
+            grid_column_labels,
+            self.direction,
+            self.allocentric_axis_y,
+        )
+    else:
+        raise ValueError("unsupported controller type")
+    # -------------------------------------------------------------------------------------------
+
+    self.cell_index_to_respond_to = cell_index_to_respond_to
+    if np.isnan(cell_index_to_respond_to[0]):
         next_direction = self.direction
         response_type = None
+        self.any_consistent_sound = "no"
     else:
         time_delay_of_activated_cell = grid_row_labels[cell_index_to_respond_to[0]]
         angle_of_activated_cell = grid_column_labels[cell_index_to_respond_to[1]]
@@ -51,6 +74,7 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
             self.direction,
             self.allocentric_axis_y,
         )
+        self.any_consistent_sound = "yes"
 
     return next_direction.normalize(), response_type
 
@@ -66,6 +90,7 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
         0
     ]
     spl_threshold_for_repulsions = self.parameters_df["SPL_THRESHOLD_FOR_REPULSION"][0]
+    response_type = "random"
     if len(detected_sound_objects) != 0:
         max_spl = np.max([i["received_spl"] for i in detected_sound_objects])
 
@@ -82,6 +107,7 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
             if max_spl > spl_threshold_for_repulsions:
                 next_direction = max_spl_sound_vector.rotate(np.pi).normalize()
                 effect_strength = ((max_spl - spl_threshold_for_repulsions) / 5) * np.pi
+                response_type = "repulsion"
                 # print(f"Repulsion: {max_spl} dB")
 
             else:
@@ -89,6 +115,7 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
                 effect_strength = (
                     (max_spl - spl_threshold_for_attractions) / 5
                 ) * np.pi
+                response_type = "attraction"
                 # print(f"Attraction: {max_spl} dB")
 
         else:
@@ -106,4 +133,4 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
     elif self.direction.angle_between(next_direction) < -cap_directon_change:
         next_direction = self.direction.rotate(-cap_directon_change)
 
-    return next_direction
+    return next_direction, response_type

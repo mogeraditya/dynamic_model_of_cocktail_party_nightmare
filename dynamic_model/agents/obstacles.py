@@ -8,24 +8,26 @@ from supporting_files.vectors import Vector
 class Obstacle:
     _id_counter = 0
 
-    def __init__(self, parameters_df):
+    def __init__(self, parameters_df, position, radius):
         self.id = Obstacle._id_counter
         Obstacle._id_counter += 1
         self.parameters_df = parameters_df
-        self.position = Vector(
-            random.uniform(
-                self.parameters_df["OBSTACLE_RADIUS"][0],
-                self.parameters_df["ARENA_WIDTH"][0]
-                - self.parameters_df["OBSTACLE_RADIUS"][0],
-            ),
-            random.uniform(
-                self.parameters_df["OBSTACLE_RADIUS"][0],
-                self.parameters_df["ARENA_HEIGHT"][0]
-                - self.parameters_df["OBSTACLE_RADIUS"][0],
-            ),
-        )
-
-        self.radius = self.parameters_df["OBSTACLE_RADIUS"][0]
+        if position == "random":
+            self.position = Vector(
+                random.uniform(
+                    self.parameters_df["OBSTACLE_RADIUS"][0],
+                    self.parameters_df["ARENA_WIDTH"][0]
+                    - self.parameters_df["OBSTACLE_RADIUS"][0],
+                ),
+                random.uniform(
+                    self.parameters_df["OBSTACLE_RADIUS"][0],
+                    self.parameters_df["ARENA_HEIGHT"][0]
+                    - self.parameters_df["OBSTACLE_RADIUS"][0],
+                ),
+            )
+        else:
+            self.position = Vector(position[0], position[1])
+        self.radius = radius  #
 
     # TODO: use this and implement avoidance on collision
     def check_collision(self, point):
