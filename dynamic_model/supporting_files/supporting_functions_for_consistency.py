@@ -16,10 +16,17 @@ def convert_matrix_to_one_hot(matrix):
     return one_hot_matrix
 
 
-def given_matrix_find_cell_to_respond_to(
-    matrix, threshold_for_activation, previous_output_cell
-):
-    # cell_to_respond_to =
+def check_if_two_lists_are_disjoint(list1, list2):
+    for element in list1:
+        is_element_in_list2 = any(
+            all(item in sublist for item in element) for sublist in list2
+        )
+        if is_element_in_list2:
+            return False
+    return True
+
+
+def given_matrix_shortlist_response_cells(matrix, threshold_for_activation):
     num_rows, num_columns = matrix.shape
     short_list_of_cells = []
     short_listed_thresholds = []
@@ -28,58 +35,117 @@ def given_matrix_find_cell_to_respond_to(
             if matrix[i, j] >= threshold_for_activation:
                 short_list_of_cells.append([i, j])
                 short_listed_thresholds.append(matrix[i, j])
-    # print(matrix)
+
     short_list_of_cells = np.array(short_list_of_cells)
     short_listed_thresholds = np.array(short_listed_thresholds)
+
+    find_all_elements_with_min_row_index = []
+    find_all_thresholds_with_min_row_index = []
+
     if len(short_list_of_cells) == 0:
-        return [np.nan, np.nan]
+        find_all_thresholds_with_min_row_index.append([np.nan, np.nan])
+        find_all_elements_with_min_row_index.append([np.nan, np.nan])
     else:
 
         np.random.shuffle(short_list_of_cells)
         minimum_row_index = np.min(short_list_of_cells[:, 0])
-        # find_all_elements_with_min_row_index = [
-        #     i for i in short_list_of_cells if i[0] == minimum_row_index
-        # ]
-        # find_all_thresholds_with_min_row_index = [
-        #     threshold
-        #     for i, threshold in enumerate(short_listed_thresholds)
-        #     if short_list_of_cells[i] in find_all_elements_with_min_row_index
-        # ]
-        find_all_elements_with_min_row_index = []
-        find_all_thresholds_with_min_row_index = []
+
         for i, matrix_index in enumerate(short_list_of_cells):
             if matrix_index[0] == minimum_row_index:
                 find_all_elements_with_min_row_index.append(matrix_index)
                 find_all_thresholds_with_min_row_index.append(
                     short_listed_thresholds[i]
                 )
-        # pick_middle_element = int(
-        #     np.floor(len(find_all_elements_with_min_row_index) / 2)
-        # )
-        # pick_element_at_random = np.random.choice(
-        #     range(len(find_all_elements_with_min_row_index))
-        # )
-        # output_cell_number = find_all_elements_with_min_row_index[
-        #     pick_element_at_random
-        # ]
-        # output_cell_number = find_all_elements_with_min_row_index[pick_middle_element]
+
+    return (
+        np.array(find_all_elements_with_min_row_index),
+        find_all_thresholds_with_min_row_index,
+    )
+
+
+def given_matrix_find_cell_to_respond_to_presence(
+    matrix, threshold_for_activation, previous_output_cell
+):
+    find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index = (
+        given_matrix_shortlist_response_cells(matrix, threshold_for_activation)
+    )
+
+    _first_element_for_nan_check = find_all_elements_with_min_row_index[0][0]
+    if np.isnan(_first_element_for_nan_check):
+        return [np.nan, np.nan]
+    else:
+
         is_previous_cell_repeated = any(
             all(item in sublist for item in previous_output_cell)
             for sublist in find_all_elements_with_min_row_index
         )
 
         if is_previous_cell_repeated:
-            # print(previous_output_cell)
             return previous_output_cell
 
         output_cell_number = find_all_elements_with_min_row_index[
             np.argsort(find_all_thresholds_with_min_row_index)[-1]
         ]
-        # print(
-        #     find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index
-        # )
-
         return output_cell_number
+
+
+def given_matrix_find_cell_to_respond_to_absence(
+    matrix,
+    threshold_for_activation,
+    parameters_df,
+    columns,
+    bat_direction,
+    allocentric_axis_y,
+):
+    # need to output the cell that corresponds to direction of the bat
+    find_all_elements_with_min_row_index = given_matrix_shortlist_response_cells(
+        matrix, threshold_for_activation
+    )[0]
+
+    _first_element_for_nan_check = find_all_elements_with_min_row_index[0][0]
+    if np.isnan(_first_element_for_nan_check):
+        return [np.nan, np.nan]
+
+    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"][0]
+
+    if spatial_reference_frame == "allocentric":
+        angle_between_self_and_allocentric_axis = bat_direction.angle_between(
+            allocentric_axis_y
+        )
+    elif spatial_reference_frame == "egocentric":
+        angle_between_self_and_allocentric_axis = 0
+    else:
+        raise ValueError("incorrect reference frame choice")
+
+    column_index_of_direction = bisect.bisect_right(
+        columns, angle_between_self_and_allocentric_axis
+    )
+
+    row_index_of_activation = find_all_elements_with_min_row_index[0][0]
+    column_indices_having_activations = find_all_elements_with_min_row_index[:, 1]
+    column_indices_not_having_activations = np.array(
+        [
+            i
+            for i in range(1, matrix.shape[1])
+            if i not in column_indices_having_activations
+        ]
+    )
+    print(
+        np.degrees(angle_between_self_and_allocentric_axis), column_index_of_direction
+    )
+    print(column_indices_having_activations, column_indices_not_having_activations)
+    if column_index_of_direction in column_indices_not_having_activations:
+        return [row_index_of_activation, column_index_of_direction]
+    elif len(column_indices_not_having_activations) == 0:
+        return [row_index_of_activation, column_index_of_direction]
+    else:
+        nearest_empty_column_index = column_indices_not_having_activations[
+            np.abs(
+                column_indices_not_having_activations - column_index_of_direction
+            ).argmin()
+        ]
+        print([row_index_of_activation, nearest_empty_column_index])
+        return [row_index_of_activation, nearest_empty_column_index]
 
 
 def given_parameters_df_return_grid_matrix_zeros(parameters_df):
@@ -163,6 +229,7 @@ def given_time_and_angle_return_direction(
     time_delay_threshold_for_repulsion = parameters_df[
         "TIME_DELAY_THRESHOLD_FOR_REPULSION"
     ][0]
+    controller_type = parameters_df["CONTROLLER_TYPE"][0]
 
     angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
     radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
@@ -178,11 +245,22 @@ def given_time_and_angle_return_direction(
         )
         angle_of_next_direction += angle_between_self_and_allocentric_axis
 
-    if corrected_time_delay <= time_delay_threshold_for_repulsion:
-        angle_of_next_direction += np.pi
+    if controller_type == "presence":
+        if corrected_time_delay <= time_delay_threshold_for_repulsion:
+            angle_of_next_direction += np.pi
+            response_type = "repulsion"
+        else:
+            response_type = "attraction"
+    elif controller_type == "absence":
+        print(np.degrees(angle_of_next_direction))
         response_type = "repulsion"
     else:
-        response_type = "attraction"
+        raise ValueError("unsupported controller type")
 
     next_direction = bat_direction.rotate(angle_of_next_direction)
     return next_direction.normalize(), response_type
+
+
+def implement_absence_tracker():
+    # goal is to implement a code st bat goes towards regions lcking sound.
+    return None

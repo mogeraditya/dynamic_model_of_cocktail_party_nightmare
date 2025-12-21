@@ -70,8 +70,8 @@ if __name__ == "__main__":
     # Directory containing your parameter files
     PARAM_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/dynamic_model/paramsets/effect_of_lot_of_shit/store_paramsets/"
 
-    N_RUNS = 20  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = r"/media/adityamoger/T7 Shield/NVG_FINAL_DATA_second_interation_slower_speed/"  # Base output directory
+    N_RUNS = 30  # Number of iterations per parameter set
+    DATA_STORAGE_DIR = r"/media/adityamoger/T7 Shield/SCYPHY_FINAL_DATA_second_interation_slower_speed/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing

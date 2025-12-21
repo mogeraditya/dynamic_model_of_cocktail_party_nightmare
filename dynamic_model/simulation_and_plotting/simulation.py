@@ -1,5 +1,6 @@
 """Contains the code that describes a Simulation object. Runs one instance, given parameters."""
 
+import json
 import os
 import pickle
 import sys
@@ -9,11 +10,13 @@ import numpy as np
 
 # from supporting_files.store_history import CompactHistoryManager
 
-sys.path.append("./dynamic_model")
+sys.path.append("./dynamic_model/")
 from agents.bats import Bat
 from agents.make_walls import make_walls
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
+
+# from simulation_and_plotting.single_bat_plotter import visualize
 from supporting_files.utilities import creation_time_calculation, load_parameters
 from supporting_files.vectors import Vector
 
@@ -140,12 +143,14 @@ class Simulation:
 
             save_time_of_last_iter = current_loop_time
             self.handle_data_storage_for_plotting(self.time_elapsed, False)
+            self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
         self.handle_data_storage_for_plotting(self.time_elapsed, True)
+        self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
         print("DATA SAVED")
 
-    def handle_data_storage_for_plotting(self, current_time, is_end_of_code):
+    def handle_data_storage_for_plotting_pickle(self, current_time, is_end_of_code):
         """Generates files for data used for plotting.
         Periodically the history list is cleared to ensure
         RAM doesnt get used up.
@@ -160,48 +165,54 @@ class Simulation:
             self.history = []
 
         if is_end_of_code:
+            with open(
+                self.dir_to_store + "/parameters_used.json", "w", encoding="utf-8"
+            ) as fp:
+                json.dump(self.parameters_df, fp)
+            # self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
 
-            self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
+    def handle_data_storage_for_plotting(self, current_time, is_end_of_code):
+        """Generates files for data used for plotting.
+        Periodically the history list is cleared to ensure
+        RAM doesnt get used up.
+        """
+        history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
 
-    # def handle_data_storage_for_plotting(self, current_time, is_end_of_code):
-    #     """Generates files for data used for plotting.
-    #     Periodically the history list is cleared to ensure
-    #     RAM doesnt get used up.
-    #     """
-    #     history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
+        if len(self.history) > history_array_size_limit or is_end_of_code:
+            # Save current batch as compressed numpy file instead of pickle
+            filename = self.dir_to_store + f"history_dump_{current_time:.3f}.npz"
 
-    #     if len(self.history) > history_array_size_limit or is_end_of_code:
-    #         # Save current batch as compressed numpy file instead of pickle
-    #         filename = self.dir_to_store + f"history_dump_{current_time:.3f}.npz"
+            # Convert history to compact numpy format
+            times = []
+            positions = []
 
-    #         # Convert history to compact numpy format
-    #         times = []
-    #         positions = []
+            for frame in self.history:
+                times.append(frame["time"])
+                frame_positions = []
+                for bat_pos in frame["bat_positions"]:
+                    frame_positions.extend([bat_pos[0], bat_pos[1]])
+                positions.append(frame_positions)
 
-    #         for frame in self.history:
-    #             times.append(frame["time"])
-    #             frame_positions = []
-    #             for bat_pos in frame["bat_positions"]:
-    #                 frame_positions.extend([bat_pos[0], bat_pos[1]])
-    #             positions.append(frame_positions)
+            # Save as compressed numpy
+            times_array = np.array(times, dtype="f4")
+            max_bats = max(len(frame) // 2 for frame in positions) if positions else 0
+            positions_array = np.full(
+                (len(positions), max_bats * 2), np.nan, dtype="f4"
+            )
 
-    #         # Save as compressed numpy
-    #         times_array = np.array(times, dtype="f4")
-    #         max_bats = max(len(frame) // 2 for frame in positions) if positions else 0
-    #         positions_array = np.full(
-    #             (len(positions), max_bats * 2), np.nan, dtype="f4"
-    #         )
+            for i, frame in enumerate(positions):
+                positions_array[i, : len(frame)] = frame
 
-    #         for i, frame in enumerate(positions):
-    #             positions_array[i, : len(frame)] = frame
+            np.savez_compressed(filename, times=times_array, positions=positions_array)
 
-    #         np.savez_compressed(filename, times=times_array, positions=positions_array)
+            # Clear history
+            # self.history = []
 
-    #         # Clear history
-    #         self.history = []
-
-    #     if is_end_of_code:
-    #         self.parameters_df.to_pickle(self.dir_to_store + "/parameters_used.pkl")
+        if is_end_of_code:
+            with open(
+                self.dir_to_store + "/parameters_used.json", "w", encoding="utf-8"
+            ) as fp:
+                json.dump(self.parameters_df, fp)
 
     def handle_reflections(self, current_time):
         """Generates reflections of the sound objects.
@@ -264,6 +275,7 @@ class Simulation:
                     sound.contains_point(bat.position)
                     and sound.emitter_id != bat.id
                     and f"bat_{bat.id}" not in sound.reflected_obstacles
+                    and bat.is_bat_reflective_to_sound
                 ):
                     normal = (sound.origin - bat.position).normalize()
                     reflection_point = bat.position + normal * bat.radius
@@ -324,8 +336,10 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./consistency_of_calls_movement_rule_data/bat_1_fun_stuff_4/"
-    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.csv"
+    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/sciphy_17/"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()
+    # SAVE_ANIMATION = OUTPUT_DIR
+    # visualize(OUTPUT_DIR, SAVE_ANIMATION)

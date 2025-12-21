@@ -1,6 +1,5 @@
 """This module contains the code that describes a Bat object and its behaviours"""
 
-import math
 import random
 
 import numpy as np
@@ -15,7 +14,12 @@ from supporting_files.snr_implementation import (
 from supporting_files.supporting_functions_for_consistency import (
     given_parameters_df_return_grid_matrix_zeros,
 )
-from supporting_files.utilities import call_directionality_factor, make_dir, str2bool
+from supporting_files.utilities import (
+    call_directionality_factor,
+    make_dir,
+    read_temporal_masking_fn,
+    str2bool,
+)
 from supporting_files.vectors import Vector
 
 
@@ -28,8 +32,8 @@ class Bat:
 
         self.parameters_df = parameters_df.copy()
         self.position = Vector(
-            random.uniform(2, self.parameters_df["ARENA_WIDTH"][0] - 2),
-            random.uniform(2, self.parameters_df["ARENA_HEIGHT"][0] - 2),
+            random.uniform(1, self.parameters_df["ARENA_WIDTH"][0] - 1),
+            random.uniform(1, self.parameters_df["ARENA_HEIGHT"][0] - 1),
         )
 
         self.direction = Vector().random_direction()  # randomize start direction
@@ -38,7 +42,7 @@ class Bat:
         # find the number of decimal places to set rounding equal to time step size
         # print(time_step_size)
         self.rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
-        self.call_rate = self.parameters_df["CALL_RATE"][0]
+        self.call_rate = self.parameters_df["CALL_RATE_FAST"][0]
         self.time_since_last_call = np.round(
             random.uniform(0, 1 / self.call_rate),
             self.rounding_based_on_time_step,
@@ -75,7 +79,7 @@ class Bat:
         self.include_direct_sounds_in_response = str2bool(
             self.parameters_df["INCLUDE_DIRECT_SOUNDS_IN_RESPONSE"][0]
         )
-        self.temporal_masking_file_dir = (
+        self.temporal_masking_file = read_temporal_masking_fn(
             "./dynamic_model/supporting_files/temporal_masking_fn.csv"
         )
         self.memory_window_to_store_grids = []
@@ -95,6 +99,10 @@ class Bat:
         self.ipi_matrix_timeseries = []
         self.memory_window_to_store_grids_timeseries = []
 
+        self.any_consistent_sound = "no"
+        self.kill_movement = str2bool(self.parameters_df["KILL_MOVEMENT"][0])
+        self.is_bat_reflective_to_sound = str2bool("yes")
+
     def update(self, current_time, sound_objects):
         """Function to update bats with time.
         This function handles movement update of bat each time step.
@@ -107,19 +115,23 @@ class Bat:
         """
 
         current_time = np.round(current_time, self.rounding_based_on_time_step)
-        self.update_movement()
-        self.position_history.append((current_time, (self.position.x, self.position.y)))
+        if not self.kill_movement:
+            self.update_movement()
+            self.position_history.append(
+                (current_time, (self.position.x, self.position.y))
+            )
 
         self.emit_sounds(current_time, sound_objects)
         if self.id == 0 and self.time_since_directon_change == 0:
             print(current_time)
-            # if current_time < 0.5:
-            #     print(self.ipi_matrix)
-            # print(self.ipi_matrix_timeseries)
-
-        self.update_directon(current_time, sound_objects)
-        self.cleanup_sounds(current_time)
-        self.detect_sounds(current_time, sound_objects)
+        # if current_time < 0.5:
+        #     print(self.ipi_matrix)
+        # print(self.ipi_matrix_timeseries)
+        if not self.kill_movement:
+            self.update_directon(current_time, sound_objects)
+            self.cleanup_sounds(current_time)
+            self.detect_sounds(current_time, sound_objects)
+            # self.next_direction = self.direction
 
     def update_movement(self):
         """Update poisition of Bat when called.
@@ -235,7 +247,7 @@ class Bat:
         """
         array_of_sound_detections = []
         for sound in sound_objects:
-            sound.update(current_time)
+            # sound.update(current_time)
 
             is_sound_active = sound.active
             is_sound_self_call = (
@@ -306,9 +318,8 @@ class Bat:
         # Keep only recent detections
 
         if self.time_since_last_cleanup == 0:
-            dir_to_store = self.output_dir + "/" + str(self.id)
-
             if self.store_hearing:
+                dir_to_store = self.output_dir + "/" + str(self.id)
                 make_dir(dir_to_store)
                 current_time_str = f"{current_time:.4f}".zfill(9)
                 np.save(
@@ -389,8 +400,8 @@ class Bat:
                 )
             )
         else:
-            print(behaviour_rule_to_use)
-            print(behaviour_rule_to_use == "consistency")
+            # print(behaviour_rule_to_use)
+            # print(behaviour_rule_to_use == "consistency")
             raise ValueError("unsupported behaviour rule")
         return next_direction.normalize(), response_type
 
@@ -416,13 +427,13 @@ class Bat:
             self.time_since_directon_change >= direction_change_time_interval
             and len(self.detections_for_directon_change) != 0
         ):
-            print(len(self.detections_for_directon_change))
+            # print(len(self.detections_for_directon_change))
             if self.implement_snr:
                 heard_sounds = given_sound_objects_return_detected_sounds(
                     self.detections_for_directon_change,
                     direction_change_time_interval,
                     self.hearing_angle_threshold,
-                    self.temporal_masking_file_dir,
+                    self.temporal_masking_file,
                     self.min_sound_detection_fraction,
                     self.id,
                     self.include_direct_sounds_in_response,
@@ -433,10 +444,12 @@ class Bat:
             else:
                 heard_sounds = self.detections_for_directon_change
 
-            if len(heard_sounds) == 0:
+            if self.any_consistent_sound == "no":
                 self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
+                self.call_rate = self.parameters_df["CALL_RATE_FAST"][0]
             else:
                 self.speed = self.parameters_df["BAT_SPEED"][0]
+                self.call_rate = self.parameters_df["CALL_RATE"][0]
 
             self.next_direction, self.response_type = self.decide_next_direction(
                 heard_sounds

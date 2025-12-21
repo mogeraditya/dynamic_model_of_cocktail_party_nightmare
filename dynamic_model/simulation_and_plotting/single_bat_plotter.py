@@ -11,9 +11,9 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Arrow, Circle, Patch, Rectangle, Wedge
 
-sys.path.append("./analysis_of_data/")
-sys.path.append("./exploratory_analysis/")
-sys.path.append("./dynamic_model/")
+sys.path.append("./MISC/analysis_of_data/")
+sys.path.append("./MISC/exploratory_analysis/")
+sys.path.append("./MISC/dynamic_model/")
 
 from convert_heard_sounds_to_matrix import (
     convert_into_grids,
@@ -27,6 +27,7 @@ from snr_implementation import parse_sounds, serialize_sound_info
 from supporting_files.supporting_functions_for_consistency import (
     given_parameters_df_return_grid_matrix_zeros,
 )
+from supporting_files.utilities import load_parameters
 
 plt.style.use("dark_background")
 sys.path.append("./dynamic_model")
@@ -55,8 +56,8 @@ def stitch_together_history_lists(history_output_dir):
             _list_containing_subset = pickle.load(f)
             list_containing_data_from_all_pickle_files.extend(_list_containing_subset)
 
-    parameter_file = glob.glob(history_output_dir + "/parameters_used.pkl")[0]
-    parameter_df = pd.read_pickle(parameter_file)
+    parameter_file = glob.glob(history_output_dir + "/parameters_used.json")[0]
+    parameter_df = load_parameters(parameter_file)
     with open(history_output_dir + "/bats_initial.pkl", "rb") as f:
         bats_initial_positions = pickle.load(f)
     with open(history_output_dir + "/obstacles_initial.pkl", "rb") as f:
@@ -240,7 +241,7 @@ def setup_visualization(parameters_df, bats, obstacles):
     ]
 
 
-def visualize(output_dir, save_animation):
+def visualize(output_dir, save_animation, unique_id):
     """Saves animation as an mp4 file and then also plays it.
 
     Args:
@@ -412,7 +413,7 @@ def visualize(output_dir, save_animation):
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
         ani.save(
-            save_animation + "/animation_slower.mp4",
+            save_animation + f"/animation_without_sound_id_{unique_id}.mp4",
             writer=ffwriter,
         )
     plt.show()
@@ -423,7 +424,7 @@ if __name__ == "__main__":
     print(os.getcwd())
     OUTPUT_DIR = (
         # r"./chain_experiment/3_of_5_position_0/"
-        r"./consistency_of_calls_movement_rule_data/bat_1_fun_stuff_4/"
+        r"./MISC/consistency_of_calls_movement_rule_data/sciphy_16 copy/"
     )
     SAVE_ANIMATION = OUTPUT_DIR
-    visualize(OUTPUT_DIR, SAVE_ANIMATION)
+    visualize(OUTPUT_DIR, SAVE_ANIMATION, unique_id=0)

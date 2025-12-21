@@ -1,10 +1,15 @@
 # you have a list of sound objects
 # first filtering is include direct sounds or not
 import numpy as np
-import pandas as pd
 
 # from read_simulation_output import read_data_per_simulation_per_bat
 from supporting_files.utilities import change_tuples_to_vector_in_sound
+
+# from numba import jit
+
+
+# import pandas as pd
+
 
 # call_duration = 0.005
 # sim_time_step = 0.0005
@@ -148,6 +153,7 @@ def serialize_sound_info(parsed_sound_objects, sim_time_step, sim_rounding):
     return store_serialized_sounds
 
 
+# @jit(nopython=False)
 def find_sum_of_db(list_of_spls, sim_rounding):
     """Computes the sum of all the spls in a given list.
 
@@ -273,6 +279,7 @@ def filter_sounds_based_on_total_profile(list_of_sounds, sim_time_step, sim_roun
     return filtered_list_of_sounds
 
 
+# @jit(nopython=True)
 def generate_sound_profile(
     list_of_sounds,
     focal_sound_object,
@@ -332,9 +339,9 @@ def generate_sound_profile(
         if is_sound_not_focal_sound and sound_within_time_interval(
             sound, time_extent_of_masking_global_time
         ):
-            time_of_sound_wrt_focal_sound = np.round(
-                sound["time"] - focal_sound_object["time"], sim_rounding
-            )
+            # time_of_sound_wrt_focal_sound = np.round(
+            #     sound["time"] - focal_sound_object["time"], sim_rounding
+            # )
 
             time_intervals_to_add_intensity = (
                 sound["occurance_times"] - focal_sound_object["time"]
@@ -363,7 +370,7 @@ def generate_sound_profile(
 
 def get_temporal_masking_function_based_on_sound(
     time_axis_given_sound,
-    dir_of_temporal_masking_fn_file,
+    temporal_masking_df,
     duration_of_sound,
     sim_time_step,
 ):
@@ -380,7 +387,7 @@ def get_temporal_masking_function_based_on_sound(
     Returns:
         list: masking tolerance at each point on the time axis
     """
-    temporal_masking_df = pd.read_csv(dir_of_temporal_masking_fn_file)
+    # temporal_masking_df = pd.read_csv(dir_of_temporal_masking_fn_file)
     masking_tolerance = []
     for time_step in time_axis_given_sound:
         if time_step >= 0:
@@ -394,11 +401,40 @@ def get_temporal_masking_function_based_on_sound(
         else:
             # print(time_step)
             raise ValueError
+        # print(temporal_masking_df)
 
-        subset_of_temporal_masking_df = temporal_masking_df[
-            (temporal_masking_df["timegap_ms"] >= subset_timegap_bin)
-            & (temporal_masking_df["timegap_ms"] < subset_timegap_bin + sim_time_step)
-        ]
+        timegaps = temporal_masking_df["timegap_ms"]
+        mask = (subset_timegap_bin <= timegaps) & (
+            timegaps < subset_timegap_bin + sim_time_step
+        )
+        subset_of_temporal_masking_df = {
+            "timegap_ms": timegaps[mask],
+            "dB_leveldiff": temporal_masking_df["dB_leveldiff"][mask],
+        }
+
+        # subset_of_temporal_masking_array = np.array(
+        #     [
+        #         [
+        #             temporal_masking_df["timegap_ms"][i],
+        #             temporal_masking_df["dB_leveldiff"][i],
+        #         ]
+        #         for i in range(len(temporal_masking_df["dB_leveldiff"]))
+        #         if subset_timegap_bin
+        #         <= temporal_masking_df["timegap_ms"][i]
+        #         < subset_timegap_bin + sim_time_step
+        #     ]
+        # )
+        # subset_of_temporal_masking_df = {}
+        # subset_of_temporal_masking_df["dB_leveldiff"] = (
+        #     subset_of_temporal_masking_array[:, 1]
+        # )
+        # subset_of_temporal_masking_df["timegap_ms"] = subset_of_temporal_masking_array[
+        #     :, 0
+        # ]
+        # subset_of_temporal_masking_df = temporal_masking_df[
+        #     (temporal_masking_df["timegap_ms"] >= subset_timegap_bin)
+        #     & (temporal_masking_df["timegap_ms"] < subset_timegap_bin + sim_time_step)
+        # ]
         threshold_for_masking = np.mean(subset_of_temporal_masking_df["dB_leveldiff"])
         masking_tolerance.append(threshold_for_masking)
     return masking_tolerance
@@ -407,7 +443,7 @@ def get_temporal_masking_function_based_on_sound(
 def is_signal_heard(
     focal_sound,
     parsed_sounds,
-    dir_of_temporal_masking_fn_file,
+    temporal_masking_df,
     minimum_sound_detection_fraction,
     sim_time_step,
     sim_rounding,
@@ -427,7 +463,7 @@ def is_signal_heard(
     Returns:
         bool: true if sound is heard, else false
     """
-    temporal_masking_df = pd.read_csv(dir_of_temporal_masking_fn_file)
+    # temporal_masking_df = pd.read_csv(dir_of_temporal_masking_fn_file)
     time_extent_of_temporal_masking_fn_file = [
         np.max(temporal_masking_df["timegap_ms"]),
         np.min(temporal_masking_df["timegap_ms"]),
@@ -441,7 +477,7 @@ def is_signal_heard(
     )
     temporal_masking_thresholds = get_temporal_masking_function_based_on_sound(
         time_axis_given_sound,
-        dir_of_temporal_masking_fn_file,
+        temporal_masking_df,
         focal_sound["duration"],
         sim_time_step,
     )
@@ -468,7 +504,7 @@ def given_sound_objects_return_detected_sounds(
     sound_objects,
     time_threshold_post_call,
     angle_threshold,
-    dir_of_temporal_masking_fn_file,
+    temporal_masking_df,
     minimum_sound_detection_fraction,
     focal_bat,
     include_direct_sounds,
@@ -522,7 +558,7 @@ def given_sound_objects_return_detected_sounds(
         if is_signal_heard(
             focal_sound,
             parsed_serialized_sounds,
-            dir_of_temporal_masking_fn_file,
+            temporal_masking_df,
             minimum_sound_detection_fraction,
             sim_time_step,
             sim_rounding,

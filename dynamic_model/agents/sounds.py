@@ -49,6 +49,9 @@ class EchoSound:
         self.id = uuid.uuid4()
         self.direction_vector = direction_vector
 
+        self.arena_width = self.parameters_df["ARENA_WIDTH"][0]
+        self.arena_height = self.parameters_df["ARENA_HEIGHT"][0]
+
     def update(self, current_time):
         """Function to propagate sound with time.
         This function updates the radius of the sound disk with time.
@@ -126,10 +129,7 @@ class EchoSound:
         Returns:
             Bool: True if sound is outside the bounds of the arena, else False.
         """
-        if (self.current_radius) > max(
-            self.parameters_df["ARENA_HEIGHT"][0], self.parameters_df["ARENA_WIDTH"][0]
-        ):
-
+        if (self.current_radius) > max(self.arena_height, self.arena_width):
             return True
         else:
             return False

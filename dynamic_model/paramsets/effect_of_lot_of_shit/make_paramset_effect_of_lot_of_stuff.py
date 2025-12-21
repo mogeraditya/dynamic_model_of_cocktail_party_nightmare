@@ -18,7 +18,7 @@ simulation_parameters = load_parameters(
 # We will vary num_bats and generate multiple paramsets for different number of bats keeping everything else the same.
 
 group_sizes = [5, 10, 30]
-call_rates = [5, 10, 20]
+call_rates = [10]
 behaviour_rules = ["consistency", "loudest_sound"]
 
 DIR_TO_STORE_PARAMSETS = (
@@ -26,13 +26,20 @@ DIR_TO_STORE_PARAMSETS = (
 )
 make_dir(DIR_TO_STORE_PARAMSETS)
 simulation_parameters["ARENA_WIDTH"] = 7
-simulation_parameters["ARENA_HEIGHT"] = 5
-simulation_parameters["SIM_DURATION"] = 10
+simulation_parameters["ARENA_HEIGHT"] = 7
+simulation_parameters["SIM_DURATION"] = 15
 simulation_parameters["TIME_DELAY_THRESHOLD_FOR_REPULSION"] = 0.008
 
 for group_size in group_sizes:
     for call_rate in call_rates:
         for behaviour_rule in behaviour_rules:
+            if behaviour_rule == "loudest_sound":
+                simulation_parameters["TIME_DELAY_THRESHOLD_FOR_REPULSION"] = 0.03
+                simulation_parameters["TIME_DELAY_FOR_DIRECTION_CHANGE"] = 0.03
+            else:
+                simulation_parameters["TIME_DELAY_THRESHOLD_FOR_REPULSION"] = 0.008
+                simulation_parameters["TIME_DELAY_FOR_DIRECTION_CHANGE"] = 0.008
+
             simulation_parameters["BEHAVIOUR_RULE"] = behaviour_rule
             simulation_parameters["NUM_BATS"] = group_size
             simulation_parameters["CALL_RATE"] = call_rate

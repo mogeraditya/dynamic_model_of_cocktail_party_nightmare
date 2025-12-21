@@ -1,7 +1,8 @@
 import numpy as np
 from supporting_files.supporting_functions_for_consistency import (
     convert_detected_sounds_into_grids,
-    given_matrix_find_cell_to_respond_to,
+    given_matrix_find_cell_to_respond_to_absence,
+    given_matrix_find_cell_to_respond_to_presence,
     given_time_and_angle_return_direction,
 )
 
@@ -37,15 +38,32 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     self.memory_window_sum_matrix = sum_grids_in_memory.copy()
     self.ipi_matrix = grids_to_consider_for_direction_change[-1]
 
-    cell_index_to_respond_to = given_matrix_find_cell_to_respond_to(
-        sum_grids_in_memory,
-        number_of_consistent_ipis_for_behaviour,
-        self.cell_index_to_respond_to,
-    )
+    # absence presence implementation ---------------------------------------------------------
+    controller_type = self.parameters_df["CONTROLLER_TYPE"][0]
+    if controller_type == "presence":
+        cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_presence(
+            sum_grids_in_memory,
+            number_of_consistent_ipis_for_behaviour,
+            self.cell_index_to_respond_to,
+        )
+    elif controller_type == "absence":
+        cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_absence(
+            sum_grids_in_memory,
+            number_of_consistent_ipis_for_behaviour,
+            self.parameters_df,
+            grid_column_labels,
+            self.direction,
+            self.allocentric_axis_y,
+        )
+    else:
+        raise ValueError("unsupported controller type")
+    # -------------------------------------------------------------------------------------------
+
     self.cell_index_to_respond_to = cell_index_to_respond_to
     if np.isnan(cell_index_to_respond_to[0]):
         next_direction = self.direction
         response_type = None
+        self.any_consistent_sound = "no"
     else:
         time_delay_of_activated_cell = grid_row_labels[cell_index_to_respond_to[0]]
         angle_of_activated_cell = grid_column_labels[cell_index_to_respond_to[1]]
@@ -56,6 +74,7 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
             self.direction,
             self.allocentric_axis_y,
         )
+        self.any_consistent_sound = "yes"
 
     return next_direction.normalize(), response_type
 

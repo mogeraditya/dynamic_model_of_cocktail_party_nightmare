@@ -1,6 +1,7 @@
 """These are misc functions that are used across many files"""
 
 import bisect
+import json
 import os
 import pickle
 
@@ -38,8 +39,27 @@ def convert_txt_to_int_or_float(txt):
         return txt
 
 
+# def load_parameters(file_dir):
+#     """load parameters from csv
+
+#     Args:
+#         file_dir (string): directory of the csv file
+
+#     Returns:
+#         DataFrame: DataFrame extracted from csv file
+#     """
+#     with open(file_dir, "r") as csv_file:
+#         reader = pd.read_csv(file_dir)
+#     # output_df = pd.DataFrame({})
+#     # for key in reader.keys():
+#     #     value = reader[key][0]
+#     #     value = convert_txt_to_int_or_float(value)
+#     #     output_df[key] = [value]
+#     return reader
+
+
 def load_parameters(file_dir):
-    """load parameters from csv
+    """load parameters from json
 
     Args:
         file_dir (string): directory of the csv file
@@ -47,13 +67,15 @@ def load_parameters(file_dir):
     Returns:
         DataFrame: DataFrame extracted from csv file
     """
-    with open(file_dir, "r") as csv_file:
-        reader = pd.read_csv(csv_file)
-    output_df = pd.DataFrame()
-    for key in reader.keys():
-        value = reader[key][0]
-        value = convert_txt_to_int_or_float(value)
-        output_df[key] = [value]
+    with open(file_dir) as f:
+        output_df = json.load(f)
+    # with open(file_dir, "r") as csv_file:
+    #     reader = pd.read_csv(file_dir)
+    # output_df = pd.DataFrame({})
+    # for key in reader.keys():
+    #     value = reader[key][0]
+    #     value = convert_txt_to_int_or_float(value)
+    #     output_df[key] = [value]
     return output_df
 
 
@@ -98,8 +120,8 @@ def creation_time_calculation(sound, reflection_point):
 
 
 def combine_pickle_files(directory_path):
-    combined_df = (
-        pd.DataFrame()
+    combined_df = pd.DataFrame(
+        {}
     )  # Initialize an empty DataFrame to store the merged data
 
     for file_name in os.listdir(directory_path):
@@ -162,3 +184,11 @@ def load_history_dump(filename):
         )
 
     return reconstructed_history
+
+
+def read_temporal_masking_fn(dir):
+    dict_1 = pd.read_csv(dir)
+    dict_2 = {}
+    for key in dict_1.keys()[1:]:
+        dict_2[key] = np.float64(dict_1[key].values)
+    return dict_2
