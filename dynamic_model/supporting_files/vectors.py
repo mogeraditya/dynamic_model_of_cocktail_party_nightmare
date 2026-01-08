@@ -123,3 +123,9 @@ class Vector:
 
     def __repr__(self):
         return f"Vector({self.x:.3f}, {self.y:.3f})"
+
+
+if __name__ == "__main__":
+    allo_axis = Vector(0, 1)
+    bat_dir = Vector(-0.9, 0.1)
+    print(allo_axis.angle_between(bat_dir))

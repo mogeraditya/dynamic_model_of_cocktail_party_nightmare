@@ -35,9 +35,11 @@ class Bat:
             random.uniform(1, self.parameters_df["ARENA_WIDTH"][0] - 1),
             random.uniform(1, self.parameters_df["ARENA_HEIGHT"][0] - 1),
         )
-
+        angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
         self.direction = Vector().random_direction()  # randomize start direction
-        self.allocentric_axis_y = Vector(0, 1)  # self.direction
+        self.allocentric_axis_y = Vector(
+            -np.tan(angular_resolution), 1
+        )  # self.direction
         time_step_size = self.parameters_df["TIME_STEP"][0]
         # find the number of decimal places to set rounding equal to time step size
         # print(time_step_size)
@@ -511,7 +513,12 @@ class Bat:
                 rotation_angle = angle_between_current_and_new
 
             rotated_vector = current_direction.rotate(rotation_angle)
-
+            # print(
+            #     f"next dir {self.next_direction}",
+            #     f"dir {self.direction}",
+            #     f"angle {self.direction.angle_between(self.next_direction)}",
+            #     f"rotation angle {self.direction}",
+            # )
             self.direction = rotated_vector.normalize()
 
     # def aditya(self)

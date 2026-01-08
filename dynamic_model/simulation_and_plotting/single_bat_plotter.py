@@ -32,9 +32,6 @@ from supporting_files.utilities import load_parameters
 plt.style.use("dark_background")
 sys.path.append("./dynamic_model")
 plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
-ANGULAR_RESOLUTION = np.pi / 6  # radians
-RADIAL_RESOLUTION = 0.001
-param = (0, True, np.pi)
 
 
 def stitch_together_history_lists(history_output_dir):
@@ -264,6 +261,7 @@ def visualize(output_dir, save_animation, unique_id):
 
     focal_bat = 0
     grid_data_time_series = [frame["bat_ipi_matrix"] for frame in history]
+    # print([i[0].shape for i in grid_data_time_series])
     grid_data_time_series_sum = [frame["bat_sum_matrix"] for frame in history]
     rows, columns = given_parameters_df_return_grid_matrix_zeros(parameters_df)[1:3]
     spatial_grid_r = rows
@@ -424,7 +422,7 @@ if __name__ == "__main__":
     print(os.getcwd())
     OUTPUT_DIR = (
         # r"./chain_experiment/3_of_5_position_0/"
-        r"./MISC/consistency_of_calls_movement_rule_data/sciphy_16 copy/"
+        r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/ChainExperiment2/Data/IntermediateData/position_0_left_turn/"
     )
-    SAVE_ANIMATION = OUTPUT_DIR
+    SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION, unique_id=0)

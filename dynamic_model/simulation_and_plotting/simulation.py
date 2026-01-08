@@ -4,6 +4,7 @@ import json
 import os
 import pickle
 import sys
+import uuid
 from datetime import datetime
 
 import numpy as np
@@ -15,8 +16,7 @@ from agents.bats import Bat
 from agents.make_walls import make_walls
 from agents.obstacles import Obstacle
 from agents.sounds import DirectSound
-
-# from simulation_and_plotting.single_bat_plotter import visualize
+from simulation_and_plotting.single_bat_plotter import visualize
 from supporting_files.utilities import creation_time_calculation, load_parameters
 from supporting_files.vectors import Vector
 
@@ -42,6 +42,8 @@ class Simulation:
             Bat(self.parameters_df, self.output_dir, store_hearing=True)
             for _ in range(int(self.parameters_df["NUM_BATS"][0]))
         ]
+        self.bats[0].position = Vector(1, self.parameters_df["ARENA_HEIGHT"][0] / 2)
+        self.bats[0].direction = Vector(1, 0)
         obstacle_position = "random"
         obstacle_radius = self.parameters_df["OBSTACLE_RADIUS"][0]
         self.obstacles = [
@@ -142,9 +144,9 @@ class Simulation:
             )
 
             save_time_of_last_iter = current_loop_time
-            self.handle_data_storage_for_plotting(self.time_elapsed, False)
+            # self.handle_data_storage_for_plotting(self.time_elapsed, False)
             self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
-        self.handle_data_storage_for_plotting(self.time_elapsed, True)
+        # self.handle_data_storage_for_plotting(self.time_elapsed, True)
         self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
@@ -336,10 +338,13 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/sciphy_17/"
+    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_6AQA/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()
-    # SAVE_ANIMATION = OUTPUT_DIR
-    # visualize(OUTPUT_DIR, SAVE_ANIMATION)
+    SAVE_ANIMATION = OUTPUT_DIR
+    unique_id = uuid.uuid4()
+
+    visualize(OUTPUT_DIR, SAVE_ANIMATION, unique_id)
+    print(unique_id)
