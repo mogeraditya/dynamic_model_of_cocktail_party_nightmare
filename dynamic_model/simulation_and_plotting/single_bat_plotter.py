@@ -361,7 +361,7 @@ def visualize(output_dir, save_animation, unique_id):
             trajectory_history[j].append((x, y))
 
             # Keep only the last 400 positions
-            if len(trajectory_history[j]) > 400:
+            if len(trajectory_history[j]) > 100:
                 trajectory_history[j].pop(0)
 
             # Update trajectory line

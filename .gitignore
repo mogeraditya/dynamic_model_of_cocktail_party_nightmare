@@ -164,5 +164,5 @@ cython_debug/
 *.pkl
 *.mp4
 .vscode/
-*.json
+# *.json
 *.npz

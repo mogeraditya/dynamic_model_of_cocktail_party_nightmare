@@ -42,8 +42,10 @@ class Simulation:
             Bat(self.parameters_df, self.output_dir, store_hearing=True)
             for _ in range(int(self.parameters_df["NUM_BATS"][0]))
         ]
-        self.bats[0].position = Vector(1, self.parameters_df["ARENA_HEIGHT"][0] / 2)
-        self.bats[0].direction = Vector(1, 0)
+        for i in range(len(self.bats)):
+            self.bats[i].position = Vector(1, (i + 1))
+            print(self.bats[i].position)
+            self.bats[i].direction = Vector(1, 0)
         obstacle_position = "random"
         obstacle_radius = self.parameters_df["OBSTACLE_RADIUS"][0]
         self.obstacles = [
@@ -338,7 +340,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_6AQA/"
+    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_6AQB/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
