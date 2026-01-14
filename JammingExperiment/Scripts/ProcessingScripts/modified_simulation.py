@@ -40,9 +40,14 @@ class Modified_Simulation(Simulation):
         jammer_locations,
     ):
         super().__init__(parameters_df, output_dir)
+
+        parameters_df["ARENA_WIDTH"] = [3.9]
+        parameters_df["ARENA_HEIGHT"] = [2.6]
+        parameters_df["SIM_DURATION"] = [10]
+
         self.bats = []
-        self.obstacles = []
-        num_bats = 1  # len(bat_locations.keys()) %2 # just how the csv is organised
+
+        num_bats = 1
 
         self.bats = [
             Bat(self.parameters_df, self.output_dir, store_hearing=False)
@@ -64,21 +69,23 @@ class Modified_Simulation(Simulation):
             bat.kill_movement = True
             bat.position = Vector(jammer_locations["x"][i], jammer_locations["y"][i])
             bat.is_bat_reflective_to_sound = False
-        # for i, obstacle in enumerate(self.obstacles):
-        #     self.obstacles[i].position = Vector(
+            bat.parameters_df["REFLECTION_LOSS"] = [-np.inf]
+            bat.parameters_df["CALL_RATE"] = [0.000001]
+            if (
+                jammer_locations["speaker_direction_x"][i] == 0
+                and jammer_locations["speaker_direction_y"][i] == 0
+            ):
+                bat.parameters_df["CALL_DIRECTIONALITY"] = [0]
+                bat.direction = Vector(0, 1)
+            else:
+                bat.direction = Vector(
+                    jammer_locations["speaker_direction_x"][i],
+                    jammer_locations["speaker_direction_y"][i],
+                )
 
-        #     )
-
-        # self.bats = self.bats[0:num_bats]
-        # print(self.bats[0].id)
-        # for i, bat in enumerate(self.bats):
-        #     bat_locations
         initial_release_point = make_vector(initial_release_point)
         self.bats[0].position = initial_release_point
-        # self.bats[0].direction = Vector(
-        #     random.uniform(0, 0),
-        #     random.uniform(1, 1),
-        # ).normalize()
+        self.bats[0].direction = Vector(1, 0)
         self.bats[0].id = 0
         self.bats.extend(self.jammers)
 
@@ -93,84 +100,42 @@ if __name__ == "__main__":
     store_metric = []
     store_value = []
 
-    jammer_resolutions = list(np.arange(2, 4, 2))
-    for jammer_resolution in jammer_resolutions:
-        OUTPUT_DIR = (
-            f"./JammingExperiment/Data/IntermediateData/profiling_{jammer_resolution}/"
-        )
-        PARAMETER_FILE_DIR = r"./JammingExperiment/Data/InputData/common_parameters.csv"
+    JAMMER_LOCATIONS_DIR = "./JammingExperiment/Data/InputData/jammer_positions.csv"
+    JAMMER_LOCATIONS = pd.read_csv(JAMMER_LOCATIONS_DIR)
 
-        PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
-        bat_locations_dir = "./JammingExperiment/Data/InputData/bat_start_positions.csv"
-        bat_locations = pd.read_csv(bat_locations_dir)
-        # jammer_resolutions = [
-        #     0.001,
-        #     0.01,
-        #     0.1,
-        #     1,
-        # ]
-        if jammer_resolution == 0:
-            jammer_locations = None
-        else:
-            width_array = np.linspace(
-                0.5, PARAMETER_DF["ARENA_WIDTH"][0] - 0.5, num=jammer_resolution
-            )
-            height_array = np.linspace(
-                0.5, PARAMETER_DF["ARENA_HEIGHT"][0] - 0.5, num=jammer_resolution
-            )
-            left_wall = [(0.01, i) for i in height_array]
-            right_wall = [
-                (PARAMETER_DF["ARENA_WIDTH"][0] - 0.01, i) for i in height_array
-            ]
-            top_wall = [
-                (i, PARAMETER_DF["ARENA_HEIGHT"][0] - 0.01) for i in width_array
-            ]
-            bottom_wall = [(i, 0.01) for i in width_array]
+    sim_identifier = uuid.uuid4()
+    OUTPUT_DIR = (
+        f"./JammingExperiment/Data/IntermediateData/simulation_files_{sim_identifier}/"
+    )
+    PARAMETER_FILE_DIR = r"./JammingExperiment/Data/InputData/common_parameters.json"
 
-            positions_to_put_objects = np.array(
-                [*left_wall, *right_wall, *top_wall, *bottom_wall]
-            )
+    PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
 
-            jammer_locations = {
-                "x": positions_to_put_objects[:, 0],
-                "y": positions_to_put_objects[:, 1],
-            }
-        print(jammer_locations)
-        print(bat_locations.keys())
-        LOCATION_NUMBER = 0
-        chosen_start_location = (
-            PARAMETER_DF["ARENA_WIDTH"][0] / 2,
-            PARAMETER_DF["ARENA_HEIGHT"][0] / 2,
-        )
-        sim_identifier = uuid.uuid4()
-        sim = Modified_Simulation(
-            PARAMETER_DF, OUTPUT_DIR, chosen_start_location, jammer_locations
-        )
-        sim.run()
-        SAVE_ANIMATION = False  # OUTPUT_DIR
-        visualize(OUTPUT_DIR, SAVE_ANIMATION, sim_identifier)
-        plt.close()
-        positions_array = load_history_dump(OUTPUT_DIR + "/data_for_plotting/")
-        print(
-            f"collision counts : {compute_collision_counts_and_length(positions_array)}"
-        )
-        print(f"collision rate : {compute_collision_rate(positions_array)}")
-        print(f"duration (frames) : {len(positions_array)}")
+    chosen_start_location = (0.8, 0.8)
 
-        store_jammer_resolution.append(jammer_resolution)
-        store_metric.append("collision_rate")
-        store_value.append(compute_collision_rate(positions_array))
+    sim = Modified_Simulation(
+        PARAMETER_DF, OUTPUT_DIR, chosen_start_location, JAMMER_LOCATIONS
+    )
+    sim.run()
+    SAVE_ANIMATION = False  # OUTPUT_DIR
+    visualize(OUTPUT_DIR, SAVE_ANIMATION, sim_identifier)
+    plt.close()
+    positions_array = load_history_dump(OUTPUT_DIR + "/data_for_plotting/")
+    print(
+        f"collision counts : {compute_collision_counts_and_length(positions_array, PARAMETER_DF)}"
+    )
+    print(f"collision rate : {compute_collision_rate(positions_array, PARAMETER_DF)}")
+    print(f"duration (frames) : {len(positions_array)}")
 
-        store_jammer_resolution.append(jammer_resolution)
-        store_metric.append("collision_counts")
-        store_value.append(compute_collision_counts_and_length(positions_array))
+    store_metric.append("collision_rate")
+    store_value.append(compute_collision_rate(positions_array, PARAMETER_DF))
 
-        # store_jammer_resolution.append(jammer_resolution)
-        # store_metric.append("collision_time")
-        # store_value.append(time_spent_in_collision(positions_array))
-        # print(df_to_store_collsion)
-        # print(store_value)
-    df_to_store_collsion["jammer_resolution"] = store_jammer_resolution
+    store_metric.append("collision_counts")
+    store_value.append(
+        compute_collision_counts_and_length(positions_array, PARAMETER_DF)
+    )
+
+    # df_to_store_collsion["jammer_resolution"] = store_jammer_resolution
     df_to_store_collsion["metric"] = store_metric
     df_to_store_collsion["value"] = store_value
-    df_to_store_collsion.to_csv("loud_nonrandom_data.csv")
+    df_to_store_collsion.to_csv(OUTPUT_DIR + "loud_nonrandom_data.csv")

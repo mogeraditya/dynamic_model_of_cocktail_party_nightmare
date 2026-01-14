@@ -164,7 +164,9 @@ def given_parameters_df_return_grid_matrix_zeros(parameters_df):
     return matrix_spatial_grid, spatial_grid_r, spatial_grid_theta
 
 
-def convert_detected_sounds_into_grids(heard_sounds, parameters_df, allocentric_axis_y):
+def convert_detected_sounds_into_grids(
+    heard_sounds, parameters_df, bat_direction, allocentric_axis_y
+):
     """
 
     Args:
@@ -202,9 +204,7 @@ def convert_detected_sounds_into_grids(heard_sounds, parameters_df, allocentric_
         if spatial_reference_frame == "allocentric":
             theta = allocentric_axis_y.angle_between(sound_object["incident_direction"])
         elif spatial_reference_frame == "egocentric":
-            theta = sound_object["bat_direction"].angle_between(
-                sound_object["incident_direction"]
-            )
+            theta = bat_direction.angle_between(sound_object["incident_direction"])
         else:
             raise ValueError("not a supported spatail reference frame")
 

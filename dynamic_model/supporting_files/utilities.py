@@ -192,3 +192,8 @@ def read_temporal_masking_fn(dir):
     for key in dict_1.keys()[1:]:
         dict_2[key] = np.float64(dict_1[key].values)
     return dict_2
+
+
+def given_shape_make_agent_bounce(consequtive_shape_points):
+    for i, point in consequtive_shape_points:
+        line = [consequtive_shape_points[i - 1], point]

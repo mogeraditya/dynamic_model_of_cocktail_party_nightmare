@@ -109,7 +109,7 @@ def plot_grid_matrix_into_radial_time_series(
     masked_z = np.ma.masked_where(z == 0, z)
 
     # Black to Blue to Cyan/Electric Blue
-    colors = ["black", "red", "orange", "green", "green", "green"]
+    colors = ["black", "red", "orange", "darkgreen", "green", "lime"]
     cmap = mpl.colors.LinearSegmentedColormap.from_list(
         "black_to_cyan", colors, N=(cmax - cmin + 1)
     )
@@ -386,6 +386,50 @@ def visualize(output_dir, save_animation, unique_id):
         im0.set_array(new_grid_data_time_series[i, 0].T)
         im1.set_array(new_grid_data_time_series_sum[i, 0].T)
 
+        # for sound in frame["sound_objects"]:
+        #     if not sound["status"]:
+        #         continue
+
+        #     emitter_color = cm(sound["emitter_id"] / NUM_COLORS)
+        #     alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
+
+        #     inner = max(
+        #         0,
+        #         sound["radius"]
+        #         - parameters_df["CALL_DURATION"][0] * parameters_df["SOUND_SPEED"][0],
+        #     )
+        #     outer = sound["radius"]
+
+        #     if inner < outer:
+        #         if sound["type"] == "direct":
+        #             linestyle = "-"
+        #             hatching_of_disk = "++"
+        #         else:
+        #             linestyle = "--"
+        #             alpha = 0.5 * alpha
+        #             hatching_of_disk = ".."
+        #         if inner == 0:
+        #             width_of_disk = sound["radius"]
+        #         else:
+        #             width_of_disk = (
+        #                 parameters_df["CALL_DURATION"][0]
+        #                 * parameters_df["SOUND_SPEED"][0]
+        #             )
+        #         wedge = Wedge(
+        #             sound["origin"],
+        #             outer,
+        #             0,
+        #             360,
+        #             width=width_of_disk,
+        #             fill=False,
+        #             color=emitter_color,
+        #             alpha=alpha,
+        #             linestyle=linestyle,
+        #             hatch=hatching_of_disk,
+        #         )
+        #         ax[0].add_patch(wedge)
+        #         sound_artists.append(wedge)
+
         return (
             bat_markers
             + direction_arrows
@@ -414,8 +458,8 @@ def visualize(output_dir, save_animation, unique_id):
             save_animation + f"/animation_without_sound_id_{unique_id}.mp4",
             writer=ffwriter,
         )
-    plt.show()
-    # plt.clf()
+    # plt.show()
+    plt.clf()
 
 
 if __name__ == "__main__":

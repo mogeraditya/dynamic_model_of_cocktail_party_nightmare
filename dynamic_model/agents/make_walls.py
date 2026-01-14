@@ -1,13 +1,27 @@
 import numpy as np
-from agents.obstacles import Obstacle
+from agents.class_obstacles import Obstacle
+from supporting_files.vectors import Vector
+
+
+class WallPanel(Obstacle):
+    def __init__(self, parameters_df, position):
+        radius = 0.0001
+        super.__init__(parameters_df, position, radius)
+
+    def __repr__(self):
+        return f"WallPanel(id={self.id}, position={self.position})"
 
 
 def make_walls(parameters_df):
     width_array = np.arange(
-        0.5, parameters_df["ARENA_WIDTH"][0], parameters_df["WALL_RESOLUTION"][0]
+        parameters_df["WALL_RESOLUTION"][0],
+        parameters_df["ARENA_WIDTH"][0],
+        parameters_df["WALL_RESOLUTION"][0],
     )
     height_array = np.arange(
-        0.5, parameters_df["ARENA_HEIGHT"][0], parameters_df["WALL_RESOLUTION"][0]
+        parameters_df["WALL_RESOLUTION"][0],
+        parameters_df["ARENA_HEIGHT"][0],
+        parameters_df["WALL_RESOLUTION"][0],
     )
     # positions_to_put_objects = []
     left_wall = [(0, i) for i in height_array]
@@ -18,9 +32,7 @@ def make_walls(parameters_df):
     # object_labels =
     # positions_to_put_objects = [* for i in walls]
 
-    obstacle_radius = 0.0001
     store_wall_objects = [
-        Obstacle(parameters_df, position, obstacle_radius)
-        for position in positions_to_put_objects
+        WallPanel(parameters_df, position) for position in positions_to_put_objects
     ]
     return store_wall_objects

@@ -8,10 +8,11 @@ import unittest
 import numpy as np
 
 sys.path.append("./dynamic_model")
-from agents.obstacles import Obstacle
-from agents.sounds import DirectSound
 from supporting_files.utilities import creation_time_calculation, load_parameters
 from supporting_files.vectors import Vector
+
+from dynamic_model.agents.class_obstacles import Obstacle
+from dynamic_model.agents.class_sounds import DirectSound
 
 # sys.path.insert(1, ".")
 

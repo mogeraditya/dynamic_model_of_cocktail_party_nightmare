@@ -12,10 +12,10 @@ import numpy as np
 # from supporting_files.store_history import CompactHistoryManager
 
 sys.path.append("./dynamic_model/")
-from agents.bats import Bat
+from agents.class_bats import Bat
+from agents.class_obstacles import Obstacle
+from agents.class_sounds import DirectSound
 from agents.make_walls import make_walls
-from agents.obstacles import Obstacle
-from agents.sounds import DirectSound
 from simulation_and_plotting.single_bat_plotter import visualize
 from supporting_files.utilities import creation_time_calculation, load_parameters
 from supporting_files.vectors import Vector
@@ -42,18 +42,15 @@ class Simulation:
             Bat(self.parameters_df, self.output_dir, store_hearing=True)
             for _ in range(int(self.parameters_df["NUM_BATS"][0]))
         ]
-        for i in range(len(self.bats)):
-            self.bats[i].position = Vector(1, (i + 1))
-            print(self.bats[i].position)
-            self.bats[i].direction = Vector(1, 0)
+
         obstacle_position = "random"
         obstacle_radius = self.parameters_df["OBSTACLE_RADIUS"][0]
         self.obstacles = [
             Obstacle(self.parameters_df, obstacle_position, obstacle_radius)
             for _ in range(int(self.parameters_df["OBSTACLE_COUNT"][0]))
         ]
-        wall_objects = make_walls(self.parameters_df)
-        self.obstacles.extend(wall_objects)
+        self.wall_objects = make_walls(self.parameters_df)
+        # self.obstacles.extend(wall_objects)
         self.sound_objects = []  # Contains both DirectSound and EchoSound
 
         self.time_elapsed = 0.0
@@ -83,7 +80,10 @@ class Simulation:
         save_time_of_last_iter = start_timing
         for step in range(num_steps):
             # print(self.obstacles[0].position.x)
-            self.time_elapsed = step * self.parameters_df["TIME_STEP"][0]
+            self.time_elapsed = np.round(
+                step * self.parameters_df["TIME_STEP"][0],
+                self.rounding_based_on_time_step,
+            )
 
             for sound in self.sound_objects:
                 sound.update(self.time_elapsed)
@@ -93,66 +93,61 @@ class Simulation:
 
             self.handle_reflections(self.time_elapsed)
 
-            self.history.append(
-                {
-                    "time": np.round(
-                        self.time_elapsed, self.rounding_based_on_time_step
-                    ),
-                    "bat_ipi_counters": [len(bat.emit_times) for bat in self.bats],
-                    "bat_positions": [
-                        (bat.position.x, bat.position.y) for bat in self.bats
-                    ],
-                    "bat_directions": [
-                        (bat.direction.normalize().x, bat.direction.normalize().y)
-                        for bat in self.bats
-                    ],
-                    "bat_detections": [
-                        bat.get_detections_at_time(self.time_elapsed)
-                        for bat in self.bats
-                    ],
-                    "sound_objects": [
-                        self.serialize_sound(s)
-                        for s in self.sound_objects
-                        if s.active
-                        and s.current_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
-                    ],
-                    "sound_objects_count": len(self.sound_objects),
-                    "next_dir_angle": [
-                        bat.next_direction.angle_between(Vector(1, 0))
-                        for bat in self.bats
-                    ],
-                    "current_dir_angle": [
-                        bat.direction.angle_between(Vector(1, 0)) for bat in self.bats
-                    ],
-                    "bat_response_vector": [
-                        bat.responding_to_direction for bat in self.bats
-                    ],
-                    "response_type": [bat.response_type for bat in self.bats],
-                    "bat_ipi_matrix": [bat.ipi_matrix for bat in self.bats],
-                    "bat_sum_matrix": [
-                        bat.memory_window_sum_matrix for bat in self.bats
-                    ],
-                }
-            )
             # self.history_manager.add_frame(self.time_elapsed, self.bats)
 
             self.sound_objects = [
-                s for s in self.sound_objects if s.active and s.current_spl > 20
+                s
+                for s in self.sound_objects
+                if s.active
+                and s.current_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
             ]
 
+            self.history.append(self.convert_necessary_information_into_dict())
             current_loop_time = datetime.now()
             list_time_taken_for_each_loop.append(
                 current_loop_time - save_time_of_last_iter
             )
 
             save_time_of_last_iter = current_loop_time
-            # self.handle_data_storage_for_plotting(self.time_elapsed, False)
+            self.handle_data_storage_for_plotting(self.time_elapsed, False)
             self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
-        # self.handle_data_storage_for_plotting(self.time_elapsed, True)
+        self.handle_data_storage_for_plotting(self.time_elapsed, True)
         self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
         print("DATA SAVED")
+
+    def convert_necessary_information_into_dict(self):
+        dictionary_w_information = {
+            "time": np.round(self.time_elapsed, self.rounding_based_on_time_step),
+            "bat_ipi_counters": [len(bat.emit_times) for bat in self.bats],
+            "bat_positions": [(bat.position.x, bat.position.y) for bat in self.bats],
+            "bat_directions": [
+                (bat.direction.normalize().x, bat.direction.normalize().y)
+                for bat in self.bats
+            ],
+            "bat_detections": [
+                bat.get_detections_at_time(self.time_elapsed) for bat in self.bats
+            ],
+            "sound_objects": [
+                self.serialize_sound(s)
+                for s in self.sound_objects
+                if s.active
+                and s.current_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
+            ],
+            "sound_objects_count": len(self.sound_objects),
+            "next_dir_angle": [
+                bat.next_direction.angle_between(Vector(1, 0)) for bat in self.bats
+            ],
+            "current_dir_angle": [
+                bat.direction.angle_between(Vector(1, 0)) for bat in self.bats
+            ],
+            "bat_response_vector": [bat.responding_to_direction for bat in self.bats],
+            "response_type": [bat.response_type for bat in self.bats],
+            "bat_ipi_matrix": [bat.ipi_matrix for bat in self.bats],
+            "bat_sum_matrix": [bat.memory_window_sum_matrix for bat in self.bats],
+        }
+        return dictionary_w_information
 
     def handle_data_storage_for_plotting_pickle(self, current_time, is_end_of_code):
         """Generates files for data used for plotting.
@@ -238,32 +233,61 @@ class Simulation:
 
             reflection_point_arr, normal_arr, obstacle_id_arr = [], [], []
 
-            # Check walls
-            wall_points_to_check = [
-                Vector(0, sound.origin.y),
-                Vector(sound.origin.x, 0),
-                Vector(self.parameters_df["ARENA_WIDTH"][0], sound.origin.y),
-                Vector(sound.origin.x, self.parameters_df["ARENA_HEIGHT"][0]),
-            ]
-            wall_ids = ["left", "down", "right", "up"]
-            for i, wall_point in enumerate(wall_points_to_check):
+            # # Check walls
+
+            # wall_points_to_check = [
+            #     Vector(0, sound.origin.y),
+            #     Vector(sound.origin.x, 0),
+            #     Vector(
+            #         self.parameters_df["ARENA_WIDTH"][0],
+            #         sound.origin.y,
+            #     ),
+            #     Vector(
+            #         sound.origin.x,
+            #         self.parameters_df["ARENA_HEIGHT"][0],
+            #     ),
+            # ]
+
+            # wall_ids = [
+            #     *["left"],
+            #     *["down"],
+            #     *["right"],
+            #     *["up"],
+            # ]
+            # for i, wall_point in enumerate(wall_points_to_check):
+            #     if (
+            #         sound.contains_point(wall_point)
+            #         and f"wall_{wall_ids[i]}" not in sound.reflected_obstacles
+            #     ):
+            #         normal = (sound.origin - wall_point).normalize()
+            #         reflection_point = wall_point
+            #         obstacle_id = f"wall_{wall_ids[i]}"
+
+            #         normal_arr.append(normal)
+            #         reflection_point_arr.append(reflection_point)
+            #         obstacle_id_arr.append(obstacle_id)
+
+            # check walls
+            for wall_objects in self.wall_objects:
                 if (
-                    sound.contains_point(wall_point)
-                    and f"wall_{wall_ids[i]}" not in sound.reflected_obstacles
+                    sound.contains_point(wall_objects.position)
+                    and f"wall_obstacle_{wall_objects.id}"
+                    not in sound.reflected_obstacles
                 ):
-                    normal = (sound.origin - wall_point).normalize()
-                    reflection_point = wall_point
-                    obstacle_id = f"wall_{wall_ids[i]}"
+                    normal = wall_objects.get_reflection_normal(sound.origin)
+                    reflection_point = (
+                        wall_objects.position + normal * wall_objects.radius
+                    )
+                    obstacle_id = f"wall_obstacle_{wall_objects.id}"
 
                     normal_arr.append(normal)
                     reflection_point_arr.append(reflection_point)
                     obstacle_id_arr.append(obstacle_id)
-
-            # Check obstacles
+            # check obstacles
             for obstacle in self.obstacles:
                 if (
                     sound.contains_point(obstacle.position)
-                    and f"wall_{obstacle.id}" not in sound.reflected_obstacles
+                    and f"obstacle_{obstacle.id}" not in sound.reflected_obstacles
                 ):
                     normal = obstacle.get_reflection_normal(sound.origin)
                     reflection_point = obstacle.position + normal * obstacle.radius
@@ -273,7 +297,7 @@ class Simulation:
                     reflection_point_arr.append(reflection_point)
                     obstacle_id_arr.append(obstacle_id)
 
-            # Check other bats
+            # check other bats
             for bat in self.bats:
                 if (
                     sound.contains_point(bat.position)
@@ -301,10 +325,10 @@ class Simulation:
                     )
 
                     if echo:
-                        # Mark this obstacle as reflected for the original sound
+                        # mark this obstacle as reflected for the original sound
                         echo.update(current_time)
                         sound.reflected_obstacles.add(obstacle_id)
-                        # Copy reflected obstacles to the echo
+                        # copy reflected obstacles to the echo
                         echo.reflected_obstacles.update(sound.reflected_obstacles)
                         new_echoes.append(echo)
 
@@ -340,8 +364,8 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_6AQB/"
-    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
+    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_10/"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters copy.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()

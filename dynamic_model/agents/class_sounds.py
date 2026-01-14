@@ -88,7 +88,10 @@ class EchoSound:
         """
         distance = self.origin.distance_to(point)
         return distance <= self.current_radius and distance >= max(
-            0, self.current_radius - self.parameters_df["SOUND_DISK_WIDTH"][0]
+            0,
+            self.current_radius
+            - self.parameters_df["CALL_DURATION"][0]
+            * self.parameters_df["SOUND_SPEED"][0],
         )
 
     def sound_directionality(self, angle_between_sound_and_receiver):
@@ -162,7 +165,10 @@ class DirectSound(EchoSound):
         self.current_spl = self.initial_spl
         self.current_radius = 0
         # Keep track of sound disc width
-        self.max_radius = self.parameters_df["SOUND_DISK_WIDTH"][0]
+        self.max_radius = (
+            self.parameters_df["CALL_DURATION"][0]
+            * self.parameters_df["SOUND_SPEED"][0]
+        )
 
         self.active = True
         # Direct sounds can only reflect once/ i.e. per collision only one echo ngl

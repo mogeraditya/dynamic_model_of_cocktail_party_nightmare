@@ -8,10 +8,11 @@ import unittest
 import numpy as np
 
 sys.path.append("./dynamic_model")
-from agents.bats import Bat
-from agents.sounds import DirectSound
 from supporting_files.utilities import load_parameters
 from supporting_files.vectors import Vector
+
+from dynamic_model.agents.class_bats import Bat
+from dynamic_model.agents.class_sounds import DirectSound
 
 # sys.path.insert(1, ".")
 Bat._id_counter = 0
