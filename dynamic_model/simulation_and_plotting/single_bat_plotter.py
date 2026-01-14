@@ -32,9 +32,6 @@ from supporting_files.utilities import load_parameters
 plt.style.use("dark_background")
 sys.path.append("./dynamic_model")
 plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
-ANGULAR_RESOLUTION = np.pi / 6  # radians
-RADIAL_RESOLUTION = 0.001
-param = (0, True, np.pi)
 
 
 def stitch_together_history_lists(history_output_dir):
@@ -112,7 +109,7 @@ def plot_grid_matrix_into_radial_time_series(
     masked_z = np.ma.masked_where(z == 0, z)
 
     # Black to Blue to Cyan/Electric Blue
-    colors = ["black", "red", "orange", "green", "green", "green"]
+    colors = ["black", "red", "orange", "darkgreen", "green", "lime"]
     cmap = mpl.colors.LinearSegmentedColormap.from_list(
         "black_to_cyan", colors, N=(cmax - cmin + 1)
     )
@@ -264,6 +261,7 @@ def visualize(output_dir, save_animation, unique_id):
 
     focal_bat = 0
     grid_data_time_series = [frame["bat_ipi_matrix"] for frame in history]
+    # print([i[0].shape for i in grid_data_time_series])
     grid_data_time_series_sum = [frame["bat_sum_matrix"] for frame in history]
     rows, columns = given_parameters_df_return_grid_matrix_zeros(parameters_df)[1:3]
     spatial_grid_r = rows
@@ -363,7 +361,7 @@ def visualize(output_dir, save_animation, unique_id):
             trajectory_history[j].append((x, y))
 
             # Keep only the last 400 positions
-            if len(trajectory_history[j]) > 400:
+            if len(trajectory_history[j]) > 100:
                 trajectory_history[j].pop(0)
 
             # Update trajectory line
@@ -387,6 +385,50 @@ def visualize(output_dir, save_animation, unique_id):
 
         im0.set_array(new_grid_data_time_series[i, 0].T)
         im1.set_array(new_grid_data_time_series_sum[i, 0].T)
+
+        # for sound in frame["sound_objects"]:
+        #     if not sound["status"]:
+        #         continue
+
+        #     emitter_color = cm(sound["emitter_id"] / NUM_COLORS)
+        #     alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
+
+        #     inner = max(
+        #         0,
+        #         sound["radius"]
+        #         - parameters_df["CALL_DURATION"][0] * parameters_df["SOUND_SPEED"][0],
+        #     )
+        #     outer = sound["radius"]
+
+        #     if inner < outer:
+        #         if sound["type"] == "direct":
+        #             linestyle = "-"
+        #             hatching_of_disk = "++"
+        #         else:
+        #             linestyle = "--"
+        #             alpha = 0.5 * alpha
+        #             hatching_of_disk = ".."
+        #         if inner == 0:
+        #             width_of_disk = sound["radius"]
+        #         else:
+        #             width_of_disk = (
+        #                 parameters_df["CALL_DURATION"][0]
+        #                 * parameters_df["SOUND_SPEED"][0]
+        #             )
+        #         wedge = Wedge(
+        #             sound["origin"],
+        #             outer,
+        #             0,
+        #             360,
+        #             width=width_of_disk,
+        #             fill=False,
+        #             color=emitter_color,
+        #             alpha=alpha,
+        #             linestyle=linestyle,
+        #             hatch=hatching_of_disk,
+        #         )
+        #         ax[0].add_patch(wedge)
+        #         sound_artists.append(wedge)
 
         return (
             bat_markers
@@ -416,15 +458,15 @@ def visualize(output_dir, save_animation, unique_id):
             save_animation + f"/animation_without_sound_id_{unique_id}.mp4",
             writer=ffwriter,
         )
-    plt.show()
-    # plt.clf()
+    # plt.show()
+    plt.clf()
 
 
 if __name__ == "__main__":
     print(os.getcwd())
     OUTPUT_DIR = (
         # r"./chain_experiment/3_of_5_position_0/"
-        r"./MISC/consistency_of_calls_movement_rule_data/sciphy_16 copy/"
+        r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/ChainExperiment2/Data/IntermediateData/position_0_left_turn/"
     )
-    SAVE_ANIMATION = OUTPUT_DIR
+    SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION, unique_id=0)

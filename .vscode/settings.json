@@ -6,6 +6,6 @@
         "source.organizeImports": "explicit"
     },
   },
-  "pylint.args": ["--disable=C0115", "--disable=E0401"],
+  "pylint.args": ["--disable=C0115", "--disable=E0401", "--disable=C0413"],
   "isort.args":["--profile", "black"],
 }

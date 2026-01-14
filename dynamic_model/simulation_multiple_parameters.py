@@ -4,8 +4,9 @@ import os
 import time
 
 import pandas as pd
-from simulation_and_plotting.simulation import Simulation
 from supporting_files.utilities import make_dir
+
+from dynamic_model.simulation_and_plotting.class_simulation import Simulation
 
 
 def run_one_instance_of_simulation(

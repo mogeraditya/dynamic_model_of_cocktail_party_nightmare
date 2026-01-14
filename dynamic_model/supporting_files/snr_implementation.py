@@ -1,19 +1,7 @@
 # you have a list of sound objects
 # first filtering is include direct sounds or not
 import numpy as np
-
-# from read_simulation_output import read_data_per_simulation_per_bat
 from supporting_files.utilities import change_tuples_to_vector_in_sound
-
-# from numba import jit
-
-
-# import pandas as pd
-
-
-# call_duration = 0.005
-# sim_time_step = 0.0005
-# sim_rounding = 4
 
 
 def parse_sounds(
@@ -183,38 +171,6 @@ def sound_within_time_interval(sound, global_time_interval):
     return is_sound_inside_time_interval
 
 
-# def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
-
-#     start_time_of_ipi = list_of_sounds[0]["bat_last_call_time"]
-#     end_time_of_ipi = np.max([i["time"] + i["duration"] for i in list_of_sounds])
-#     time_axis_of_ipi = np.arange(start_time_of_ipi, end_time_of_ipi, sim_time_step)
-#     time_axis_of_ipi = np.round(time_axis_of_ipi, sim_rounding)
-#     matrix_to_store_spls = np.zeros(
-#         shape=(len(time_axis_of_ipi), len(list_of_sounds))
-#     ).copy()
-
-#     for i, sound in enumerate(list_of_sounds):
-#         sound_detection_time = np.round(sound["time"], sim_rounding)
-#         sound_duration = np.round(sound["duration"], sim_rounding)
-#         time_intervals_of_sound = np.arange(
-#             sound_detection_time,
-#             sound_detection_time + sound_duration - sim_time_step / 2,
-#             sim_time_step,
-#         )
-#         # print(time_intervals_of_sound, sound_duration, time_axis_of_ipi)
-#         for j, time in enumerate(time_intervals_of_sound):
-#             index_to_put_spl = np.where(time_axis_of_ipi == time)[0]
-#             matrix_to_store_spls[index_to_put_spl, i] = sound["all_spl_values"][j]
-#         # print(sound["all_spl_values"], matrix_to_store_spls[:, i])
-
-#     total_profile = np.array(
-#         [find_sum_of_db(i, sim_rounding) for i in matrix_to_store_spls]
-#     )
-#     # print(matrix_to_store_spls)
-#     # print(time_axis_of_ipi)
-#     return np.array(time_axis_of_ipi), total_profile
-
-
 def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
 
     start_time_of_ipi = list_of_sounds[0]["bat_last_call_time"]
@@ -250,6 +206,7 @@ def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
     # print(matrix_to_store_spls)
     # print(time_axis_of_ipi)
     # print(list_of_sounds)
+    # print(total_profile)
     return np.array(time_axis_of_ipi), total_profile
 
 

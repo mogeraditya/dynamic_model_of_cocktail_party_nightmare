@@ -22,7 +22,7 @@ from snr_implementation import parse_sounds, serialize_sound_info
 plt.style.use("dark_background")
 sys.path.append("./dynamic_model")
 plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
-ANGULAR_RESOLUTION = np.pi / 6  # radians
+ANGULAR_RESOLUTION = np.pi / 18  # radians
 RADIAL_RESOLUTION = 0.001
 param = (0, True, np.pi)
 
@@ -193,6 +193,8 @@ def convert_matrix_for_plotting_nicer(
     # print([i.shape for i in list_of_matrix])
     # print(list_of_matrix[0])
     for matrix in list_of_matrix:
+        # print(matrix)
+        # print(matrix.shape)
         new_matrix = np.zeros(shape=(len(rows), len(new_column_labels) - 1)).copy()
         for i in range(new_matrix.shape[0]):
             for j in range(new_matrix.shape[1]):

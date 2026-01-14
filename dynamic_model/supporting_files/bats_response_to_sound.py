@@ -1,10 +1,12 @@
 import numpy as np
-from supporting_files.supporting_functions_for_consistency import (
+from supporting_files.supporting_functions_for_consistency import (  # given_matrix_find_cell_to_respond_to_absence,
     convert_detected_sounds_into_grids,
     given_matrix_find_cell_to_respond_to_absence,
     given_matrix_find_cell_to_respond_to_presence,
+    given_matrix_find_cell_to_respond_to_presence_2,
     given_time_and_angle_return_direction,
 )
+from supporting_files.vectors import Vector
 
 
 def decide_next_direction_based_on_consistency(self, detected_sound_objects):
@@ -19,7 +21,10 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     ][0]
     grid_for_current_ipi, grid_row_labels, grid_column_labels = (
         convert_detected_sounds_into_grids(
-            detected_sound_objects, self.parameters_df, self.allocentric_axis_y
+            detected_sound_objects,
+            self.parameters_df,
+            self.direction,
+            self.allocentric_axis_y,
         )
     )
     self.memory_window_to_store_grids.append(grid_for_current_ipi)
@@ -41,9 +46,12 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     # absence presence implementation ---------------------------------------------------------
     controller_type = self.parameters_df["CONTROLLER_TYPE"][0]
     if controller_type == "presence":
-        cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_presence(
+        cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_presence_2(
             sum_grids_in_memory,
             number_of_consistent_ipis_for_behaviour,
+            self.parameters_df,
+            self.direction,
+            self.allocentric_axis_y,
             self.cell_index_to_respond_to,
         )
     elif controller_type == "absence":
@@ -51,19 +59,29 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
             sum_grids_in_memory,
             number_of_consistent_ipis_for_behaviour,
             self.parameters_df,
-            grid_column_labels,
             self.direction,
             self.allocentric_axis_y,
+            self.cell_index_to_respond_to,
         )
+    #     cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_absence(
+    #         sum_grids_in_memory,
+    #         number_of_consistent_ipis_for_behaviour,
+    #         self.parameters_df,
+    #         grid_column_labels,
+    #         self.direction,
+    #         self.allocentric_axis_y,
+    #     )
     else:
         raise ValueError("unsupported controller type")
     # -------------------------------------------------------------------------------------------
+    print(f"bat call time {self.emit_times[-1]}")
 
     self.cell_index_to_respond_to = cell_index_to_respond_to
     if np.isnan(cell_index_to_respond_to[0]):
         next_direction = self.direction
         response_type = None
         self.any_consistent_sound = "no"
+
     else:
         time_delay_of_activated_cell = grid_row_labels[cell_index_to_respond_to[0]]
         angle_of_activated_cell = grid_column_labels[cell_index_to_respond_to[1]]

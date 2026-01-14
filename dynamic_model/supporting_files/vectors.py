@@ -3,11 +3,13 @@
 import math
 import random
 
+import numpy as np
+
 
 class Vector:
     def __init__(self, x=0.0, y=0.0):
-        self.x = x
-        self.y = y
+        self.x = np.round(x, 5)
+        self.y = np.round(y, 5)
 
     def __add__(self, other):
         return Vector(self.x + other.x, self.y + other.y)
@@ -121,5 +123,33 @@ class Vector:
         new_y = self.x * math.sin(angle) + self.y * math.cos(angle)
         return Vector(new_x, new_y)
 
+    def rotation_matrix(self, angle):
+        """rotation matrix
+
+        Args:
+            angle (float): angle in radians
+
+        Returns:
+            matrix: matrix defining rotation
+        """
+        matrix = np.matrix(
+            [
+                [math.cos(angle), -1 * math.sin(angle)],
+                [math.sin(angle), math.cos(angle)],
+            ]
+        )
+        return matrix
+
+    def matrix_multiplication(self, matrix):
+        new_x = self.x * matrix[0, 0] + self.y * matrix[0, 1]
+        new_y = self.x * matrix[1, 0] + self.y * matrix[1, 1]
+        return Vector(new_x, new_y)
+
     def __repr__(self):
         return f"Vector({self.x:.3f}, {self.y:.3f})"
+
+
+if __name__ == "__main__":
+    allo_axis = Vector(0, 1)
+    bat_dir = Vector(-0.9, 0.1)
+    print(allo_axis.angle_between(bat_dir))
