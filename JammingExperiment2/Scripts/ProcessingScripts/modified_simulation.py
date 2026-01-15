@@ -94,7 +94,7 @@ if __name__ == "__main__":
     store_value = []
 
     jammer_resolutions = [2, 0]
-    params = [3, 6, 9]
+    params = [3]
     for param in params:
         for jammer_resolution in jammer_resolutions:
             OUTPUT_DIR = f"./JammingExperiment2/Data/IntermediateData/effect_of_rotation_{param}_{jammer_resolution}/"

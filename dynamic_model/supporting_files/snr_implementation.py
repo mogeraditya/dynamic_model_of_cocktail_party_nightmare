@@ -180,15 +180,11 @@ def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
     )
     time_axis_of_ipi = np.round(time_axis_of_ipi, sim_rounding)
     matrix_to_store_spls = np.zeros(shape=(len(time_axis_of_ipi))).copy()
-    # print(matrix_to_store_spls)
+
     for i, sound in enumerate(list_of_sounds):
         sound_detection_time = np.round(sound["time"], sim_rounding)
-        # sound_duration = np.round(sound["duration"], sim_rounding)
-        # print(time_intervals_of_sound, sound_duration, time_axis_of_ipi)
-
         index_to_put_spl = np.where(time_axis_of_ipi == sound_detection_time)[0]
-        # print(index_to_put_spl)
-        # print(matrix_to_store_spls[index_to_put_spl])
+
         if matrix_to_store_spls[index_to_put_spl] == 0:
             matrix_to_store_spls[index_to_put_spl] = sound["received_spl"]
         else:
@@ -197,16 +193,7 @@ def create_total_masking_profile(list_of_sounds, sim_time_step, sim_rounding):
                 sim_rounding,
             )
 
-        # print(sound["all_spl_values"], matrix_to_store_spls[:, i])
-
-    # total_profile = np.array(
-    #     [find_sum_of_db(i, sim_rounding) for i in matrix_to_store_spls]
-    # )
     total_profile = matrix_to_store_spls
-    # print(matrix_to_store_spls)
-    # print(time_axis_of_ipi)
-    # print(list_of_sounds)
-    # print(total_profile)
     return np.array(time_axis_of_ipi), total_profile
 
 
@@ -216,27 +203,57 @@ def filter_sounds_based_on_total_profile(list_of_sounds, sim_time_step, sim_roun
         list_of_sounds, sim_time_step, sim_rounding
     )
     intensity_threshold_based_on_total_profile = total_profile - 34
-    # print(total_profile)
+
     for sound in list_of_sounds:
         sound_detection_time = np.round(sound["time"], sim_rounding)
         index_based_on_time = np.where(time_axis_of_ipi == sound_detection_time)[0]
-        # print(index_based_on_time, sound_detection_time, time_axis_of_ipi)
-        # print(f"is time in list {sound_detection_time in time_axis_of_ipi}")
-        # print(np.where(t))
+
         sound_detection_intensity = sound["received_spl"]
         is_intensity_above_threshold = (
             sound_detection_intensity
             > intensity_threshold_based_on_total_profile[index_based_on_time]
         )
-        # print(sound_detection_intensity, intensity_threshold_based_on_total_profile)
-        # print(is_intensity_above_threshold, index_based_on_time)
+
         if is_intensity_above_threshold:
             filtered_list_of_sounds.append(sound)
 
     return filtered_list_of_sounds
 
 
-# @jit(nopython=True)
+def given_focal_sound_find_time_axis_relevant_for_snr(
+    focal_sound_object,
+    time_extent_of_temporal_masking_fn_file,
+    sim_time_step,
+    sim_rounding,
+):
+    # the - sim_time_step / 2 is cause numpy sometimes includes the last term
+    start_time_of_focal_sound = focal_sound_object["time"]
+    ipi_start_time = focal_sound_object["bat_last_call_time"]
+    duration_before_call_to_consider = start_time_of_focal_sound - ipi_start_time
+
+    start_of_time_axis = np.min(
+        [time_extent_of_temporal_masking_fn_file[0], duration_before_call_to_consider]
+    )
+    end_of_time_axis = (
+        -focal_sound_object["duration"] + time_extent_of_temporal_masking_fn_file[1]
+    )
+
+    time_extent_of_masking_in_global_time = [
+        start_time_of_focal_sound - start_of_time_axis,
+        start_time_of_focal_sound - end_of_time_axis,
+    ]
+
+    time_axis_given_sound = np.round(
+        np.arange(
+            start_of_time_axis,
+            end_of_time_axis - sim_time_step / 2,
+            -sim_time_step,
+        ),
+        sim_rounding,
+    )
+    return time_extent_of_masking_in_global_time, time_axis_given_sound
+
+
 def generate_sound_profile(
     list_of_sounds,
     focal_sound_object,
@@ -258,35 +275,15 @@ def generate_sound_profile(
         list,list: returns the focal sound to masker ratio and
         the time axis centered around focal sound
     """
-    # the - sim_time_step / 2 is cause numpy sometimes includes the last term wtf kms
-    start_time_of_focal_sound = focal_sound_object["time"]
-    ipi_start_time = focal_sound_object["bat_last_call_time"]
 
-    duration_before_call_to_consider = start_time_of_focal_sound - ipi_start_time
-
-    # time_extent_of_temporal_masking_fn_file = [0.025, -0.001]
-
-    start_of_time_axis = np.min(
-        [time_extent_of_temporal_masking_fn_file[0], duration_before_call_to_consider]
+    time_extent_of_masking_in_global_time, time_axis_given_sound = (
+        given_focal_sound_find_time_axis_relevant_for_snr(
+            focal_sound_object,
+            time_extent_of_temporal_masking_fn_file,
+            sim_time_step,
+            sim_rounding,
+        )
     )
-    end_of_time_axis = (
-        -focal_sound_object["duration"] + time_extent_of_temporal_masking_fn_file[1]
-    )
-
-    time_extent_of_masking_global_time = [
-        start_time_of_focal_sound - start_of_time_axis,
-        start_time_of_focal_sound - end_of_time_axis,
-    ]
-
-    time_axis_given_sound = np.round(
-        np.arange(
-            start_of_time_axis,
-            end_of_time_axis - sim_time_step / 2,
-            -sim_time_step,
-        ),
-        sim_rounding,
-    )
-
     matrix_with_spls = np.zeros(shape=(len(time_axis_given_sound), len(list_of_sounds)))
 
     for i, sound in enumerate(list_of_sounds):
@@ -294,20 +291,12 @@ def generate_sound_profile(
             sound["sound_object_id"] != focal_sound_object["sound_object_id"]
         )
         if is_sound_not_focal_sound and sound_within_time_interval(
-            sound, time_extent_of_masking_global_time
+            sound, time_extent_of_masking_in_global_time
         ):
-            # time_of_sound_wrt_focal_sound = np.round(
-            #     sound["time"] - focal_sound_object["time"], sim_rounding
-            # )
 
             time_intervals_to_add_intensity = (
                 sound["occurance_times"] - focal_sound_object["time"]
             )
-            # np.arange(
-            #     time_of_sound_wrt_focal_sound,
-            #     time_of_sound_wrt_focal_sound + sound["duration"] + sim_time_step / 2,
-            #     sim_time_step,
-            # )
 
             for j, time_step in enumerate(time_intervals_to_add_intensity):
                 index_to_put_spl = np.where(time_axis_given_sound == time_step)[0]
@@ -318,7 +307,7 @@ def generate_sound_profile(
         [find_sum_of_db(i, sim_rounding) for i in matrix_with_spls]
     )
     focal_sound_profile = (
-        np.ones(shape=(len(time_axis_given_sound))) * focal_sound_object["received_spl"]
+        np.ones(shape=len(time_axis_given_sound)) * focal_sound_object["received_spl"]
     )
 
     focal_sound_masker_ratio = focal_sound_profile - masker_profile
@@ -332,7 +321,6 @@ def get_temporal_masking_function_based_on_sound(
     sim_time_step,
 ):
     """
-
     Args:
         time_axis_given_sound (list): time axis centered around focal sound
         dir_of_temporal_masking_fn_file (str): directory of temporal masking function file
@@ -344,7 +332,6 @@ def get_temporal_masking_function_based_on_sound(
     Returns:
         list: masking tolerance at each point on the time axis
     """
-    # temporal_masking_df = pd.read_csv(dir_of_temporal_masking_fn_file)
     masking_tolerance = []
     for time_step in time_axis_given_sound:
         if time_step >= 0:
@@ -356,9 +343,7 @@ def get_temporal_masking_function_based_on_sound(
         elif time_step < -duration_of_sound:
             subset_timegap_bin = time_step + duration_of_sound
         else:
-            # print(time_step)
             raise ValueError
-        # print(temporal_masking_df)
 
         timegaps = temporal_masking_df["timegap_ms"]
         mask = (subset_timegap_bin <= timegaps) & (
@@ -369,29 +354,6 @@ def get_temporal_masking_function_based_on_sound(
             "dB_leveldiff": temporal_masking_df["dB_leveldiff"][mask],
         }
 
-        # subset_of_temporal_masking_array = np.array(
-        #     [
-        #         [
-        #             temporal_masking_df["timegap_ms"][i],
-        #             temporal_masking_df["dB_leveldiff"][i],
-        #         ]
-        #         for i in range(len(temporal_masking_df["dB_leveldiff"]))
-        #         if subset_timegap_bin
-        #         <= temporal_masking_df["timegap_ms"][i]
-        #         < subset_timegap_bin + sim_time_step
-        #     ]
-        # )
-        # subset_of_temporal_masking_df = {}
-        # subset_of_temporal_masking_df["dB_leveldiff"] = (
-        #     subset_of_temporal_masking_array[:, 1]
-        # )
-        # subset_of_temporal_masking_df["timegap_ms"] = subset_of_temporal_masking_array[
-        #     :, 0
-        # ]
-        # subset_of_temporal_masking_df = temporal_masking_df[
-        #     (temporal_masking_df["timegap_ms"] >= subset_timegap_bin)
-        #     & (temporal_masking_df["timegap_ms"] < subset_timegap_bin + sim_time_step)
-        # ]
         threshold_for_masking = np.mean(subset_of_temporal_masking_df["dB_leveldiff"])
         masking_tolerance.append(threshold_for_masking)
     return masking_tolerance
@@ -420,7 +382,6 @@ def is_signal_heard(
     Returns:
         bool: true if sound is heard, else false
     """
-    # temporal_masking_df = pd.read_csv(dir_of_temporal_masking_fn_file)
     time_extent_of_temporal_masking_fn_file = [
         np.max(temporal_masking_df["timegap_ms"]),
         np.min(temporal_masking_df["timegap_ms"]),
@@ -504,11 +465,8 @@ def given_sound_objects_return_detected_sounds(
     parsed_serialized_sounds = serialize_sound_info(
         parsed_serialized_sounds, sim_time_step, sim_rounding
     )
-    # print(len(parsed_serialized_sounds))
     if len(parsed_serialized_sounds) == 0:
         return []
-
-    # print(len(parsed_serialized_sounds))
 
     heard_sounds = []
     for focal_sound in parsed_serialized_sounds:

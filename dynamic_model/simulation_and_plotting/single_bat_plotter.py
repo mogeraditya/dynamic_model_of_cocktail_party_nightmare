@@ -458,15 +458,15 @@ def visualize(output_dir, save_animation, unique_id):
             save_animation + f"/animation_without_sound_id_{unique_id}.mp4",
             writer=ffwriter,
         )
-    # plt.show()
-    plt.clf()
+    plt.show()
+    # plt.clf()
 
 
 if __name__ == "__main__":
     print(os.getcwd())
     OUTPUT_DIR = (
         # r"./chain_experiment/3_of_5_position_0/"
-        r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/ChainExperiment2/Data/IntermediateData/position_0_left_turn/"
+        "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/MISC/consistency_of_calls_movement_rule_data/presence_revamp_10"
     )
     SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION, unique_id=0)

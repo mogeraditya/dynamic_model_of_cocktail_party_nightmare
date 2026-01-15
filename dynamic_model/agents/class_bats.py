@@ -451,7 +451,7 @@ class Bat:
                 self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
                 self.call_rate = self.parameters_df["CALL_RATE_FAST"][0]
             else:
-                self.speed = self.parameters_df["BAT_SPEED"][0]
+                # self.speed = self.parameters_df["BAT_SPEED"][0]
                 self.call_rate = self.parameters_df["CALL_RATE"][0]
 
             self.next_direction, self.response_type = self.decide_next_direction(

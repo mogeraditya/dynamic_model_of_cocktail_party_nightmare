@@ -6,7 +6,7 @@ from supporting_files.vectors import Vector
 class WallPanel(Obstacle):
     def __init__(self, parameters_df, position):
         radius = 0.0001
-        super.__init__(parameters_df, position, radius)
+        super().__init__(parameters_df, position, radius)
 
     def __repr__(self):
         return f"WallPanel(id={self.id}, position={self.position})"
