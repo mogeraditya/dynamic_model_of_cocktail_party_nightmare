@@ -42,7 +42,7 @@ class Modified_Simulation(Simulation):
         super().__init__(parameters_df, output_dir)
 
         parameters_df["ARENA_WIDTH"] = [3.9]
-        parameters_df["ARENA_HEIGHT"] = [2.6]
+        parameters_df["ARENA_LENGTH"] = [2.6]
         parameters_df["SIM_DURATION"] = [10]
 
         self.bats = []

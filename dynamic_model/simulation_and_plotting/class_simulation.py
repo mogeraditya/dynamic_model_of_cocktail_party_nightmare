@@ -99,7 +99,7 @@ class Simulation:
                 s
                 for s in self.sound_objects
                 if s.active
-                and s.current_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
+                and s.current_spl > self.parameters_df["HEARING_THRESHOLD"][0]
             ]
 
             self.history.append(self.convert_necessary_information_into_dict())
@@ -133,7 +133,7 @@ class Simulation:
                 self.serialize_sound(s)
                 for s in self.sound_objects
                 if s.active
-                and s.current_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
+                and s.current_spl > self.parameters_df["HEARING_THRESHOLD"][0]
             ],
             "sound_objects_count": len(self.sound_objects),
             "next_dir_angle": [
@@ -244,7 +244,7 @@ class Simulation:
             #     ),
             #     Vector(
             #         sound.origin.x,
-            #         self.parameters_df["ARENA_HEIGHT"][0],
+            #         self.parameters_df["ARENA_LENGTH"][0],
             #     ),
             # ]
 

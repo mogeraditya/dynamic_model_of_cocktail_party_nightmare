@@ -142,14 +142,14 @@ def setup_visualization(parameters_df, bats, obstacles):
     ax[1] = fig.add_subplot(132, projection="polar")
     ax[2] = fig.add_subplot(133, projection="polar")
     ax[0].set_xlim(0, parameters_df["ARENA_WIDTH"][0])
-    ax[0].set_ylim(0, parameters_df["ARENA_HEIGHT"][0])
+    ax[0].set_ylim(0, parameters_df["ARENA_LENGTH"][0])
     ax[0].set_aspect("equal")
     ax[0].set_title("Bat Echolocation with Direct Calls and Echoes")
 
     boundary = Rectangle(
         (0, 0),
         parameters_df["ARENA_WIDTH"][0],
-        parameters_df["ARENA_HEIGHT"][0],
+        parameters_df["ARENA_LENGTH"][0],
         fill=False,
         linestyle="--",
         color="gray",

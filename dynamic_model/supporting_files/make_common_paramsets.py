@@ -14,7 +14,7 @@ simulation_parameters["CLEANUP_PLOT_DATA"] = (
     1000  # iterations; number of iterations of simulation after which data is stored for plotting
 )
 simulation_parameters["ARENA_WIDTH"] = 7  # m; width of arena
-simulation_parameters["ARENA_HEIGHT"] = 5  # m; height of arena
+simulation_parameters["ARENA_LENGTH"] = 5  # m; LENGTH of arena
 simulation_parameters["TIME_STEP"] = 0.001  # s; time step of simulation
 simulation_parameters["FRAME_RATE"] = 100  # frame of the plotted video
 
@@ -26,7 +26,7 @@ simulation_parameters["REFLECTION_LOSS"] = 0.5  # dB loss per reflection
 simulation_parameters["BAT_SPEED"] = 10  # m/s; speed of bat
 simulation_parameters["BAT_RADIUS"] = 0  # m; radius of bat
 simulation_parameters["EMITTED_SPL"] = 140  # dB; emitted spl of bat call
-simulation_parameters["MIN_DETECTABLE_SPL"] = (
+simulation_parameters["HEARING_THRESHOLD"] = (
     20  # dB; spl level below whih a bat cannot detect a sound
 )
 simulation_parameters["NUM_BATS"] = 1  # number of bats in the simulation

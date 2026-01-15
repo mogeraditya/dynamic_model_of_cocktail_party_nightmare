@@ -113,13 +113,13 @@ if __name__ == "__main__":
                 jammer_locations = None
             else:
                 width_array = np.arange(2, PARAMETER_DF["ARENA_WIDTH"][0], 2)
-                height_array = np.arange(2, PARAMETER_DF["ARENA_HEIGHT"][0], 2)
-                left_wall = [(0.01, i) for i in height_array]
+                LENGTH_array = np.arange(2, PARAMETER_DF["ARENA_LENGTH"][0], 2)
+                left_wall = [(0.01, i) for i in LENGTH_array]
                 right_wall = [
-                    (PARAMETER_DF["ARENA_WIDTH"][0] - 0.01, i) for i in height_array
+                    (PARAMETER_DF["ARENA_WIDTH"][0] - 0.01, i) for i in LENGTH_array
                 ]
                 top_wall = [
-                    (i, PARAMETER_DF["ARENA_HEIGHT"][0] - 0.01) for i in width_array
+                    (i, PARAMETER_DF["ARENA_LENGTH"][0] - 0.01) for i in width_array
                 ]
                 bottom_wall = [(i, 0.01) for i in width_array]
 
@@ -138,7 +138,7 @@ if __name__ == "__main__":
             LOCATION_NUMBER = 0
             chosen_start_location = (
                 PARAMETER_DF["ARENA_WIDTH"][0] / 2,
-                PARAMETER_DF["ARENA_HEIGHT"][0] / 2,
+                PARAMETER_DF["ARENA_LENGTH"][0] / 2,
             )
             sim_identifier = uuid.uuid4()
             sim = Modified_Simulation(

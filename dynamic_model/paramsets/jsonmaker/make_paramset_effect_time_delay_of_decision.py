@@ -25,7 +25,7 @@ simulation_parameters = load_parameters(
 # )
 # make_dir(DIR_TO_STORE_PARAMSETS)
 # simulation_parameters["ARENA_WIDTH"] = 7
-# simulation_parameters["ARENA_HEIGHT"] = 5
+# simulation_parameters["ARENA_LENGTH"] = 5
 # simulation_parameters["NUM_BATS"] = 25
 # simulation_parameters["SIM_DURATION"] = 10
 # for time_delay in time_delays:
