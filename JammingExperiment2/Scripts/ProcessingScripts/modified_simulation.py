@@ -93,8 +93,10 @@ if __name__ == "__main__":
     store_metric = []
     store_value = []
 
-    jammer_resolutions = [2, 0]
-    params = [3]
+    jammer_resolutions = [
+        uuid.uuid4(),
+    ]
+    params = [6]
     for param in params:
         for jammer_resolution in jammer_resolutions:
             OUTPUT_DIR = f"./JammingExperiment2/Data/IntermediateData/effect_of_rotation_{param}_{jammer_resolution}/"

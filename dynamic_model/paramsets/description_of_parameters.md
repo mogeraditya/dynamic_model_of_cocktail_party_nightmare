@@ -57,6 +57,3 @@ Parameters crucial for the simulation are described in this file. Details about 
 3. "MEMORY_WINDOW_FOR_CONSISTENCY": Number of calls over which movement decision is integrated over. Think of this as a moving window, i.e., if the value of this parameter was x, decision after the i-th call occurs after integrating information obtained from (i-x)-th call to i-th call. 
 4. "CONVERT_GRIDS+TO_ONE_HOT_?": Yes if you want sound information to be converted to one hot encoding every call, no if you want to normalize based on the total number of sounds (Bool). 
 5. "NUMBER_OF_CONSISTENT_IPIS_FOR_MOVEMENT":  Minimum number of calls over which information needs to be heard in order to be considered for response. 
-
-
-
