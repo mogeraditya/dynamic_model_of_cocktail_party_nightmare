@@ -1,14 +1,14 @@
 
-Read the Docs logo
-Add project
-Add a configuration file to your project
-Help topics
-Configuration file tutorial
-Configuration file reference
-Manually configuring a Git repository
-A .readthedocs.yaml file is required at the root of your repository to build your project's documentation. You can pick an example for your documentation tool as a starting point below, and save and commit it to your repository.
-Example configuration for:
-.readthedocs.yaml
+# Read the Docs logo
+# Add project
+# Add a configuration file to your project
+# Help topics
+# Configuration file tutorial
+# Configuration file reference
+# Manually configuring a Git repository
+# A .readthedocs.yaml file is required at the root of your repository to build your project's documentation. You can pick an example for your documentation tool as a starting point below, and save and commit it to your repository.
+# Example configuration for:
+# .readthedocs.yaml
 
 # Read the Docs configuration file
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
