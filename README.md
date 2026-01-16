@@ -9,6 +9,7 @@ Use the environment_cocktail_3.yml alongside conda in order to install all the p
 > conda env create -f environment_cocktail_3.yml
 Ensure that the code is run through this environment with the base path set to the repository directory. The base path should be repository directory and *NOT* path of individual experiment folders.
 ---
+
 ## Parameters of the model? 
 For detailed description of the parameters involved in any simulation, please refer to ./dynamic_model\paramsets\description_of_parameters.md.
 ---
