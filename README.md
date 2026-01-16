@@ -1,13 +1,13 @@
 ---
 # Dynamic Model of Cocktail Party Nightmare
- Implementing a dynamic model of the cocktail party nightmare problem :)
+Agent-based model implementing heuristic behaviours to understand bat collective behaviour.
 ---
 
 ## Installation of environment
 
-Use the environment_cocktail_3.yml alongside conda in order to install all the pre-requistite packages needed to run these simulations. This can be come running;
+Use the environment_cocktail_3.yml alongside conda in order to install all the pre-requistite packages needed to run these simulations. This can be done by running;
 > conda env create -f environment_cocktail_3.yml
-
+Ensure that the code is run through this environment with the base path set to the repository directory. The base path should be repository directory and *NOT* path of individual experiment folders.
 ---
 ## Parameters of the model? 
 For detailed description of the parameters involved in any simulation, please refer to ./dynamic_model\paramsets\description_of_parameters.md.
