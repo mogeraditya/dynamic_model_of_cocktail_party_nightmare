@@ -23,11 +23,10 @@ For detailed description of the parameters used in model, please refer to ./dyna
 3. Run the ./dynamic_model/simulation_and_plotting/simulation.py file
     this runs one instance of the simulation. 
 
-4. Change directories in the plotter.py/ single_bat_plotter.py file
+4. Change directories in the plotter.py or single_bat_plotter.py file
     change the OUTPUT_DIR (directory where the output of the simulation is saved) and SAVE_SIMULATION (False if animation need not be saved, else is the directory where the animation needs to be saved)
 
-5. Run ./dynamic_model/simulation_and_plotting/plotter.py 
-    animation will pop out of a video after it is processed!
+5. Run ./dynamic_model/simulation_and_plotting/plotter.py or ./dynamic_model/simulation_and_plotting/single_bat_plotter.py depending on the required type of animation and an animation will pop out as a window after it is processed! If a directory was specfied in SAVE_SIMULATION, video is rendered and stored as well.
 ---
 
 ## How to run for varying parameters
