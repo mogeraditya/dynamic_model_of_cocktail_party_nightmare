@@ -25,7 +25,7 @@ DIR_TO_STORE_PARAMSETS = r"./dynamic_model/paramsets/effect_of_nothing/store_par
 make_dir(DIR_TO_STORE_PARAMSETS)
 simulation_parameters["CALL_RATE"] = 0.00000000000000001
 simulation_parameters["ARENA_WIDTH"] = 7
-simulation_parameters["ARENA_HEIGHT"] = 5
+simulation_parameters["ARENA_LENGTH"] = 5
 simulation_parameters["SIM_DURATION"] = 10
 simulation_parameters["TIME_DELAY_THRESHOLD_FOR_REPULSION"] = 0.008
 

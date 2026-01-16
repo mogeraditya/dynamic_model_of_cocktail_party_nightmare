@@ -63,91 +63,6 @@ def given_matrix_shortlist_response_cells(matrix, threshold_for_activation):
     )
 
 
-def given_matrix_find_cell_to_respond_to_presence(
-    matrix, threshold_for_activation, previous_output_cell
-):
-    find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index = (
-        given_matrix_shortlist_response_cells(matrix, threshold_for_activation)
-    )
-
-    _first_element_for_nan_check = find_all_elements_with_min_row_index[0][0]
-    if np.isnan(_first_element_for_nan_check):
-        return [np.nan, np.nan]
-    else:
-
-        is_previous_cell_repeated = any(
-            all(item in sublist for item in previous_output_cell)
-            for sublist in find_all_elements_with_min_row_index
-        )
-
-        if is_previous_cell_repeated:
-            return previous_output_cell
-
-        output_cell_number = find_all_elements_with_min_row_index[
-            np.argsort(find_all_thresholds_with_min_row_index)[-1]
-        ]
-        return output_cell_number
-
-
-# def given_matrix_find_cell_to_respond_to_absence(
-#     matrix,
-#     threshold_for_activation,
-#     parameters_df,
-#     columns,
-#     bat_direction,
-#     allocentric_axis_y,
-# ):
-#     # need to output the cell that corresponds to direction of the bat
-#     find_all_elements_with_min_row_index = given_matrix_shortlist_response_cells(
-#         matrix, threshold_for_activation
-#     )[0]
-
-#     _first_element_for_nan_check = find_all_elements_with_min_row_index[0][0]
-#     if np.isnan(_first_element_for_nan_check):
-#         return [np.nan, np.nan]
-
-#     spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"][0]
-
-#     if spatial_reference_frame == "allocentric":
-#         angle_between_self_and_allocentric_axis = bat_direction.angle_between(
-#             allocentric_axis_y
-#         )
-#     elif spatial_reference_frame == "egocentric":
-#         angle_between_self_and_allocentric_axis = 0
-#     else:
-#         raise ValueError("incorrect reference frame choice")
-
-#     column_index_of_direction = bisect.bisect_right(
-#         columns, angle_between_self_and_allocentric_axis
-#     )
-
-#     row_index_of_activation = find_all_elements_with_min_row_index[0][0]
-#     column_indices_having_activations = find_all_elements_with_min_row_index[:, 1]
-#     column_indices_not_having_activations = np.array(
-#         [
-#             i
-#             for i in range(1, matrix.shape[1])
-#             if i not in column_indices_having_activations
-#         ]
-#     )
-#     print(
-#         np.degrees(angle_between_self_and_allocentric_axis), column_index_of_direction
-#     )
-#     print(column_indices_having_activations, column_indices_not_having_activations)
-#     if column_index_of_direction in column_indices_not_having_activations:
-#         return [row_index_of_activation, column_index_of_direction]
-#     elif len(column_indices_not_having_activations) == 0:
-#         return [row_index_of_activation, column_index_of_direction]
-#     else:
-#         nearest_empty_column_index = column_indices_not_having_activations[
-#             np.abs(
-#                 column_indices_not_having_activations - column_index_of_direction
-#             ).argmin()
-#         ]
-#         print([row_index_of_activation, nearest_empty_column_index])
-#         return [row_index_of_activation, nearest_empty_column_index]
-
-
 def given_parameters_df_return_grid_matrix_zeros(parameters_df):
     radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
     angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
@@ -178,8 +93,7 @@ def convert_detected_sounds_into_grids(
     Returns:
         _type_: _description_
     """
-    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
+
     spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"][0]
     convert_grid_to_one_hot = str2bool(parameters_df["CONVERT_GRIDS+TO_ONE_HOT_?"][0])
     time_step_size = parameters_df["TIME_STEP"][0]
@@ -206,7 +120,7 @@ def convert_detected_sounds_into_grids(
         elif spatial_reference_frame == "egocentric":
             theta = bat_direction.angle_between(sound_object["incident_direction"])
         else:
-            raise ValueError("not a supported spatail reference frame")
+            raise ValueError("not a supported spatial reference frame")
 
         grid_row_index = bisect.bisect_left(spatial_grid_r, delta_t)
         grid_column_index = bisect.bisect_left(spatial_grid_theta, theta)
@@ -215,12 +129,11 @@ def convert_detected_sounds_into_grids(
         if grid_column_index == len(spatial_grid_theta):
             grid_column_index = 0
 
-        # print(delta_t, theta, grid_row_index, grid_column_index, spatial_grid_r)
         store_grid[grid_row_index, grid_column_index] += 1
     if convert_grid_to_one_hot:
         store_grid = convert_matrix_to_one_hot(store_grid).copy()
-    if (store_grid == matrix_spatial_grid).all():
-        print("aiyo")
+    else:
+        store_grid = store_grid / np.max(store_grid)
     return store_grid, spatial_grid_r, spatial_grid_theta
 
 
@@ -241,7 +154,7 @@ def given_time_and_angle_return_direction(
     radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
     noise_in_angle = np.random.uniform(-angular_resolution / 2, angular_resolution / 2)
     angle_of_next_direction = (
-        angle_of_activated_cell - angular_resolution / 2  # + noise_in_angle
+        angle_of_activated_cell - angular_resolution / 2 + noise_in_angle
     )
     corrected_time_delay = time_delay_of_activated_cell - radial_resolution / 2
 
@@ -281,7 +194,6 @@ def find_indices_corresponding_to_hearing_range(
     hearing_range,
 ):
     bat_angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
-    # hearing_range = np.radians(parameters_df["HEARING_ANGLE_THRESHOLD"][0])
 
     print(hearing_range, angle_between_reference_axis_and_bat)
     angles_to_hearing_range = np.arange(
@@ -303,89 +215,33 @@ def find_indices_corresponding_to_hearing_range(
     return indices_corresponding_to_hearing_range
 
 
-def given_matrix_find_cell_to_respond_to_absence(
+def check_if_no_sound_in_front_of_bat(
     matrix,
+    angle_between_reference_axis_and_bat,
     number_of_consistent_ipis_for_behaviour,
     parameters_df,
-    bat_direction,
-    allocentric_axis_y,
-    previous_output_cell,
 ):
     matrix_w_only_activations = np.zeros(shape=matrix.shape)
     indices_of_matrix_w_activations = np.where(
         matrix >= number_of_consistent_ipis_for_behaviour
     )
     matrix_w_only_activations[indices_of_matrix_w_activations] = 1
-
     consolidated_matrix = np.sum(matrix_w_only_activations, axis=0)
-
-    angle_between_reference_axis_and_bat = allocentric_axis_y.angle_between(
-        bat_direction
-    )
-
-    no_consistent_sound_in_front = check_if_no_sound_in_front_of_bat(
-        consolidated_matrix, angle_between_reference_axis_and_bat, parameters_df
-    )
-    if no_consistent_sound_in_front:
-        print()
-        return [np.nan, np.nan]
-    else:
-        sublist_based_on_hearing_range, hearing_range_indices = (
-            make_sublist_based_on_hearing_range(
-                consolidated_matrix, angle_between_reference_axis_and_bat, parameters_df
-            )
-        )
-        # print(np.where(sublist_based_on_hearing_range <= 0))
-        indices_of_no_activation = hearing_range_indices[
-            np.where(sublist_based_on_hearing_range <= 0)[0]
-        ]
-        print(consolidated_matrix, angle_between_reference_axis_and_bat)
-        print(
-            f"indices_of_no_activation {indices_of_no_activation}, sublist_based_on_hearing_range {sublist_based_on_hearing_range}, hearing_range_indices {hearing_range_indices}"
-        )
-        length_of_sublist = len(sublist_based_on_hearing_range)
-        midpoint_of_sublist = length_of_sublist / 2
-        left_sum_of_sublist = np.sum(
-            sublist_based_on_hearing_range[: int(np.ceil(midpoint_of_sublist))]
-        )
-        right_sum_of_sublist = np.sum(
-            sublist_based_on_hearing_range[int(np.floor(midpoint_of_sublist)) :]
-        )
-        # if left_sum_of_sublist < right_sum_of_sublist:
-        #     return [0, hearing_range_indices[0]]
-        # elif right_sum_of_sublist < left_sum_of_sublist:
-        #     return [0, hearing_range_indices[-1]]
-        if False:
-            return [np.nan, np.nan]
-        else:
-            presence_response = given_matrix_find_cell_to_respond_to_presence(
-                matrix, number_of_consistent_ipis_for_behaviour, previous_output_cell
-            )
-            return presence_response
-
-
-def check_if_no_sound_in_front_of_bat(
-    activation_array, angle_between_reference_axis_and_bat, parameters_df
-):
 
     angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
     spatial_grid_theta = np.arange(-np.pi, np.pi, angular_resolution)
-    print(
-        f"{np.degrees(angle_between_reference_axis_and_bat)} is the angle_between_reference_axis_and_bat"
-    )
+
     frontal_range_indices = find_indices_corresponding_to_hearing_range(
         parameters_df,
         spatial_grid_theta,
         angle_between_reference_axis_and_bat,
-        hearing_range=angular_resolution,
+        hearing_range=angular_resolution * 2,
     )
 
     sublist_based_on_frontal_range = []
     for index in frontal_range_indices:
-        sublist_based_on_frontal_range.append(activation_array[index])
-    print(
-        f"frontal range indices {frontal_range_indices}; sublist_based on frontal range {sublist_based_on_frontal_range}"
-    )
+        sublist_based_on_frontal_range.append(consolidated_matrix[index])
+
     if all(i == 0 for i in sublist_based_on_frontal_range):
         return True
     else:
@@ -425,7 +281,7 @@ def convert_angles_to_negpi_to_pi(list_of_angles):
     return np.array(new_list)
 
 
-def given_matrix_find_cell_to_respond_to_presence_2(
+def given_matrix_find_cell_to_respond_to_presence(
     matrix,
     number_of_consistent_ipis_for_behaviour,
     parameters_df,
@@ -433,20 +289,15 @@ def given_matrix_find_cell_to_respond_to_presence_2(
     allocentric_axis_y,
     previous_output_cell,
 ):
-    matrix_w_only_activations = np.zeros(shape=matrix.shape)
-    indices_of_matrix_w_activations = np.where(
-        matrix >= number_of_consistent_ipis_for_behaviour
-    )
-    matrix_w_only_activations[indices_of_matrix_w_activations] = 1
-
-    consolidated_matrix = np.sum(matrix_w_only_activations, axis=0)
-
     angle_between_reference_axis_and_bat = allocentric_axis_y.angle_between(
         bat_direction
     )
 
     no_consistent_sound_in_front = check_if_no_sound_in_front_of_bat(
-        consolidated_matrix, angle_between_reference_axis_and_bat, parameters_df
+        matrix,
+        angle_between_reference_axis_and_bat,
+        number_of_consistent_ipis_for_behaviour,
+        parameters_df,
     )
     if no_consistent_sound_in_front:
         print()
@@ -474,3 +325,88 @@ def given_matrix_find_cell_to_respond_to_presence_2(
             np.argsort(find_all_thresholds_with_min_row_index)[-1]
         ]
         return output_cell_number
+
+
+# def given_matrix_find_cell_to_respond_to_presence(
+#     matrix, threshold_for_activation, previous_output_cell
+# ):
+#     find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index = (
+#         given_matrix_shortlist_response_cells(matrix, threshold_for_activation)
+#     )
+
+#     _first_element_for_nan_check = find_all_elements_with_min_row_index[0][0]
+#     if np.isnan(_first_element_for_nan_check):
+#         return [np.nan, np.nan]
+#     else:
+
+#         is_previous_cell_repeated = any(
+#             all(item in sublist for item in previous_output_cell)
+#             for sublist in find_all_elements_with_min_row_index
+#         )
+
+#         if is_previous_cell_repeated:
+#             return previous_output_cell
+
+#         output_cell_number = find_all_elements_with_min_row_index[
+#             np.argsort(find_all_thresholds_with_min_row_index)[-1]
+#         ]
+#         return output_cell_number
+# def given_matrix_find_cell_to_respond_to_absence(
+#     matrix,
+#     number_of_consistent_ipis_for_behaviour,
+#     parameters_df,
+#     bat_direction,
+#     allocentric_axis_y,
+#     previous_output_cell,
+# ):
+#     matrix_w_only_activations = np.zeros(shape=matrix.shape)
+#     indices_of_matrix_w_activations = np.where(
+#         matrix >= number_of_consistent_ipis_for_behaviour
+#     )
+#     matrix_w_only_activations[indices_of_matrix_w_activations] = 1
+
+#     consolidated_matrix = np.sum(matrix_w_only_activations, axis=0)
+
+#     angle_between_reference_axis_and_bat = allocentric_axis_y.angle_between(
+#         bat_direction
+#     )
+
+#     no_consistent_sound_in_front = check_if_no_sound_in_front_of_bat(
+#         consolidated_matrix, angle_between_reference_axis_and_bat, parameters_df
+#     )
+#     if no_consistent_sound_in_front:
+#         print()
+#         return [np.nan, np.nan]
+#     else:
+#         sublist_based_on_hearing_range, hearing_range_indices = (
+#             make_sublist_based_on_hearing_range(
+#                 consolidated_matrix, angle_between_reference_axis_and_bat, parameters_df
+#             )
+#         )
+#         # print(np.where(sublist_based_on_hearing_range <= 0))
+#         indices_of_no_activation = hearing_range_indices[
+#             np.where(sublist_based_on_hearing_range <= 0)[0]
+#         ]
+#         print(consolidated_matrix, angle_between_reference_axis_and_bat)
+#         print(
+#             f"indices_of_no_activation {indices_of_no_activation}, sublist_based_on_hearing_range {sublist_based_on_hearing_range}, hearing_range_indices {hearing_range_indices}"
+#         )
+#         length_of_sublist = len(sublist_based_on_hearing_range)
+#         midpoint_of_sublist = length_of_sublist / 2
+#         left_sum_of_sublist = np.sum(
+#             sublist_based_on_hearing_range[: int(np.ceil(midpoint_of_sublist))]
+#         )
+#         right_sum_of_sublist = np.sum(
+#             sublist_based_on_hearing_range[int(np.floor(midpoint_of_sublist)) :]
+#         )
+#         # if left_sum_of_sublist < right_sum_of_sublist:
+#         #     return [0, hearing_range_indices[0]]
+#         # elif right_sum_of_sublist < left_sum_of_sublist:
+#         #     return [0, hearing_range_indices[-1]]
+#         if False:
+#             return [np.nan, np.nan]
+#         else:
+#             presence_response = given_matrix_find_cell_to_respond_to_presence(
+#                 matrix, number_of_consistent_ipis_for_behaviour, previous_output_cell
+#             )
+#             return presence_response

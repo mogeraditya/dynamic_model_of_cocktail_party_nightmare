@@ -50,7 +50,7 @@ class EchoSound:
         self.direction_vector = direction_vector
 
         self.arena_width = self.parameters_df["ARENA_WIDTH"][0]
-        self.arena_height = self.parameters_df["ARENA_HEIGHT"][0]
+        self.arena_LENGTH = self.parameters_df["ARENA_LENGTH"][0]
 
     def update(self, current_time):
         """Function to propagate sound with time.
@@ -132,7 +132,7 @@ class EchoSound:
         Returns:
             Bool: True if sound is outside the bounds of the arena, else False.
         """
-        if (self.current_radius) > max(self.arena_height, self.arena_width):
+        if (self.current_radius) > max(self.arena_LENGTH, self.arena_width):
             return True
         else:
             return False
@@ -222,7 +222,7 @@ class DirectSound(EchoSound):
         )
 
         reflected_spl = spl_corrected_for_width - reflection_loss + call_directionality
-        if reflected_spl < self.parameters_df["MIN_DETECTABLE_SPL"][0]:
+        if reflected_spl < self.parameters_df["HEARING_THRESHOLD"][0]:
             return None
 
         # if reflected_spl > spl_corrected_for_width:

@@ -21,7 +21,7 @@ class Obstacle:
                 ),
                 random.uniform(
                     self.parameters_df["OBSTACLE_RADIUS"][0],
-                    self.parameters_df["ARENA_HEIGHT"][0]
+                    self.parameters_df["ARENA_LENGTH"][0]
                     - self.parameters_df["OBSTACLE_RADIUS"][0],
                 ),
             )

@@ -33,7 +33,7 @@ class Bat:
         self.parameters_df = parameters_df.copy()
         self.position = Vector(
             random.uniform(1, self.parameters_df["ARENA_WIDTH"][0] - 1),
-            random.uniform(1, self.parameters_df["ARENA_HEIGHT"][0] - 1),
+            random.uniform(1, self.parameters_df["ARENA_LENGTH"][0] - 1),
         )
         angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
         self.direction = Vector().random_direction()  # randomize start direction
@@ -153,7 +153,7 @@ class Bat:
             self.next_direction = self.direction
         if (
             self.position.y <= 0
-            or self.position.y >= self.parameters_df["ARENA_HEIGHT"][0]
+            or self.position.y >= self.parameters_df["ARENA_LENGTH"][0]
         ):
             self.direction.y *= -1
             self.next_direction = self.direction
@@ -281,7 +281,7 @@ class Bat:
 
                 received_spl += hearing_directionality
                 is_sound_audible = (
-                    received_spl > self.parameters_df["MIN_DETECTABLE_SPL"][0]
+                    received_spl > self.parameters_df["HEARING_THRESHOLD"][0]
                 )
 
                 if not is_sound_audible:
@@ -451,7 +451,7 @@ class Bat:
                 self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
                 self.call_rate = self.parameters_df["CALL_RATE_FAST"][0]
             else:
-                self.speed = self.parameters_df["BAT_SPEED"][0]
+                # self.speed = self.parameters_df["BAT_SPEED"][0]
                 self.call_rate = self.parameters_df["CALL_RATE"][0]
 
             self.next_direction, self.response_type = self.decide_next_direction(

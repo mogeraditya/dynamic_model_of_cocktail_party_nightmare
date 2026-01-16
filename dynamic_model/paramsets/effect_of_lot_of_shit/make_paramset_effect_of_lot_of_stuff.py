@@ -26,7 +26,7 @@ DIR_TO_STORE_PARAMSETS = (
 )
 make_dir(DIR_TO_STORE_PARAMSETS)
 simulation_parameters["ARENA_WIDTH"] = 7
-simulation_parameters["ARENA_HEIGHT"] = 7
+simulation_parameters["ARENA_LENGTH"] = 7
 simulation_parameters["SIM_DURATION"] = 15
 simulation_parameters["TIME_DELAY_THRESHOLD_FOR_REPULSION"] = 0.008
 

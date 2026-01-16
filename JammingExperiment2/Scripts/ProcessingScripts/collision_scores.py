@@ -70,7 +70,7 @@ def compute_collision_rate(bat_positions, parameters_df):
     # bat_positions =
     # compute distance matrix in allf rames
     arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_height = parameters_df["ARENA_HEIGHT"][0]
+    arena_LENGTH = parameters_df["ARENA_LENGTH"][0]
     bat_radius = parameters_df["BAT_RADIUS"][0]
 
     number_of_collisions_across_time = []
@@ -82,7 +82,7 @@ def compute_collision_rate(bat_positions, parameters_df):
         for bat in position_frame:
             if bat[0] >= arena_width - bat_radius or bat[0] <= bat_radius:
                 count_collisions += 1
-            elif bat[1] >= arena_height - bat_radius or bat[1] <= bat_radius:
+            elif bat[1] >= arena_LENGTH - bat_radius or bat[1] <= bat_radius:
                 count_collisions += 1
         number_of_collisions_across_time.append(count_collisions)
 
@@ -93,7 +93,7 @@ def compute_collision_counts_and_length(bat_positions, parameters_df):
     # bat_positions = [i["bat_positions"] for i in history][1000:]
 
     arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_height = parameters_df["ARENA_HEIGHT"][0]
+    arena_LENGTH = parameters_df["ARENA_LENGTH"][0]
     bat_radius = parameters_df["BAT_RADIUS"][0]
 
     collision_counter = 0
@@ -122,7 +122,7 @@ def compute_collision_counts_and_length(bat_positions, parameters_df):
             if (
                 bat[0] >= arena_width - bat_radius
                 or bat[0] <= bat_radius
-                or bat[1] >= arena_height - bat_radius
+                or bat[1] >= arena_LENGTH - bat_radius
                 or bat[1] <= bat_radius
             ):
                 track_collision_in_current_frame_w_walls.append(i)
@@ -138,7 +138,7 @@ def compute_collision_counts_and_length(bat_positions, parameters_df):
 
 def time_spent_in_collision(bat_positions, parameters_df):
     arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_height = parameters_df["ARENA_HEIGHT"][0]
+    arena_LENGTH = parameters_df["ARENA_LENGTH"][0]
     bat_radius = parameters_df["BAT_RADIUS"][0]
 
     collision_list = []
@@ -150,7 +150,7 @@ def time_spent_in_collision(bat_positions, parameters_df):
         for bat in position_frame:
             if bat[0] >= arena_width - bat_radius or bat[0] <= bat_radius:
                 count_collisions += 1
-            elif bat[1] >= arena_height - bat_radius or bat[1] <= bat_radius:
+            elif bat[1] >= arena_LENGTH - bat_radius or bat[1] <= bat_radius:
                 count_collisions += 1
 
         if count_collisions != 0:
@@ -165,7 +165,7 @@ def time_spent_in_collision(bat_positions, parameters_df):
 def individual_collision_rate(bat_positions, parameters_df):
 
     arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_height = parameters_df["ARENA_HEIGHT"][0]
+    arena_LENGTH = parameters_df["ARENA_LENGTH"][0]
     bat_radius = parameters_df["BAT_RADIUS"][0]
 
     individual_rate = []
@@ -179,7 +179,7 @@ def individual_collision_rate(bat_positions, parameters_df):
             ):
                 count_collisions += 1
             elif (
-                position_frame[bat][1] >= arena_height - bat_radius
+                position_frame[bat][1] >= arena_LENGTH - bat_radius
                 or position_frame[bat][1] <= bat_radius
             ):
                 count_collisions += 1
