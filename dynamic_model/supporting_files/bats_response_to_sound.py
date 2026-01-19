@@ -75,8 +75,7 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
             self.allocentric_axis_y,
         )
         self.any_consistent_sound = "yes"
-        speed_array = np.linspace(0.3, 3, num=len(grid_row_labels))
-        self.speed = speed_array[cell_index_to_respond_to[0]]
+
     return next_direction.normalize(), response_type
 
 

@@ -89,6 +89,11 @@ def serialize_sound_info(parsed_sound_objects, sim_time_step, sim_rounding):
         "reflected_from",
         "sound_object_id",
         "bat_last_call_time",
+        "sound_direction",
+        "theta",
+        "bat_position",
+        "distance_from_bat",
+        "creation_time",
     ]
     for sound in parsed_sound_objects:
         if sound["sound_object_id"] not in track_unique_ids:

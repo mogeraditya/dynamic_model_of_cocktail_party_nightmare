@@ -128,7 +128,7 @@ class Bat:
         self.emit_sounds(current_time, sound_objects)
         if not self.kill_movement:
             self.update_directon(current_time, sound_objects)
-            self.cleanup_sounds(current_time)
+            # self.cleanup_sounds(current_time)
             self.detect_sounds(current_time, sound_objects)
 
         if self.id == 0 and self.time_since_directon_change == 0:
@@ -139,9 +139,10 @@ class Bat:
         Every timestep the position of the bat needs to be
         updated based on velcoity and direction.
         """
-        self.position += (
-            self.direction * self.speed * self.parameters_df["TIME_STEP"][0]
-        )
+        if self.speed != 0:
+            self.position += (
+                self.direction * self.speed * self.parameters_df["TIME_STEP"][0]
+            )
 
         # Boundary checks with bounce
 
@@ -183,13 +184,14 @@ class Bat:
             sound_objects.append(sound)
 
             self.next_direction = self.direction
-            self.time_since_directon_change = -self.parameters_df["CALL_DURATION"][0]
+            # call_duration = self.parameters_df["CALL_DURATION"][0]
+            self.time_since_directon_change = 0
             self.time_since_last_call = np.random.uniform(
                 -self.parameters_df["NOISE_IN_CALL_RATE"][0],
                 self.parameters_df["NOISE_IN_CALL_RATE"][0],
             )
             self.detections_for_directon_change = []
-            self.time_since_last_cleanup = 0
+            # self.time_since_last_cleanup = 0
 
     def convert_sound_to_dictionary(self, sound, current_time, received_spl):
         """converts a given sound to dictionary
@@ -209,6 +211,7 @@ class Bat:
 
         dictionary = {
             "time": current_time,
+            "creation_time": sound.creation_time,
             "origin": (sound.origin.x, sound.origin.y),
             "distance_from_bat": sound.origin.distance_to(self.position),
             "received_spl": received_spl,
@@ -228,6 +231,9 @@ class Bat:
             "bat_direction": (self.direction.x, self.direction.y),
             "bat_position": (self.position.x, self.position.y),
             "bat_last_call_time": self.emit_times[-1],
+            "theta": np.degrees(
+                self.allocentric_axis_y.angle_between(incident_direction)
+            ),
         }
         return dictionary
 
@@ -310,7 +316,7 @@ class Bat:
             self.memory_window_to_store_grids
         )
 
-    def cleanup_sounds(self, current_time):
+    def cleanup_sounds(self, current_time, heard_sounds):
         """Stores the detections into a .npy file.
         After a fixed amount of time the detection list is stored
         into local memory and this is cleared from RAM.
@@ -328,7 +334,7 @@ class Bat:
                 np.save(
                     dir_to_store
                     + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time_str}.npy",
-                    self.received_sounds,
+                    heard_sounds,
                 )
                 np.save(
                     dir_to_store
@@ -403,8 +409,6 @@ class Bat:
                 )
             )
         else:
-            # print(behaviour_rule_to_use)
-            # print(behaviour_rule_to_use == "consistency")
             raise ValueError("unsupported behaviour rule")
         return next_direction.normalize(), response_type
 
@@ -416,7 +420,7 @@ class Bat:
             sound_objects (list): list containing detected sounds
         """
         self.time_since_directon_change += self.parameters_df["TIME_STEP"][0]
-        # self.reaction_time += self.parameters_df["TIME_STEP"][0]
+
         direction_change_time_interval = self.parameters_df[
             "TIME_DELAY_FOR_DIRECTION_CHANGE"
         ][0]
@@ -430,7 +434,7 @@ class Bat:
             self.time_since_directon_change >= direction_change_time_interval
             and len(self.detections_for_directon_change) != 0
         ):
-            # print(len(self.detections_for_directon_change))
+
             if self.implement_snr:
                 heard_sounds = given_sound_objects_return_detected_sounds(
                     self.detections_for_directon_change,
@@ -447,11 +451,14 @@ class Bat:
             else:
                 heard_sounds = self.detections_for_directon_change
 
+            self.time_since_last_cleanup = 0
+            self.cleanup_sounds(current_time, heard_sounds)
+
             if self.any_consistent_sound == "no":
                 self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
                 self.call_rate = self.parameters_df["CALL_RATE_FAST"][0]
             else:
-                # self.speed = self.parameters_df["BAT_SPEED"][0]
+                self.speed = self.parameters_df["BAT_SPEED"][0]
                 self.call_rate = self.parameters_df["CALL_RATE"][0]
 
             self.next_direction, self.response_type = self.decide_next_direction(
@@ -459,8 +466,7 @@ class Bat:
             )
             self.detections_for_directon_change = []
             self.time_since_directon_change = -np.inf
-            # self.reaction_time = 0
-            # self.reaction_state = "responding"
+
             if self.next_direction != self.direction.normalize():
                 self.responding_to_direction = (
                     self.next_direction.x,
@@ -479,11 +485,7 @@ class Bat:
                 self.parameters_df
             )[0]
             self.memory_window_sum_matrix = self.ipi_matrix.copy()
-            # print("oh this part running rrn")
-        # if self.reaction_time >= self.parameters_df["REACTION_TIME"][0]:
-        #     print("aaa")
-        #     self.reaction_state = None
-        #     self.reaction_time = -np.inf
+
         rotation_speed = self.parameters_df["BAT_ROTATION_SPEED"][0]
         rotation_speed_scaled_by_time_step = (
             rotation_speed * self.parameters_df["TIME_STEP"][0]
@@ -514,28 +516,7 @@ class Bat:
                 rotation_angle = angle_between_current_and_new
 
             rotated_vector = current_direction.rotate(rotation_angle)
-            # print(
-            #     f"next dir {self.next_direction}",
-            #     f"dir {self.direction}",
-            #     f"angle {self.direction.angle_between(self.next_direction)}",
-            #     f"rotation angle {self.direction}",
-            # )
             self.direction = rotated_vector.normalize()
-
-    # def aditya(self)
-
-    # def update_call_rate(self):
-    #     change_call_rate = str2bool(self.parameters_df["ENABLE_ADAPTIVE_CALL_RATE"][0])
-    #     call_rate_method = self.parameters_df["ADAPTIVE_CALL_RATE_METHOD"][0]
-    #     if change_call_rate:
-    #         if call_rate_method == "aditya":
-    #             self.aditya()
-    #         elif call_rate_method == "thejasvi":
-    #             self.thejasvi()
-    #         else:
-    #             raise ValueError("not supported adaptive call rate method")
-    #     else:
-    #         self.
 
     def __repr__(self):
         return f"Bat(id={self.id}, position={self.position})"

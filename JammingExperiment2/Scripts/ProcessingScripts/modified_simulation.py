@@ -45,7 +45,7 @@ class Modified_Simulation(Simulation):
         num_bats = 1  # len(bat_locations.keys()) %2 # just how the csv is organised
 
         self.bats = [
-            Bat(self.parameters_df, self.output_dir, store_hearing=False)
+            Bat(self.parameters_df, self.output_dir, store_hearing=True)
             for _ in range(int(num_bats))
         ]
         if (jammer_locations) is None:
@@ -96,16 +96,16 @@ if __name__ == "__main__":
     jammer_resolutions = [
         uuid.uuid4(),
     ]
-    params = [6]
+    params = [3]
     for param in params:
         for jammer_resolution in jammer_resolutions:
-            OUTPUT_DIR = f"./JammingExperiment2/Data/IntermediateData/effect_of_rotation_{param}_{jammer_resolution}/"
+            OUTPUT_DIR = f"./JammingExperiment2/Data/IntermediateData/debug7/"
             PARAMETER_FILE_DIR = (
                 r"./JammingExperiment2/Data/InputData/common_parameters.json"
             )
 
             PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
-            PARAMETER_DF["BAT_ROTATION_SPEED"] = [param]
+            # PARAMETER_DF["BAT_ROTATION_SPEED"] = [param]
             bat_locations_dir = (
                 "./JammingExperiment2/Data/InputData/bat_start_positions.csv"
             )
@@ -114,8 +114,8 @@ if __name__ == "__main__":
             if jammer_resolution == 0:
                 jammer_locations = None
             else:
-                width_array = np.arange(2, PARAMETER_DF["ARENA_WIDTH"][0], 2)
-                LENGTH_array = np.arange(2, PARAMETER_DF["ARENA_LENGTH"][0], 2)
+                width_array = np.arange(1, PARAMETER_DF["ARENA_WIDTH"][0], 1)
+                LENGTH_array = np.arange(1, PARAMETER_DF["ARENA_LENGTH"][0], 1)
                 left_wall = [(0.01, i) for i in LENGTH_array]
                 right_wall = [
                     (PARAMETER_DF["ARENA_WIDTH"][0] - 0.01, i) for i in LENGTH_array

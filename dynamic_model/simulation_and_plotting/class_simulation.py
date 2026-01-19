@@ -121,6 +121,7 @@ class Simulation:
         dictionary_w_information = {
             "time": np.round(self.time_elapsed, self.rounding_based_on_time_step),
             "bat_ipi_counters": [len(bat.emit_times) for bat in self.bats],
+            "bat_call_time": [bat.emit_times[-1] for bat in self.bats],
             "bat_positions": [(bat.position.x, bat.position.y) for bat in self.bats],
             "bat_directions": [
                 (bat.direction.normalize().x, bat.direction.normalize().y)

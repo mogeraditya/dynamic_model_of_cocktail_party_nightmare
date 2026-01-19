@@ -317,6 +317,14 @@ def visualize(output_dir, save_animation, unique_id):
         ha="left",
         va="top",
     )
+    call_time_plot = plt.figtext(
+        0.01,
+        0.9,
+        f"bat call time : {-np.inf}",
+        fontsize=25,
+        ha="left",
+        va="top",
+    )
 
     def init():
         for marker in bat_markers:
@@ -382,6 +390,7 @@ def visualize(output_dir, save_animation, unique_id):
         ipi_counter_plot.set_text(
             f"interpulse interval number : {frame["bat_ipi_counters"][focal_bat]}"
         )
+        call_time_plot.set_text(f"call time : {frame["bat_call_time"][focal_bat]}")
 
         im0.set_array(new_grid_data_time_series[i, 0].T)
         im1.set_array(new_grid_data_time_series_sum[i, 0].T)
