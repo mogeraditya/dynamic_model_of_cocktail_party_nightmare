@@ -122,16 +122,17 @@ class Simulation:
 
             if self.store_history:
                 self.handle_data_storage_for_plotting(self.time_elapsed, False)
-                self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
+                # self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
         if self.store_history:
             self.handle_data_storage_for_plotting(self.time_elapsed, True)
-            self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
+            # self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
 
         # TODO : make score calculations.
 
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
-        print("DATA SAVED")
+        if self.store_history:
+            print("DATA SAVED")
 
     def convert_necessary_information_into_dict(self):
         dictionary_w_information = {

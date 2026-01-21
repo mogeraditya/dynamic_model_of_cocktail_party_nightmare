@@ -41,7 +41,6 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     self.memory_window_sum_matrix = sum_grids_in_memory.copy()
     self.ipi_matrix = grids_to_consider_for_direction_change[-1]
 
-    # absence presence implementation ---------------------------------------------------------
     controller_type = self.parameters_df["CONTROLLER_TYPE"][0]
     if controller_type == "presence":
         cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_presence(
@@ -55,7 +54,7 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
 
     else:
         raise ValueError("unsupported controller type")
-    # -------------------------------------------------------------------------------------------
+
     print(f"bat call time {self.emit_times[-1]}")
 
     self.cell_index_to_respond_to = cell_index_to_respond_to

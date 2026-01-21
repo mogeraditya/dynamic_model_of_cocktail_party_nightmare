@@ -10,12 +10,16 @@ sys.path.append("./dynamic_model/")
 sys.path.append("./JammingExperiment/Scripts/ProcessingScripts/")
 from agents.class_bats import Bat
 from agents.class_jammers import Jammers
-from collision_scores import (
+from plotting.single_bat_plotter import visualize
+from scores.collision_scores import (
     compute_collision_counts_and_length,
     compute_collision_rate,
+)
+from scores.run_all_score_calculations import (
+    filter_bat_positions_from_history,
     load_history_dump,
 )
-from plotting.single_bat_plotter import visualize
+from scores.space_occupied_scores import space_occupied_score
 from simulation.class_simulation import Simulation
 from supporting_files.utilities import load_parameters, make_vector
 from supporting_files.vectors import Vector
@@ -66,6 +70,15 @@ class Modified_Simulation(Simulation):
         self.bats[0].direction = Vector(0, 1)
         self.bats[0].id = 0
 
+    def convert_necessary_information_into_dict(self):
+        dictionary_w_information = {
+            "time": np.round(self.time_elapsed, self.rounding_based_on_time_step),
+            "bat_call_time": [bat.emit_times[-1] for bat in self.bats],
+            "bat_positions": [(bat.position.x, bat.position.y) for bat in self.bats],
+        }
+        # print(dictionary_w_information)
+        return dictionary_w_information
+
 
 if __name__ == "__main__":
     df_to_store_collsion = pd.DataFrame()
@@ -77,13 +90,11 @@ if __name__ == "__main__":
     store_metric = []
     store_value = []
 
-    jammer_resolutions = [
-        uuid.uuid4(),
-    ]
+    jammer_resolutions = [uuid.uuid4()]
     params = [3]
     for param in params:
         for jammer_resolution in jammer_resolutions:
-            OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug10/"
+            OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug11/"
 
             PARAMETER_FILE_DIR = (
                 r"./JammingExperiment/Data/InputData/common_parameters.json"
@@ -111,20 +122,23 @@ if __name__ == "__main__":
             )
             sim.run()
             SAVE_ANIMATION = OUTPUT_DIR
-            visualize(
-                OUTPUT_DIR,
-                SAVE_ANIMATION,
-                sim_identifier,
-                resolution=30,
-                show_sounds=False,
-            )
-            plt.close()
-            positions_array = load_history_dump(OUTPUT_DIR + "/data_for_plotting/")
+            # visualize(
+            #     OUTPUT_DIR,
+            #     SAVE_ANIMATION,
+            #     sim_identifier,
+            #     resolution=30,
+            #     show_sounds=False,
+            # )
+            # plt.close()
+            positions_array = filter_bat_positions_from_history(sim.history)
             print(
                 f"collision counts : {compute_collision_counts_and_length(positions_array, PARAMETER_DF)}"
             )
             print(
                 f"collision rate : {compute_collision_rate(positions_array, PARAMETER_DF)}"
+            )
+            print(
+                f"space ocuupied : {space_occupied_score(PARAMETER_DF, positions_array)}"
             )
             print(f"duration (frames) : {len(positions_array)}")
 
