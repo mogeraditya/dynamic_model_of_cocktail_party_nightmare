@@ -4,19 +4,12 @@ import os
 import time
 
 import pandas as pd
+from simulation.class_simulation import Simulation
 from supporting_files.utilities import make_dir
-
-from JammingExperiment.Scripts.ProcessingScripts.modified_simulation import (
-    Modified_Simulation,
-)
 
 
 def run_one_instance_of_simulation(
-    dir_of_one_param_file,
-    simulation_id,
-    data_storage_dir,
-    initial_release_point,
-    obstacle_locations,
+    dir_of_one_param_file, simulation_id, data_storage_dir
 ):
     """run one instance of the simulation
 
@@ -32,23 +25,11 @@ def run_one_instance_of_simulation(
     )
     make_dir(output_dir)
     print(output_dir)
-    sim = Modified_Simulation(
-        parameter_df,
-        output_dir,
-        initial_release_point,
-        obstacle_locations,
-    )
+    sim = Simulation(parameter_df, output_dir)
     sim.run()
 
 
-def parallel_process_with_pool(
-    param_dir,
-    n_runs,
-    data_storage_dir,
-    max_workers,
-    initial_release_point,
-    obstacle_locations,
-):
+def parallel_process_with_pool(param_dir, n_runs, data_storage_dir, max_workers=None):
     """run simulation multiple times for all parameter files
 
     Args:
@@ -57,7 +38,7 @@ def parallel_process_with_pool(
         max_workers (int, optional): maximum number of cores that need to be used. Defaults to None.
     """
     # Find parameter files
-    param_files = glob.glob(os.path.join(param_dir, "*.csv"))
+    param_files = glob.glob(os.path.join(param_dir, "*.json"))
     param_files = [f for f in param_files if os.path.isfile(f)]
     print(param_files)
 
@@ -69,15 +50,7 @@ def parallel_process_with_pool(
     tasks = []
     for param_file in param_files:
         for iteration in range(n_runs):
-            tasks.append(
-                (
-                    param_file,
-                    iteration,
-                    data_storage_dir,
-                    initial_release_point,
-                    obstacle_locations,
-                )
-            )
+            tasks.append((param_file, iteration, data_storage_dir))
 
     # Process with Pool
     if max_workers is None:
@@ -95,27 +68,17 @@ def parallel_process_with_pool(
 
 if __name__ == "__main__":
     # Directory containing your parameter files
-    PARAM_DIR = "./behaviour_analysis_for_nvg/parameters/"
+    PARAM_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/dynamic_model/paramsets/effect_of_lot_of_shit/store_paramsets/"
 
-    N_RUNS = 5  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = (
-        r"/media/adityamoger/T7 Shield/dir_store_snr/"  # Base output directory
-    )
+    N_RUNS = 30  # Number of iterations per parameter set
+    DATA_STORAGE_DIR = r"/media/adityamoger/T7 Shield/SCYPHY_FINAL_DATA_second_interation_slower_speed/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing
     print("Starting parallel processing...")
-    bat_locations_dir = "./behaviour_analysis_for_nvg/bat_start_positions.csv"
-    obstacle_locations_dir = "./behaviour_analysis_for_nvg/chain_positions.csv"
-
-    bat_locations = pd.read_csv(bat_locations_dir)
-    obstacle_locations = pd.read_csv(obstacle_locations_dir)
-
     parallel_process_with_pool(
         param_dir=PARAM_DIR,
         n_runs=N_RUNS,
         data_storage_dir=DATA_STORAGE_DIR,
-        max_workers=None,
-        initial_release_point=(bat_locations["x"][2], bat_locations["y"][2]),
-        obstacle_locations=obstacle_locations,
+        # max_workers=MAX_WORKERS,
     )

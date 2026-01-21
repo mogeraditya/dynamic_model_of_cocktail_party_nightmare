@@ -176,6 +176,7 @@ class DirectSound(EchoSound):
         self.reflected_obstacles = (
             set()
         )  # Track obstacles that it reflected off of in order to cap this in the future
+        self.wall_id = None
 
     def create_echo(self, point, current_time, normal, reflected_from):
         """Handles EchoSound creation by the sound object.
@@ -192,7 +193,7 @@ class DirectSound(EchoSound):
         """
         if self.has_reflected:
             return None
-
+        # print(self.direction_vector)
         angle_between_sound_and_reflection_point = self.direction_vector.angle_between(
             point
         )
@@ -247,6 +248,6 @@ class DirectSound(EchoSound):
 
     def __repr__(self):
         return (
-            f"DirectSound(origin={self.origin}, radius={self.current_radius:.2f}, "
+            f"DirectSound(origin={self.origin}, direction={self.direction_vector}, radius={self.current_radius:.2f}, "
             f"spl={self.current_spl:.1f}dB, emitter={self.emitter_id}), creation_time={self.creation_time}"
         )

@@ -75,10 +75,11 @@ def compute_collision_rate(bat_positions, parameters_df):
 
     number_of_collisions_across_time = []
     for position_frame in bat_positions:
-        distance_matrix = scp.spatial.distance_matrix(position_frame, position_frame)
-        count_collisions = (
-            np.sum([distance_matrix < bat_radius * 2]) - distance_matrix.shape[0]
-        ) / 2
+        count_collisions = 0
+        # distance_matrix = scp.spatial.distance_matrix(position_frame, position_frame)
+        # count_collisions = (
+        #     np.sum([distance_matrix < bat_radius * 2]) - distance_matrix.shape[0]
+        # ) / 2
         for bat in position_frame:
             if bat[0] >= arena_width - bat_radius or bat[0] <= bat_radius:
                 count_collisions += 1
@@ -109,13 +110,13 @@ def compute_collision_counts_and_length(bat_positions, parameters_df):
         track_collision_in_current_frame_w_bats = []
         track_collision_in_current_frame_w_walls = []
 
-        for i in range(distance_matrix.shape[0]):
-            for j in range(distance_matrix.shape[0]):
-                if i < j:
-                    if distance_matrix[i, j] < 2 * bat_radius:
-                        track_collision_in_current_frame_w_bats.append((i, j))
-                        if (i, j) not in track_collision_in_last_frame_w_bats:
-                            collision_counter += 1
+        # for i in range(distance_matrix.shape[0]):
+        #     for j in range(distance_matrix.shape[0]):
+        #         if i < j:
+        #             if distance_matrix[i, j] < 2 * bat_radius:
+        #                 track_collision_in_current_frame_w_bats.append((i, j))
+        #                 if (i, j) not in track_collision_in_last_frame_w_bats:
+        #                     collision_counter += 1
 
         for i, bat in enumerate(position_frame):
 

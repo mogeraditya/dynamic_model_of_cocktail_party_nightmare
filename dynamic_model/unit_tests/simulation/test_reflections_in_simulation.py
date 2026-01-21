@@ -11,7 +11,7 @@ from supporting_files.vectors import Vector
 
 from dynamic_model.agents.class_bats import Bat
 from dynamic_model.agents.class_sounds import DirectSound
-from dynamic_model.simulation_and_plotting.class_simulation import Simulation
+from dynamic_model.simulation.class_simulation import Simulation
 
 # sys.path.insert(1, ".")
 
