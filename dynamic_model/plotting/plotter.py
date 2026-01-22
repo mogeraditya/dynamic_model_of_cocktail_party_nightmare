@@ -88,15 +88,15 @@ def setup_visualization(parameters_df, bats, obstacles):
         list: contains axes, figure, markers and artists to build the animation on.
     """
     fig, ax = plt.subplots(figsize=(10, 7))
-    ax.set_xlim(0, parameters_df["ARENA_WIDTH"][0])
-    ax.set_ylim(0, parameters_df["ARENA_LENGTH"][0])
+    ax.set_xlim(0, parameters_df["ARENA_WIDTH"])
+    ax.set_ylim(0, parameters_df["ARENA_LENGTH"])
     ax.set_aspect("equal")
     ax.set_title("Bat Echolocation with Direct Calls and Echoes")
 
     boundary = Rectangle(
         (0, 0),
-        parameters_df["ARENA_WIDTH"][0],
-        parameters_df["ARENA_LENGTH"][0],
+        parameters_df["ARENA_WIDTH"],
+        parameters_df["ARENA_LENGTH"],
         fill=False,
         linestyle="--",
         color="gray",
@@ -273,7 +273,7 @@ def visualize(output_dir, save_animation):
         #     emitter_color = cm(sound["emitter_id"] / NUM_COLORS)
         #     alpha = 0.5 - (0.1 * sound.get("reflection_count", 0))
 
-        #     inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"][0])
+        #     inner = max(0, sound["radius"] - parameters_df["SOUND_DISK_WIDTH"])
         #     outer = sound["radius"]
 
         #     if inner < outer:
@@ -287,7 +287,7 @@ def visualize(output_dir, save_animation):
         #         if inner == 0:
         #             width_of_disk = sound["radius"]
         #         else:
-        #             width_of_disk = parameters_df["SOUND_DISK_WIDTH"][0]
+        #             width_of_disk = parameters_df["SOUND_DISK_WIDTH"]
         #         wedge = Wedge(
         #             sound["origin"],
         #             outer,
@@ -318,7 +318,7 @@ def visualize(output_dir, save_animation):
         frames=len(history),
         init_func=init,
         blit=False,
-        interval=parameters_df["FRAME_RATE"][0] * 0.00001,
+        interval=parameters_df["FRAME_RATE"] * 0.00001,
     )
 
     handles, labels = ax.get_legend_handles_labels()
@@ -326,7 +326,7 @@ def visualize(output_dir, save_animation):
 
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=handles)
     if save_animation:
-        ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
+        ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"])
         ani.save(
             save_animation + "/animation_slower.mp4",
             writer=ffwriter,

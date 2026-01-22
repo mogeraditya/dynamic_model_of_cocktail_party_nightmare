@@ -39,7 +39,7 @@ class TestingSoundPropagation(unittest.TestCase):
         )
         time_passed = 5  # seconds
         sound.update(time_passed)
-        calculated_radius = time_passed * self.parameters_df["SOUND_SPEED"][0]
+        calculated_radius = time_passed * self.parameters_df["SOUND_SPEED"]
         radius_of_sound_after_update = sound.current_radius
         self.assertTrue((radius_of_sound_after_update == calculated_radius))
 
@@ -60,9 +60,9 @@ class TestingSoundPropagation(unittest.TestCase):
         time_passed = 1  # seconds
         sound.update(time_passed)
         computed_width = [
-            (time_passed - self.parameters_df["CALL_DURATION"][0])
-            * self.parameters_df["SOUND_SPEED"][0],
-            time_passed * self.parameters_df["SOUND_SPEED"][0],
+            (time_passed - self.parameters_df["CALL_DURATION"])
+            * self.parameters_df["SOUND_SPEED"],
+            time_passed * self.parameters_df["SOUND_SPEED"],
         ]  # start and end of the sound disk
         points_to_check = [
             Vector(computed_width[0] - 0.001, 0),
@@ -88,13 +88,13 @@ class TestingSoundPropagation(unittest.TestCase):
             direction_vector=Vector(0, 1),
         )
         time_passed = 1
-        radius = time_passed * self.parameters_df["SOUND_SPEED"][0]
-        initial_spl = self.parameters_df["EMITTED_SPL"][0]
+        radius = time_passed * self.parameters_df["SOUND_SPEED"]
+        initial_spl = self.parameters_df["EMITTED_SPL"]
         distance_effect = 20 * math.log10(radius / 1)
         calculated_spl = (
             initial_spl
             - distance_effect
-            - (self.parameters_df["AIR_ABSORPTION"][0] * radius)
+            - (self.parameters_df["AIR_ABSORPTION"] * radius)
         )
 
         sound.update(time_passed)
@@ -112,7 +112,7 @@ class TestingSoundPropagation(unittest.TestCase):
             direction_vector=Vector(0, 1),
         )
         obstacle = Obstacle(self.parameters_df)
-        distance = self.parameters_df["SOUND_DISK_WIDTH"][0]
+        distance = self.parameters_df["SOUND_DISK_WIDTH"]
         obstacle.position = Vector(0, distance)
         sound_objects = [sound]
 

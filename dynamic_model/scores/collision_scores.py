@@ -4,9 +4,9 @@ import scipy as scp
 
 def compute_collision_rate(bat_positions, parameters_df):
 
-    arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_length = parameters_df["ARENA_LENGTH"][0]
-    bat_radius = parameters_df["BAT_RADIUS"][0]
+    arena_width = parameters_df["ARENA_WIDTH"]
+    arena_length = parameters_df["ARENA_LENGTH"]
+    bat_radius = parameters_df["BAT_RADIUS"]
 
     number_of_collisions_across_time = []
     for position_frame in bat_positions:
@@ -28,9 +28,9 @@ def compute_collision_rate(bat_positions, parameters_df):
 def compute_collision_counts_and_length(bat_positions, parameters_df):
     # bat_positions = [i["bat_positions"] for i in history][1000:]
 
-    arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_length = parameters_df["ARENA_LENGTH"][0]
-    bat_radius = parameters_df["BAT_RADIUS"][0]
+    arena_width = parameters_df["ARENA_WIDTH"]
+    arena_length = parameters_df["ARENA_LENGTH"]
+    bat_radius = parameters_df["BAT_RADIUS"]
 
     collision_counter = 0
     # collision_duration = []
@@ -73,9 +73,9 @@ def compute_collision_counts_and_length(bat_positions, parameters_df):
 
 
 def time_spent_in_collision(bat_positions, parameters_df):
-    arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_length = parameters_df["ARENA_LENGTH"][0]
-    bat_radius = parameters_df["BAT_RADIUS"][0]
+    arena_width = parameters_df["ARENA_WIDTH"]
+    arena_length = parameters_df["ARENA_LENGTH"]
+    bat_radius = parameters_df["BAT_RADIUS"]
 
     collision_list = []
     for position_frame in bat_positions:

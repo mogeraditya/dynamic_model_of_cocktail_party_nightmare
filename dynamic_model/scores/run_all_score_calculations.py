@@ -37,7 +37,7 @@ def load_history_dump(folder_path):
         data = np.load(file_path)
         times = data["times"]
         positions_array = data["positions"]
-
+        # call_times_array = data["bat_call_time"]
         for i, frame_time in enumerate(times):
             frame_data = positions_array[i]
             valid_positions = frame_data[~np.isnan(frame_data)]
@@ -47,12 +47,14 @@ def load_history_dump(folder_path):
                     for j in range(0, len(valid_positions), 2)
                 ]
             )
+            # bat_call_time = np.array([])
 
             all_frames.append(
                 {
                     "time": np.round(frame_time, 3),
                     "bat_positions_x": bat_positions[:, 0],
                     "bat_positions_y": bat_positions[:, 1],
+                    # "bat_call_time": bat_call_time
                 }
             )
     all_frames.sort(key=lambda x: x["time"])
@@ -63,13 +65,25 @@ def filter_bat_positions_from_history(all_frames):
 
     store_only_positions = []
     for item in all_frames:
-        store_only_positions.append((item["bat_positions_x"], item["bat_positions_y"]))
+        store_only_positions.append([[item["bat_positions"]]])
     return store_only_positions
 
 
-def reformat_history(all_frames, focal_bat):
+def reformat_history(history, focal_bat, parameter_df, iteration_label):
     # get time, position, call time data
     # reformat into long csv
     subset_of_focal_bat = []
+    for item in history:
+        reformatted_item = {
+            "time": item["time"],
+            "bat_position_x": item["bat_positions"][focal_bat][0],
+            "bat_position_y": item["bat_positions"][focal_bat][1],
+            "bat_call_time": item["bat_call_time"][focal_bat],
+            "iteration_number": iteration_label,
+        }
+        reformatted_item.update(parameter_df.copy())
+        subset_of_focal_bat.append(reformatted_item)
 
-    df_position_data = pd.DataFrame.from_dict(all_frames)
+    # df_position_data = pd.DataFrame.from_dict(subset_of_focal_bat, orient="columns")
+    # print(df_position_data)
+    return subset_of_focal_bat

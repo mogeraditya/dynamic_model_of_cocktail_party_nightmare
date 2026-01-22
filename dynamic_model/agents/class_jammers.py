@@ -16,7 +16,7 @@ class Jammers:
         self.direction = direction.normalize()
         self.radius = 0.125
 
-        time_step_size = self.parameters_df["TIME_STEP"][0]
+        time_step_size = self.parameters_df["TIME_STEP"]
         # find the number of decimal places to set rounding equal to time step size
         self.rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
 
@@ -53,7 +53,7 @@ class Jammers:
             current_time (float): Time, in seconds, for which the simualtion has been running.
             sound_objects (list): List containing all active sounds in the simulation
         """
-        self.time_since_last_call += self.parameters_df["TIME_STEP"][0]
+        self.time_since_last_call += self.parameters_df["TIME_STEP"]
         call_interval = 1.0 / self.call_rate
 
         if self.time_since_last_call >= call_interval:
@@ -69,8 +69,8 @@ class Jammers:
             sound_objects.append(sound)
 
             self.time_since_last_call = np.random.uniform(
-                -self.parameters_df["NOISE_IN_CALL_RATE"][0],
-                self.parameters_df["NOISE_IN_CALL_RATE"][0],
+                -self.parameters_df["NOISE_IN_CALL_RATE"],
+                self.parameters_df["NOISE_IN_CALL_RATE"],
             )
 
     def __repr__(self):

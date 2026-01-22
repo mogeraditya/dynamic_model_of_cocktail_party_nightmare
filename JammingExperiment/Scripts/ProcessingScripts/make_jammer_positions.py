@@ -4,23 +4,23 @@ from dynamic_model.agents.class_jammers import Jammers
 
 
 def make_jammer_locations(parameters_df, jammer_resolution, call_rate):
-    arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_length = parameters_df["ARENA_LENGTH"][0]
+    arena_width = parameters_df["ARENA_WIDTH"]
+    arena_length = parameters_df["ARENA_LENGTH"]
 
     width_array = np.arange(
         jammer_resolution,
-        parameters_df["ARENA_WIDTH"][0],
+        parameters_df["ARENA_WIDTH"],
         jammer_resolution,
     )
     length_array = np.arange(
         jammer_resolution,
-        parameters_df["ARENA_LENGTH"][0],
+        parameters_df["ARENA_LENGTH"],
         jammer_resolution,
     )
 
     left_wall = [(0, i) for i in length_array]
-    right_wall = [(parameters_df["ARENA_WIDTH"][0], i) for i in length_array]
-    top_wall = [(i, parameters_df["ARENA_LENGTH"][0]) for i in width_array]
+    right_wall = [(parameters_df["ARENA_WIDTH"], i) for i in length_array]
+    top_wall = [(i, parameters_df["ARENA_LENGTH"]) for i in width_array]
     bottom_wall = [(i, 0) for i in width_array]
 
     left_jammer_directions = [(1, 0) for i in left_wall]

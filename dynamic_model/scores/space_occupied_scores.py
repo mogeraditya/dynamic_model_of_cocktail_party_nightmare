@@ -5,8 +5,8 @@ import numpy as np
 
 def space_occupied_score(parameters_df, bat_positions):
     # TODO : make this multi bat compatible.
-    arena_width = parameters_df["ARENA_WIDTH"][0]
-    arena_length = parameters_df["ARENA_LENGTH"][0]
+    arena_width = parameters_df["ARENA_WIDTH"]
+    arena_length = parameters_df["ARENA_LENGTH"]
 
     x = np.arange(0, arena_width, 0.5)
     y = np.arange(0, arena_length, 0.5)

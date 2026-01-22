@@ -8,8 +8,9 @@ sys.path.append("./dynamic_model/")
 sys.path.append("./JammingExperiment/Scripts/ProcessingScripts/")
 import pandas as pd
 from modified_simulation import Modified_Simulation
-from scores.run_all_score_calculations import filter_bat_positions_from_history
 from supporting_files.utilities import make_dir
+
+from dynamic_model.scores.run_all_score_calculations import reformat_history
 
 
 def run_one_instance_of_simulation(
@@ -28,7 +29,7 @@ def run_one_instance_of_simulation(
     parameter_df = pd.read_csv(dir_of_one_param_file)
     output_dir = (
         data_storage_dir
-        + parameter_df["OUTPUT_DIR_FOR_SIMULATION"][0]
+        + parameter_df["OUTPUT_DIR_FOR_SIMULATION"]
         + f"iteration_number_{simulation_id}"
     )
     make_dir(output_dir)
@@ -40,30 +41,37 @@ def run_one_instance_of_simulation(
         obstacle_locations,
     )
     sim.run()
-    filter_bat_positions_from_history(sim.history)
+    return sim
 
 
-def store_positions_for_n_iterations(
-    n_iterations,
-    dir_of_one_param_file,
-    simulation_id,
-    data_storage_dir,
-    initial_release_point,
-    obstacle_locations,
-):
-    store_iteration_labels = []
-    store_position_history = []
+# def store_positions_for_n_iterations(
+#     n_iterations,
+#     dir_of_one_param_file,
+#     simulation_id,
+#     data_storage_dir,
+#     initial_release_point,
+#     obstacle_locations,
+# ):
+#     store_iteration_labels = []
+#     store_iteration_dicts = []
 
-    for i in range(n_iterations):
-        iteration_label = f"iteration_number_{i}"
+#     for i in range(n_iterations):
+#         iteration_label = f"iteration_number_{i}"
 
-        run_one_instance_of_simulation(
-            dir_of_one_param_file,
-            simulation_id,
-            data_storage_dir,
-            initial_release_point,
-            obstacle_locations,
-        )
+#         sim = run_one_instance_of_simulation(
+#             dir_of_one_param_file,
+#             simulation_id,
+#             data_storage_dir,
+#             initial_release_point,
+#             obstacle_locations,
+#         )
+#         history = sim.history.copy()
+#         focal_bat = 0
+#         parameters_df = sim.parameters_df.copy()
+
+#         _required_dict_subset = reformat_history(
+#             history, focal_bat, parameters_df, iteration_label
+#         )
 
 
 def parallel_process_with_pool(

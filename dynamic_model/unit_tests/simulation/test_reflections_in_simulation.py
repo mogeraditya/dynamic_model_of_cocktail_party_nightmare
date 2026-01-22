@@ -33,7 +33,7 @@ class TestReflections(unittest.TestCase):
 
     def test_echo_generation(self):
         """Test the echo generation"""
-        sound_disk_width = self.parameters_df["SOUND_DISK_WIDTH"][0]
+        sound_disk_width = self.parameters_df["SOUND_DISK_WIDTH"]
         self.bat.speed = 0
         self.bat.position = Vector(0, 0)
         self.simulation.bats = [self.bat]

@@ -18,6 +18,7 @@ from scores.collision_scores import (
 from scores.run_all_score_calculations import (
     filter_bat_positions_from_history,
     load_history_dump,
+    reformat_history,
 )
 from scores.space_occupied_scores import space_occupied_score
 from simulation.class_simulation import Simulation
@@ -33,7 +34,7 @@ class Modified_Simulation(Simulation):
         initial_release_point,
         jammer_locations_and_directions,
     ):
-        super().__init__(parameters_df, output_dir)
+        super().__init__(parameters_df, output_dir, store_history=False)
         self.bats = []
 
         num_bats = 1  # len(bat_locations.keys()) %2 # just how the csv is organised
@@ -70,14 +71,14 @@ class Modified_Simulation(Simulation):
         self.bats[0].direction = Vector(0, 1)
         self.bats[0].id = 0
 
-    def convert_necessary_information_into_dict(self):
-        dictionary_w_information = {
-            "time": np.round(self.time_elapsed, self.rounding_based_on_time_step),
-            "bat_call_time": [bat.emit_times[-1] for bat in self.bats],
-            "bat_positions": [(bat.position.x, bat.position.y) for bat in self.bats],
-        }
-
-        return dictionary_w_information
+    # def convert_necessary_information_into_dict(self):
+    #     dictionary_w_information = {
+    #         "time": np.round(self.time_elapsed, self.rounding_based_on_time_step),
+    #         "bat_call_time": [bat.emit_times[-1] for bat in self.bats],
+    #         "bat_positions": [(bat.position.x, bat.position.y) for bat in self.bats],
+    #     }
+    #     dictionary_w_information.update(self.parameters_df)
+    #     return dictionary_w_information
 
 
 if __name__ == "__main__":
@@ -91,17 +92,18 @@ if __name__ == "__main__":
     store_value = []
 
     jammer_resolutions = [uuid.uuid4()]
-    params = [1.5, 3, 6]
-    for param in params:
+    params = [3]
+    for i, param in enumerate(params):
         for jammer_resolution in jammer_resolutions:
-            OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug11/"
+            OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug12/"
 
             PARAMETER_FILE_DIR = (
                 r"./JammingExperiment/Data/InputData/common_parameters.json"
             )
 
             PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
-            PARAMETER_DF["BAT_ROTATION_SPEED"] = [param]
+            print(PARAMETER_DF)
+            PARAMETER_DF["BAT_ROTATION_SPEED"] = param
             bat_locations_dir = (
                 "./JammingExperiment/Data/InputData/bat_start_positions.csv"
             )
@@ -110,8 +112,8 @@ if __name__ == "__main__":
                 "./JammingExperiment/Data/InputData/jammer_locations.csv"
             )
             chosen_start_location = (
-                PARAMETER_DF["ARENA_WIDTH"][0] / 2,
-                PARAMETER_DF["ARENA_LENGTH"][0] / 2,
+                PARAMETER_DF["ARENA_WIDTH"] / 2,
+                PARAMETER_DF["ARENA_LENGTH"] / 2,
             )
             sim_identifier = uuid.uuid4()
             sim = Modified_Simulation(
@@ -131,6 +133,12 @@ if __name__ == "__main__":
             # )
             # plt.close()
             positions_array = filter_bat_positions_from_history(sim.history)
+            subset_of_focal_bat = reformat_history(
+                sim.history, 0, sim.parameters_df, f"iteration_{i}"
+            )
+            df_position_data = pd.DataFrame.from_dict(
+                subset_of_focal_bat, orient="columns"
+            )
             print(
                 f"collision counts : {compute_collision_counts_and_length(positions_array, PARAMETER_DF)}"
             )

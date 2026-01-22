@@ -29,19 +29,19 @@ class Bat:
         self.output_dir = output_dir
 
         self.position = Vector(
-            random.uniform(1, self.parameters_df["ARENA_WIDTH"][0] - 1),
-            random.uniform(1, self.parameters_df["ARENA_LENGTH"][0] - 1),
+            random.uniform(1, self.parameters_df["ARENA_WIDTH"] - 1),
+            random.uniform(1, self.parameters_df["ARENA_LENGTH"] - 1),
         )  # randomize initial position placement. you can also reset this in simulation.
 
         self.direction = Vector().random_direction()  # randomize start direction
         # allocentric axis is set to start direction
         self.allocentric_axis_y = self.direction
 
-        time_step_size = self.parameters_df["TIME_STEP"][0]
+        time_step_size = self.parameters_df["TIME_STEP"]
         # find the number of decimal places to set rounding equal to time step size
         self.rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
 
-        self.call_rate = self.parameters_df["CALL_RATE"][0]
+        self.call_rate = self.parameters_df["CALL_RATE"]
         self.time_since_last_call = np.round(
             random.uniform(0, 1 / self.call_rate),
             self.rounding_based_on_time_step,
@@ -51,8 +51,8 @@ class Bat:
         self.emitted_sounds = []
         self.emit_times = [-np.inf]
 
-        self.speed = self.parameters_df["BAT_FAST_SPEED"][0]  # initial speed
-        self.radius = self.parameters_df["BAT_RADIUS"][0]  # bat radius
+        self.speed = self.parameters_df["BAT_FAST_SPEED"]  # initial speed
+        self.radius = self.parameters_df["BAT_RADIUS"]  # bat radius
 
         self.detections_for_directon_change = []  # initiate detection list
         self.time_since_directon_change = -np.inf  # time counter, direction change
@@ -88,8 +88,8 @@ class Bat:
         self.emit_sounds(current_time, sound_objects)
         self.update_directon(current_time, sound_objects, temporal_masking_file)
 
-        # if self.id == 0 and self.time_since_directon_change == 0:
-        #     print(current_time)
+        if self.id == 0 and self.time_since_directon_change == 0:
+            print(current_time)
 
     def update_movement(self):
         """Update poisition of Bat when called.
@@ -98,20 +98,17 @@ class Bat:
         """
         if self.speed != 0:
             self.position += (
-                self.direction * self.speed * self.parameters_df["TIME_STEP"][0]
+                self.direction * self.speed * self.parameters_df["TIME_STEP"]
             )
 
         # Boundary checks with bounce
 
-        if (
-            self.position.x <= 0
-            or self.position.x >= self.parameters_df["ARENA_WIDTH"][0]
-        ):
+        if self.position.x <= 0 or self.position.x >= self.parameters_df["ARENA_WIDTH"]:
             self.direction.x *= -1
             self.next_direction = self.direction
         if (
             self.position.y <= 0
-            or self.position.y >= self.parameters_df["ARENA_LENGTH"][0]
+            or self.position.y >= self.parameters_df["ARENA_LENGTH"]
         ):
             self.direction.y *= -1
             self.next_direction = self.direction
@@ -125,7 +122,7 @@ class Bat:
             current_time (float): Time, in seconds, for which the simualtion has been running.
             sound_objects (list): List containing all active sounds in the simulation
         """
-        self.time_since_last_call += self.parameters_df["TIME_STEP"][0]
+        self.time_since_last_call += self.parameters_df["TIME_STEP"]
         call_interval = 1.0 / self.call_rate
 
         if self.time_since_last_call >= call_interval:
@@ -144,8 +141,8 @@ class Bat:
 
             self.time_since_directon_change = 0
             self.time_since_last_call = np.random.uniform(
-                -self.parameters_df["NOISE_IN_CALL_RATE"][0],
-                self.parameters_df["NOISE_IN_CALL_RATE"][0],
+                -self.parameters_df["NOISE_IN_CALL_RATE"],
+                self.parameters_df["NOISE_IN_CALL_RATE"],
             )
             self.detections_for_directon_change = []
 
@@ -209,7 +206,7 @@ class Bat:
         array_of_sound_detections = []
         # if bat is calling it shouldnt hear anything
         is_bat_calling = (
-            current_time < self.emit_times[-1] + self.parameters_df["CALL_DURATION"][0]
+            current_time < self.emit_times[-1] + self.parameters_df["CALL_DURATION"]
         )
         if is_bat_calling:
             return array_of_sound_detections
@@ -237,13 +234,13 @@ class Bat:
                     self.position
                 )
                 hearing_directionality = call_directionality_factor(
-                    A=self.parameters_df["HEARING_DIRECTIONALITY"][0],
+                    A=self.parameters_df["HEARING_DIRECTIONALITY"],
                     theta=angle_between_sound_and_bat,
                 )
 
                 received_spl += hearing_directionality
                 is_sound_audible = (
-                    received_spl > self.parameters_df["HEARING_THRESHOLD"][0]
+                    received_spl > self.parameters_df["HEARING_THRESHOLD"]
                 )
 
                 if not is_sound_audible:
@@ -263,7 +260,7 @@ class Bat:
         """
         # Keep only recent detections
         # clean up activates after every some steps to clear memory from RAM and store it on drive
-        store_hearing = str2bool(self.parameters_df["STORE_HEARING"][0])
+        store_hearing = str2bool(self.parameters_df["STORE_HEARING"])
 
         if store_hearing and self.output_dir is not None:
             dir_to_store = self.output_dir + "/" + str(self.id)
@@ -286,7 +283,7 @@ class Bat:
     def generate_random_direction(self):
         """assign a random direction to the bat"""
         direction = self.direction
-        if random.random() < self.parameters_df["PROPENSITY_TO_CHANGE_DIRECTION"][0]:
+        if random.random() < self.parameters_df["PROPENSITY_TO_CHANGE_DIRECTION"]:
             direction = Vector().random_direction()
         return direction
 
@@ -310,7 +307,7 @@ class Bat:
 
     def decide_next_direction(self, detected_sound_objects):
         """decide next direction of bat based on sound"""
-        behaviour_rule_to_use = self.parameters_df["BEHAVIOUR_RULE"][0]
+        behaviour_rule_to_use = self.parameters_df["BEHAVIOUR_RULE"]
 
         if behaviour_rule_to_use == "consistency":
             next_direction, response_type = decide_next_direction_based_on_consistency(
@@ -333,23 +330,23 @@ class Bat:
             current_time (float): Time, in seconds, for which the simualtion has been running.
             sound_objects (list): list containing detected sounds
         """
-        self.time_since_directon_change += self.parameters_df["TIME_STEP"][0]
+        self.time_since_directon_change += self.parameters_df["TIME_STEP"]
 
-        implement_snr = str2bool(self.parameters_df["IMPLEMENT_SNR"][0])
+        implement_snr = str2bool(self.parameters_df["IMPLEMENT_SNR"])
         min_sound_detection_fraction = self.parameters_df[
             "MINIMUM_SOUND_DETECTION_FRACTION"
-        ][0]
+        ]
         include_direct_sounds_in_response = str2bool(
-            self.parameters_df["INCLUDE_DIRECT_SOUNDS_IN_RESPONSE"][0]
+            self.parameters_df["INCLUDE_DIRECT_SOUNDS_IN_RESPONSE"]
         )
 
         hearing_angle_threshold = np.radians(
-            self.parameters_df["HEARING_ANGLE_THRESHOLD"][0]
+            self.parameters_df["HEARING_ANGLE_THRESHOLD"]
         )
 
         direction_change_time_interval = self.parameters_df[
             "TIME_DELAY_FOR_DIRECTION_CHANGE"
-        ][0]
+        ]
         self.detections_for_directon_change.extend(
             self.given_sound_objects_return_sounds_at_bat_position(
                 current_time, sound_objects
@@ -370,8 +367,8 @@ class Bat:
                     min_sound_detection_fraction,
                     self.id,
                     include_direct_sounds_in_response,
-                    self.parameters_df["CALL_DURATION"][0],
-                    self.parameters_df["TIME_STEP"][0],
+                    self.parameters_df["CALL_DURATION"],
+                    self.parameters_df["TIME_STEP"],
                     self.rounding_based_on_time_step,
                 )
             else:
@@ -388,7 +385,7 @@ class Bat:
             self.time_since_directon_change = -np.inf
 
             if self.response_type == "attraction":
-                self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
+                self.speed = self.parameters_df["BAT_FAST_SPEED"]
         elif (
             self.time_since_directon_change >= direction_change_time_interval
             and len(self.detections_for_directon_change) != 0
@@ -398,9 +395,9 @@ class Bat:
             )[0]
             self.memory_window_sum_matrix = self.ipi_matrix.copy()
 
-        rotation_speed = self.parameters_df["BAT_ROTATION_SPEED"][0]
+        rotation_speed = self.parameters_df["BAT_ROTATION_SPEED"]
         rotation_speed_scaled_by_time_step = (
-            rotation_speed * self.parameters_df["TIME_STEP"][0]
+            rotation_speed * self.parameters_df["TIME_STEP"]
         )
         self.rotate_towards_given_degree(
             self.next_direction, rotation_speed_scaled_by_time_step
@@ -432,11 +429,11 @@ class Bat:
 
     def modulate_speed_call_rate(self):
         if self.any_consistent_sound == "no":
-            self.speed = self.parameters_df["BAT_FAST_SPEED"][0]
-            self.call_rate = self.parameters_df["CALL_RATE_FAST"][0]
+            self.speed = self.parameters_df["BAT_FAST_SPEED"]
+            self.call_rate = self.parameters_df["CALL_RATE_FAST"]
         else:
-            self.speed = self.parameters_df["BAT_SPEED"][0]
-            self.call_rate = self.parameters_df["CALL_RATE"][0]
+            self.speed = self.parameters_df["BAT_SPEED"]
+            self.call_rate = self.parameters_df["CALL_RATE"]
 
     def __repr__(self):
         return f"Bat(id={self.id}, position={self.position})"

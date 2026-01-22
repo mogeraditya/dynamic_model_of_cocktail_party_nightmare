@@ -123,15 +123,15 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
     ax[2].remove()
     ax[1] = fig.add_subplot(132, projection="polar")
     ax[2] = fig.add_subplot(133, projection="polar")
-    ax[0].set_xlim(0, parameters_df["ARENA_WIDTH"][0])
-    ax[0].set_ylim(0, parameters_df["ARENA_LENGTH"][0])
+    ax[0].set_xlim(0, parameters_df["ARENA_WIDTH"])
+    ax[0].set_ylim(0, parameters_df["ARENA_LENGTH"])
     ax[0].set_aspect("equal")
     ax[0].set_title("Bat Echolocation with Direct Calls and Echoes")
 
     boundary = Rectangle(
         (0, 0),
-        parameters_df["ARENA_WIDTH"][0],
-        parameters_df["ARENA_LENGTH"][0],
+        parameters_df["ARENA_WIDTH"],
+        parameters_df["ARENA_LENGTH"],
         fill=False,
         linestyle="--",
         color="gray",
@@ -412,8 +412,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
                 inner = max(
                     0,
                     sound["radius"]
-                    - parameters_df["CALL_DURATION"][0]
-                    * parameters_df["SOUND_SPEED"][0],
+                    - parameters_df["CALL_DURATION"] * parameters_df["SOUND_SPEED"],
                 )
                 outer = sound["radius"]
 
@@ -429,8 +428,8 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
                         width_of_disk = sound["radius"]
                     else:
                         width_of_disk = (
-                            parameters_df["CALL_DURATION"][0]
-                            * parameters_df["SOUND_SPEED"][0]
+                            parameters_df["CALL_DURATION"]
+                            * parameters_df["SOUND_SPEED"]
                         )
                     wedge = Wedge(
                         sound["origin"],
@@ -462,7 +461,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
         frames=len(history),
         init_func=init,
         blit=False,
-        interval=parameters_df["FRAME_RATE"][0] * 0.00001,
+        interval=parameters_df["FRAME_RATE"] * 0.00001,
     )
     print(len(history), len(grid_data_time_series))
     handles, labels = ax[0].get_legend_handles_labels()
@@ -470,7 +469,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
 
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=handles)
     if save_animation:
-        ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"][0])
+        ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"])
         ani.save(
             save_animation + f"/animation_without_sound_id_{unique_id}.mp4",
             writer=ffwriter,

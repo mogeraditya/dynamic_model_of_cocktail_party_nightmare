@@ -45,14 +45,14 @@ class Simulation:
 
         self.bats = [
             Bat(self.parameters_df, self.output_dir)
-            for _ in range(int(self.parameters_df["NUM_BATS"][0]))
+            for _ in range(int(self.parameters_df["NUM_BATS"]))
         ]
 
         obstacle_position = "random"
-        obstacle_radius = self.parameters_df["OBSTACLE_RADIUS"][0]
+        obstacle_radius = self.parameters_df["OBSTACLE_RADIUS"]
         self.obstacles = [
             Obstacle(self.parameters_df, obstacle_position, obstacle_radius)
-            for _ in range(int(self.parameters_df["OBSTACLE_COUNT"][0]))
+            for _ in range(int(self.parameters_df["OBSTACLE_COUNT"]))
         ]
         self.jammers = []
         self.wall_objects = make_walls(self.parameters_df)
@@ -61,7 +61,7 @@ class Simulation:
 
         self.time_elapsed = 0.0
         self.history = []
-        time_step_size = self.parameters_df["TIME_STEP"][0]
+        time_step_size = self.parameters_df["TIME_STEP"]
         # find the number of decimal places to set rounding equal to time step size
         self.store_history = store_history
         self.rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
@@ -81,18 +81,18 @@ class Simulation:
         temporal_masking_file = read_temporal_masking_fn(
             "./dynamic_model/supporting_files/temporal_masking_fn.csv"
         )
-
-        num_steps = int(
-            self.parameters_df["SIM_DURATION"][0] / self.parameters_df["TIME_STEP"][0]
+        time_array = np.arange(
+            0, self.parameters_df["SIM_DURATION"], self.parameters_df["TIME_STEP"]
         )
+        # save initial snapshot of the simulation
+        self.history.append(self.convert_necessary_information_into_dict())
+
         start_timing = datetime.now()
         list_time_taken_for_each_loop = []
         save_time_of_last_iter = start_timing
-        for step in range(num_steps):
-            self.time_elapsed = np.round(
-                step * self.parameters_df["TIME_STEP"][0],
-                self.rounding_based_on_time_step,
-            )
+
+        for time_step in time_array[1:]:
+            self.time_elapsed = time_step
 
             for sound in self.sound_objects:
                 sound.update(self.time_elapsed)
@@ -108,8 +108,7 @@ class Simulation:
             self.sound_objects = [
                 s
                 for s in self.sound_objects
-                if s.active
-                and s.current_spl > self.parameters_df["HEARING_THRESHOLD"][0]
+                if s.active and s.current_spl > self.parameters_df["HEARING_THRESHOLD"]
             ]
 
             self.history.append(self.convert_necessary_information_into_dict())
@@ -147,8 +146,7 @@ class Simulation:
             "sound_objects": [
                 self.serialize_sound(s)
                 for s in self.sound_objects
-                if s.active
-                and s.current_spl > self.parameters_df["HEARING_THRESHOLD"][0]
+                if s.active and s.current_spl > self.parameters_df["HEARING_THRESHOLD"]
             ],
             "sound_objects_count": len(self.sound_objects),
             "jammer_positions": [
@@ -177,7 +175,7 @@ class Simulation:
         Periodically the history list is cleared to ensure
         RAM doesnt get used up.
         """
-        history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
+        history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"]
 
         if len(self.history) > history_array_size_limit or is_end_of_code:
             with open(
@@ -198,7 +196,7 @@ class Simulation:
         Periodically the history list is cleared to ensure
         RAM doesnt get used up.
         """
-        history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"][0]
+        history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"]
 
         if len(self.history) > history_array_size_limit or is_end_of_code:
             # Save current batch as compressed numpy file instead of pickle

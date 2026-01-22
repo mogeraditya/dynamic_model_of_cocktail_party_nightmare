@@ -111,7 +111,7 @@ def plot_data_across_parameters(output_dir):
                 compute_collision_counts_and_length(history)
             )
             dict_w_values["parameters"].append(
-                parameters_df[parameters_df["VARYING_PARAM"][0]][0]
+                parameters_df[parameters_df["VARYING_PARAM"]][0]
             )
             interindividual_distance = compute_interindividual_distance(history)
             dict_w_values["mean interindividual dist"].append(
@@ -137,7 +137,7 @@ def save_extracted_data(output_dir, dir_to_store):
         )[0:2]
         dict_w_values["collision"].append(compute_collision_counts_and_length(history))
         dict_w_values["parameters"].append(
-            parameters_df[parameters_df["VARYING_PARAM"][0]][0]
+            parameters_df[parameters_df["VARYING_PARAM"]][0]
         )
         interindividual_distance = compute_interindividual_distance(history)
         dict_w_values["mean interindividual dist"].append(
@@ -147,9 +147,7 @@ def save_extracted_data(output_dir, dir_to_store):
             np.median(interindividual_distance)
         )
         print(iteration_folder)
-    with open(
-        dir_to_store + f'{dict_w_values["parameters"][0]}.pickle', "wb"
-    ) as handle:
+    with open(dir_to_store + f'{dict_w_values["parameters"]}.pickle', "wb") as handle:
         pickle.dump(dict_w_values, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 

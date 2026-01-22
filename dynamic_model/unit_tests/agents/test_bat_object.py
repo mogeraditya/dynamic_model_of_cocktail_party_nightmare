@@ -36,8 +36,8 @@ class TestBatObject(unittest.TestCase):
         self.assertTrue(self.bat.id == 0)
         self.assertTrue(isinstance(self.bat.position, Vector))
         self.assertTrue(isinstance(self.bat.direction, Vector))
-        self.assertTrue(self.bat.speed == self.mock_parameters["BAT_SPEED"][0])
-        self.assertTrue(self.bat.radius == self.mock_parameters["BAT_RADIUS"][0])
+        self.assertTrue(self.bat.speed == self.mock_parameters["BAT_SPEED"])
+        self.assertTrue(self.bat.radius == self.mock_parameters["BAT_RADIUS"])
         self.assertTrue(self.bat.implement_snr is True)
         self.assertTrue(len(self.bat.emitted_sounds) == 0)
         self.assertTrue(len(self.bat.received_sounds) == 0)
@@ -59,9 +59,7 @@ class TestBatObject(unittest.TestCase):
         self.bat.update_movement()
         expected_position = (
             initial_position
-            + initial_direction
-            * self.bat.speed
-            * self.bat.parameters_df["TIME_STEP"][0]
+            + initial_direction * self.bat.speed * self.bat.parameters_df["TIME_STEP"]
         )
         # print(self.bat.position, expected_position)
         self.assertAlmostEqual(self.bat.position.x, expected_position.x)
@@ -89,7 +87,7 @@ class TestBatObject(unittest.TestCase):
 
         # Set time since last call to exceed call interval
         self.bat.time_since_last_call = (
-            1.0 / self.bat.parameters_df["CALL_RATE"][0] + 0.001
+            1.0 / self.bat.parameters_df["CALL_RATE"] + 0.001
         )
 
         self.bat.emit_sounds(current_time, sound_objects)
@@ -110,7 +108,7 @@ class TestBatObject(unittest.TestCase):
 
         # time since last call less than call interval
         self.bat.time_since_last_call = (
-            1.0 / self.bat.parameters_df["CALL_RATE"][0] - 0.002
+            1.0 / self.bat.parameters_df["CALL_RATE"] - 0.002
         )
 
         self.bat.emit_sounds(current_time, sound_objects)
@@ -170,7 +168,7 @@ class TestBatObject(unittest.TestCase):
         creation_time = 0
         parameters_df = load_parameters(DIR_PARAMS)
 
-        sound_disk_width = self.bat.parameters_df["SOUND_DISK_WIDTH"][0]
+        sound_disk_width = self.bat.parameters_df["SOUND_DISK_WIDTH"]
 
         self.bat.position = origin
         sound1 = DirectSound(

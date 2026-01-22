@@ -64,10 +64,10 @@ def given_matrix_shortlist_response_cells(matrix, threshold_for_activation):
 
 
 def given_parameters_df_return_grid_matrix_zeros(parameters_df):
-    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
-    call_duration = parameters_df["CALL_DURATION"][0]
-    post_call_sampling_interval = parameters_df["TIME_DELAY_FOR_DIRECTION_CHANGE"][0]
+    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"]
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
+    call_duration = parameters_df["CALL_DURATION"]
+    post_call_sampling_interval = parameters_df["TIME_DELAY_FOR_DIRECTION_CHANGE"]
 
     spatial_grid_r = np.arange(
         call_duration,
@@ -94,9 +94,9 @@ def convert_detected_sounds_into_grids(
         _type_: _description_
     """
 
-    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"][0]
-    convert_grid_to_one_hot = str2bool(parameters_df["CONVERT_GRIDS+TO_ONE_HOT_?"][0])
-    time_step_size = parameters_df["TIME_STEP"][0]
+    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"]
+    convert_grid_to_one_hot = str2bool(parameters_df["CONVERT_GRIDS+TO_ONE_HOT_?"])
+    time_step_size = parameters_df["TIME_STEP"]
     rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
 
     matrix_spatial_grid, spatial_grid_r, spatial_grid_theta = (
@@ -144,14 +144,14 @@ def given_time_and_angle_return_direction(
     bat_direction,
     allocentric_axis_y,
 ):
-    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"][0]
+    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"]
     time_delay_threshold_for_repulsion = parameters_df[
         "TIME_DELAY_THRESHOLD_FOR_REPULSION"
-    ][0]
-    controller_type = parameters_df["CONTROLLER_TYPE"][0]
+    ]
+    controller_type = parameters_df["CONTROLLER_TYPE"]
 
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
-    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
+    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"]
     noise_in_angle = np.random.uniform(-angular_resolution / 2, angular_resolution / 2)
     angle_of_next_direction = (
         angle_of_activated_cell - angular_resolution / 2 + noise_in_angle
@@ -193,7 +193,7 @@ def find_indices_corresponding_to_hearing_range(
     angle_between_reference_axis_and_bat,
     hearing_range,
 ):
-    bat_angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
+    bat_angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
 
     # print(hearing_range, angle_between_reference_axis_and_bat)
     angles_to_hearing_range = np.arange(
@@ -228,7 +228,7 @@ def check_if_no_sound_in_front_of_bat(
     matrix_w_only_activations[indices_of_matrix_w_activations] = 1
     consolidated_matrix = np.sum(matrix_w_only_activations, axis=0)
 
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
     spatial_grid_theta = np.arange(-np.pi, np.pi, angular_resolution)
 
     frontal_range_indices = find_indices_corresponding_to_hearing_range(
@@ -251,10 +251,10 @@ def check_if_no_sound_in_front_of_bat(
 def make_sublist_based_on_hearing_range(
     activation_array, angle_between_reference_axis_and_bat, parameters_df
 ):
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
     spatial_grid_theta = np.arange(-np.pi, np.pi, angular_resolution)
 
-    hearing_range = np.radians(parameters_df["HEARING_ANGLE_THRESHOLD"][0])
+    hearing_range = np.radians(parameters_df["HEARING_ANGLE_THRESHOLD"])
     hearing_range_indices = find_indices_corresponding_to_hearing_range(
         parameters_df,
         spatial_grid_theta,

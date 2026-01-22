@@ -36,7 +36,7 @@ simulation_parameters["PROPENSITY_TO_CHANGE_DIRECTION"] = (
     0.001  # probability of changing direction, used for random walk of bat
 )
 simulation_parameters["SOUND_DISK_WIDTH"] = (
-    simulation_parameters["CALL_DURATION"][0] * simulation_parameters["SOUND_SPEED"][0]
+    simulation_parameters["CALL_DURATION"] * simulation_parameters["SOUND_SPEED"]
 )
 
 simulation_parameters["OBSTACLE_COUNT"] = 0  # number of obstacles

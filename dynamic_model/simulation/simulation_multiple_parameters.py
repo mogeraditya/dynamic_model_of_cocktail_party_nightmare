@@ -20,7 +20,7 @@ def run_one_instance_of_simulation(
     parameter_df = pd.read_csv(dir_of_one_param_file)
     output_dir = (
         data_storage_dir
-        + parameter_df["OUTPUT_DIR_FOR_SIMULATION"][0]
+        + parameter_df["OUTPUT_DIR_FOR_SIMULATION"]
         + f"iteration_number_{simulation_id}"
     )
     make_dir(output_dir)

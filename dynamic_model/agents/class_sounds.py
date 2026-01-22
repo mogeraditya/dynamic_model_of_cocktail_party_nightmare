@@ -35,10 +35,9 @@ class EchoSound:
         self.reflection_count = reflection_count
         self.current_radius = 0.0
         self.max_radius = (
-            self.parameters_df["SOUND_SPEED"][0]
-            * self.parameters_df["CALL_DURATION"][0]
+            self.parameters_df["SOUND_SPEED"] * self.parameters_df["CALL_DURATION"]
         )
-        self.speed = self.parameters_df["SOUND_SPEED"][0]
+        self.speed = self.parameters_df["SOUND_SPEED"]
         # Keep track of when to kill sound; either when db is below 20 or when out of arena
         self.active = True
         self.has_reflected = False  # Keep track of if it has reflected in the past
@@ -49,8 +48,8 @@ class EchoSound:
         self.id = uuid.uuid4()
         self.direction_vector = direction_vector
 
-        self.arena_width = self.parameters_df["ARENA_WIDTH"][0]
-        self.arena_LENGTH = self.parameters_df["ARENA_LENGTH"][0]
+        self.arena_width = self.parameters_df["ARENA_WIDTH"]
+        self.arena_LENGTH = self.parameters_df["ARENA_LENGTH"]
 
     def update(self, current_time):
         """Function to propagate sound with time.
@@ -70,7 +69,7 @@ class EchoSound:
             self.current_spl = (
                 self.initial_spl
                 - distance_effect
-                - (self.parameters_df["AIR_ABSORPTION"][0] * self.current_radius)
+                - (self.parameters_df["AIR_ABSORPTION"] * self.current_radius)
             )
 
         if self.check_if_sound_outside_arena():
@@ -90,13 +89,12 @@ class EchoSound:
         return distance <= self.current_radius and distance >= max(
             0,
             self.current_radius
-            - self.parameters_df["CALL_DURATION"][0]
-            * self.parameters_df["SOUND_SPEED"][0],
+            - self.parameters_df["CALL_DURATION"] * self.parameters_df["SOUND_SPEED"],
         )
 
     def sound_directionality(self, angle_between_sound_and_receiver):
         sound_directionality = call_directionality_factor(
-            A=self.parameters_df["CALL_DIRECTIONALITY"][0],
+            A=self.parameters_df["CALL_DIRECTIONALITY"],
             theta=angle_between_sound_and_receiver,
         )
         return sound_directionality
@@ -119,7 +117,7 @@ class EchoSound:
                 self.initial_spl
                 - distance_effect
                 - (
-                    self.parameters_df["AIR_ABSORPTION"][0]
+                    self.parameters_df["AIR_ABSORPTION"]
                     * distance_between_sound_and_receiver
                 )
             )
@@ -155,8 +153,8 @@ class DirectSound(EchoSound):
             origin=origin,
             creation_time=creation_time,
             emitter_id=emitter_id,
-            initial_spl=parameters_df["EMITTED_SPL"][0],
-            parent_creation_time=parameters_df["EMITTED_SPL"][0],
+            initial_spl=parameters_df["EMITTED_SPL"],
+            parent_creation_time=parameters_df["EMITTED_SPL"],
             reflection_count=0,
             reflected_from=None,
             direction_vector=direction_vector,
@@ -166,8 +164,7 @@ class DirectSound(EchoSound):
         self.current_radius = 0
         # Keep track of sound disc width
         self.max_radius = (
-            self.parameters_df["CALL_DURATION"][0]
-            * self.parameters_df["SOUND_SPEED"][0]
+            self.parameters_df["CALL_DURATION"] * self.parameters_df["SOUND_SPEED"]
         )
 
         self.active = True
@@ -198,16 +195,16 @@ class DirectSound(EchoSound):
             point
         )
         call_directionality = call_directionality_factor(
-            A=self.parameters_df["CALL_DIRECTIONALITY"][0],
+            A=self.parameters_df["CALL_DIRECTIONALITY"],
             theta=angle_between_sound_and_reflection_point,
         )
 
         object_type = reflected_from[0:4]
         if object_type == "wall":
-            reflection_loss = self.parameters_df["REFLECTION_LOSS_WALL"][0]
+            reflection_loss = self.parameters_df["REFLECTION_LOSS_WALL"]
         else:
-            reflection_loss = self.parameters_df["REFLECTION_LOSS"][0]
-
+            reflection_loss = self.parameters_df["REFLECTION_LOSS"]
+        # print(point, self.origin, self.wall_id, reflected_from)
         distance_between_sound_and_echo = self.origin.distance_to(point)
         # print(distance_between_sound_and_echo)
         distance_effect_for_echoes = 20 * math.log10(
@@ -216,14 +213,11 @@ class DirectSound(EchoSound):
         spl_corrected_for_width = (
             self.initial_spl
             - distance_effect_for_echoes
-            - (
-                self.parameters_df["AIR_ABSORPTION"][0]
-                * distance_between_sound_and_echo
-            )
+            - (self.parameters_df["AIR_ABSORPTION"] * distance_between_sound_and_echo)
         )
 
         reflected_spl = spl_corrected_for_width - reflection_loss + call_directionality
-        if reflected_spl < self.parameters_df["HEARING_THRESHOLD"][0]:
+        if reflected_spl < self.parameters_df["HEARING_THRESHOLD"]:
             return None
 
         # if reflected_spl > spl_corrected_for_width:
