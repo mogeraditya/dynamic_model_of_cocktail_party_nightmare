@@ -76,7 +76,7 @@ class Modified_Simulation(Simulation):
             "bat_call_time": [bat.emit_times[-1] for bat in self.bats],
             "bat_positions": [(bat.position.x, bat.position.y) for bat in self.bats],
         }
-        # print(dictionary_w_information)
+
         return dictionary_w_information
 
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     store_value = []
 
     jammer_resolutions = [uuid.uuid4()]
-    params = [3]
+    params = [1.5, 3, 6]
     for param in params:
         for jammer_resolution in jammer_resolutions:
             OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug11/"
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             )
 
             PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
-            # PARAMETER_DF["BAT_ROTATION_SPEED"] = [param]
+            PARAMETER_DF["BAT_ROTATION_SPEED"] = [param]
             bat_locations_dir = (
                 "./JammingExperiment/Data/InputData/bat_start_positions.csv"
             )

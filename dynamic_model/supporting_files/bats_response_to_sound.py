@@ -55,7 +55,7 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     else:
         raise ValueError("unsupported controller type")
 
-    print(f"bat call time {self.emit_times[-1]}")
+    # print(f"bat call time {self.emit_times[-1]}")
 
     self.cell_index_to_respond_to = cell_index_to_respond_to
     if np.isnan(cell_index_to_respond_to[0]):

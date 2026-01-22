@@ -2,6 +2,7 @@ import glob
 import os
 
 import numpy as np
+import pandas as pd
 
 
 def load_history_dump(folder_path):
@@ -40,21 +41,35 @@ def load_history_dump(folder_path):
         for i, frame_time in enumerate(times):
             frame_data = positions_array[i]
             valid_positions = frame_data[~np.isnan(frame_data)]
-            bat_positions = [
-                (valid_positions[j], valid_positions[j + 1])
-                for j in range(0, len(valid_positions), 2)
-            ]
+            bat_positions = np.array(
+                [
+                    (valid_positions[j], valid_positions[j + 1])
+                    for j in range(0, len(valid_positions), 2)
+                ]
+            )
 
             all_frames.append(
-                {"time": np.round(frame_time, 3), "bat_positions": bat_positions}
+                {
+                    "time": np.round(frame_time, 3),
+                    "bat_positions_x": bat_positions[:, 0],
+                    "bat_positions_y": bat_positions[:, 1],
+                }
             )
     all_frames.sort(key=lambda x: x["time"])
-    return filter_bat_positions_from_history(all_frames)
+    return all_frames
 
 
 def filter_bat_positions_from_history(all_frames):
 
     store_only_positions = []
     for item in all_frames:
-        store_only_positions.append(item["bat_positions"])
+        store_only_positions.append((item["bat_positions_x"], item["bat_positions_y"]))
     return store_only_positions
+
+
+def reformat_history(all_frames, focal_bat):
+    # get time, position, call time data
+    # reformat into long csv
+    subset_of_focal_bat = []
+
+    df_position_data = pd.DataFrame.from_dict(all_frames)

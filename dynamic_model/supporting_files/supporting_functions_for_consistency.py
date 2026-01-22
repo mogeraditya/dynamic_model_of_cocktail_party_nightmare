@@ -169,10 +169,10 @@ def given_time_and_angle_return_direction(
             angle_of_next_direction += np.pi
             response_type = "repulsion"
         else:
-            print(f"attraction delay{corrected_time_delay}")
+            # print(f"attraction delay{corrected_time_delay}")
             response_type = "attraction"
     elif controller_type == "absence":
-        print(np.degrees(angle_of_next_direction))
+        # print(np.degrees(angle_of_next_direction))
         response_type = "repulsion"
     else:
         raise ValueError("unsupported controller type")
@@ -195,7 +195,7 @@ def find_indices_corresponding_to_hearing_range(
 ):
     bat_angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
 
-    print(hearing_range, angle_between_reference_axis_and_bat)
+    # print(hearing_range, angle_between_reference_axis_and_bat)
     angles_to_hearing_range = np.arange(
         -hearing_range + angle_between_reference_axis_and_bat,
         hearing_range
@@ -211,7 +211,7 @@ def find_indices_corresponding_to_hearing_range(
         i if i != len(spatial_grid_theta) else 0
         for i in indices_corresponding_to_hearing_range
     ]
-    print(f"angles in hearing range {np.degrees(np.array(angles_to_hearing_range))}")
+    # print(f"angles in hearing range {np.degrees(np.array(angles_to_hearing_range))}")
     return indices_corresponding_to_hearing_range
 
 
@@ -300,7 +300,7 @@ def given_matrix_find_cell_to_respond_to_presence(
         parameters_df,
     )
     if no_consistent_sound_in_front:
-        print()
+        # print()
         return [np.nan, np.nan]
 
     find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index = (

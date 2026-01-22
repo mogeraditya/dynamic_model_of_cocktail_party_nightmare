@@ -1,14 +1,15 @@
 import glob
 import multiprocessing
 import os
+import sys
 import time
 
+sys.path.append("./dynamic_model/")
+sys.path.append("./JammingExperiment/Scripts/ProcessingScripts/")
 import pandas as pd
+from modified_simulation import Modified_Simulation
+from scores.run_all_score_calculations import filter_bat_positions_from_history
 from supporting_files.utilities import make_dir
-
-from JammingExperiment.Scripts.ProcessingScripts.modified_simulation import (
-    Modified_Simulation,
-)
 
 
 def run_one_instance_of_simulation(
@@ -39,6 +40,30 @@ def run_one_instance_of_simulation(
         obstacle_locations,
     )
     sim.run()
+    filter_bat_positions_from_history(sim.history)
+
+
+def store_positions_for_n_iterations(
+    n_iterations,
+    dir_of_one_param_file,
+    simulation_id,
+    data_storage_dir,
+    initial_release_point,
+    obstacle_locations,
+):
+    store_iteration_labels = []
+    store_position_history = []
+
+    for i in range(n_iterations):
+        iteration_label = f"iteration_number_{i}"
+
+        run_one_instance_of_simulation(
+            dir_of_one_param_file,
+            simulation_id,
+            data_storage_dir,
+            initial_release_point,
+            obstacle_locations,
+        )
 
 
 def parallel_process_with_pool(
@@ -57,7 +82,7 @@ def parallel_process_with_pool(
         max_workers (int, optional): maximum number of cores that need to be used. Defaults to None.
     """
     # Find parameter files
-    param_files = glob.glob(os.path.join(param_dir, "*.csv"))
+    param_files = glob.glob(os.path.join(param_dir, "*.json"))
     param_files = [f for f in param_files if os.path.isfile(f)]
     print(param_files)
 
