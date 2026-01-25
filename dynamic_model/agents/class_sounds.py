@@ -85,7 +85,7 @@ class EchoSound:
 
     def sound_directionality(self, angle_between_sound_and_receiver):
         sound_directionality = call_directionality_factor(
-            A=self.call_directionality,
+            a=self.call_directionality,
             theta=angle_between_sound_and_receiver,
         )
         return sound_directionality
@@ -178,7 +178,7 @@ class DirectSound(EchoSound):
             point
         )
         call_directionality = call_directionality_factor(
-            A=self.parameters_df["CALL_DIRECTIONALITY"],
+            a=self.parameters_df["CALL_DIRECTIONALITY"],
             theta=angle_between_sound_and_reflection_point,
         )
 

@@ -250,7 +250,7 @@ class Bat:
                     self.position
                 )
                 hearing_directionality = call_directionality_factor(
-                    A=self.parameters_df["HEARING_DIRECTIONALITY"],
+                    a=self.parameters_df["HEARING_DIRECTIONALITY"],
                     theta=angle_between_sound_and_bat,
                 )
 

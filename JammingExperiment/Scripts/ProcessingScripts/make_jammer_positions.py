@@ -1,9 +1,9 @@
 import numpy as np
+from agents.class_jammers import Jammers
+from supporting_files.vectors import Vector
 
-from dynamic_model.agents.class_jammers import Jammers
 
-
-def make_jammer_locations(parameters_df, jammer_resolution, call_rate):
+def make_jammers(parameters_df, jammer_resolution, call_rate):
     arena_width = parameters_df["ARENA_WIDTH"]
     arena_length = parameters_df["ARENA_LENGTH"]
 
@@ -18,15 +18,15 @@ def make_jammer_locations(parameters_df, jammer_resolution, call_rate):
         jammer_resolution,
     )
 
-    left_wall = [(0, i) for i in length_array]
-    right_wall = [(parameters_df["ARENA_WIDTH"], i) for i in length_array]
-    top_wall = [(i, parameters_df["ARENA_LENGTH"]) for i in width_array]
-    bottom_wall = [(i, 0) for i in width_array]
+    left_wall = [Vector(0, i) for i in length_array]
+    right_wall = [Vector(parameters_df["ARENA_WIDTH"], i) for i in length_array]
+    top_wall = [Vector(i, parameters_df["ARENA_LENGTH"]) for i in width_array]
+    bottom_wall = [Vector(i, 0) for i in width_array]
 
-    left_jammer_directions = [(1, 0) for i in left_wall]
-    right_jammer_directions = [(-1, 0) for i in right_wall]
-    top_jammer_directions = [(0, -1) for i in top_wall]
-    bottom_jammer_directions = [(0, 1) for i in bottom_wall]
+    left_jammer_directions = [Vector(1, 0) for i in left_wall]
+    right_jammer_directions = [Vector(-1, 0) for i in right_wall]
+    top_jammer_directions = [Vector(0, -1) for i in top_wall]
+    bottom_jammer_directions = [Vector(0, 1) for i in bottom_wall]
 
     positions_to_put_jammers = [*left_wall, *right_wall, *top_wall, *bottom_wall]
     directions_of_jammers = [

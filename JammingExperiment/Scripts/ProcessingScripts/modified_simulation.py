@@ -10,6 +10,7 @@ sys.path.append("./dynamic_model/")
 sys.path.append("./JammingExperiment/Scripts/ProcessingScripts/")
 from agents.class_bats import Bat
 from agents.class_jammers import Jammers
+from make_jammer_positions import make_jammers
 from plotting.single_bat_plotter import visualize
 from scores.collision_scores import (
     compute_collision_counts_and_length,
@@ -32,7 +33,7 @@ class Modified_Simulation(Simulation):
         parameters_df,
         output_dir,
         initial_release_point,
-        jammer_locations_and_directions,
+        jammer_resolution,
     ):
         super().__init__(parameters_df, output_dir, store_history=True)
         self.bats = []
@@ -42,29 +43,7 @@ class Modified_Simulation(Simulation):
         self.bats = [
             Bat(self.parameters_df, self.output_dir) for _ in range(int(num_bats))
         ]
-        self.jammers = []
-        if (jammer_locations_and_directions) is not None:
-            num_jammers = len(jammer_locations_and_directions["y"])
-
-            for i in range(num_jammers):
-                position = Vector(
-                    jammer_locations_and_directions["x"][i],
-                    jammer_locations_and_directions["y"][i],
-                )
-                direction = Vector(
-                    jammer_locations_and_directions["direction_x"][i],
-                    jammer_locations_and_directions["direction_y"][i],
-                )
-                jammer_call_rate = 10
-                self.jammers.append(
-                    Jammers(
-                        self.parameters_df,
-                        position,
-                        direction,
-                        jammer_call_rate,
-                        wall_id=jammer_locations_and_directions["wall_id"][i],
-                    )
-                )
+        self.jammers = make_jammers(self.parameters_df, jammer_resolution, 10)
 
         initial_release_point = make_vector(initial_release_point)
         self.bats[0].position = initial_release_point
@@ -91,12 +70,11 @@ if __name__ == "__main__":
     store_metric = []
     store_value = []
 
-    jammer_resolutions = [uuid.uuid4()]
     params = [180]
+    jammer_resolutions = [2]
     for i, param in enumerate(params):
         for jammer_resolution in jammer_resolutions:
-            OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug13/"
-
+            OUTPUT_DIR = "./JammingExperiment/Data/IntermediateData/debug13/"
             PARAMETER_FILE_DIR = (
                 r"./JammingExperiment/Data/InputData/common_parameters.json"
             )
@@ -104,13 +82,7 @@ if __name__ == "__main__":
             PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
             print(PARAMETER_DF)
             PARAMETER_DF["BAT_ROTATION_SPEED"] = param
-            bat_locations_dir = (
-                "./JammingExperiment/Data/InputData/bat_start_positions.csv"
-            )
-            bat_locations = pd.read_csv(bat_locations_dir)
-            jammer_locations = pd.read_csv(
-                "./JammingExperiment/Data/InputData/jammer_locations.csv"
-            )
+
             chosen_start_location = (
                 PARAMETER_DF["ARENA_WIDTH"] / 2,
                 PARAMETER_DF["ARENA_LENGTH"] / 2,
@@ -120,7 +92,7 @@ if __name__ == "__main__":
                 PARAMETER_DF,
                 OUTPUT_DIR,
                 chosen_start_location,
-                jammer_locations,
+                jammer_resolution,
             )
 
             sim.run()

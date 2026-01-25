@@ -211,7 +211,7 @@ def find_indices_corresponding_to_hearing_range(
         i if i != len(spatial_grid_theta) else 0
         for i in indices_corresponding_to_hearing_range
     ]
-    print(f"angles in hearing range {np.degrees(np.array(angles_to_hearing_range))}")
+    # print(f"angles in hearing range {np.degrees(np.array(angles_to_hearing_range))}")
     return indices_corresponding_to_hearing_range
 
 

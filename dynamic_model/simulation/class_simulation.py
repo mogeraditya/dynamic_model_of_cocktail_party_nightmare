@@ -78,10 +78,19 @@ class Simulation:
             pickle.dump(self.obstacles, f)
         with open(self.dir_to_store + "jammers_initial.pkl", "wb") as f:
             pickle.dump(self.jammers, f)
+        temporal_masking_fn_choice = self.parameters_df["TEMPORAL_MASKING_FN_TYPE"]
 
-        temporal_masking_file = read_temporal_masking_fn(
-            "./dynamic_model/supporting_files/temporal_masking_fn.csv"
-        )
+        if temporal_masking_fn_choice == "chopped":
+            temporal_masking_file = read_temporal_masking_fn(
+                "./dynamic_model/supporting_files/temporal_masking_fn_chopped.csv"
+            )
+        elif temporal_masking_fn_choice == "full":
+            temporal_masking_file = read_temporal_masking_fn(
+                "./dynamic_model/supporting_files/temporal_masking_fn.csv"
+            )
+        else:
+            raise ValueError("unsupported temporal masking fn")
+
         time_array = np.arange(
             0, self.parameters_df["SIM_DURATION"], self.parameters_df["TIME_STEP"]
         )
@@ -132,7 +141,7 @@ class Simulation:
             self.bats[0].list_to_store_sounds, orient="columns"
         )
         # print(df_position_data)
-        df_hearing_data.to_pickle(self.dir_to_store + "bat0_hearing_data.pkl")
+        df_hearing_data.to_pickle(self.dir_to_store + "bat_hearing_data.pkl")
         # print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         # print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
         # if self.store_history:

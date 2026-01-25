@@ -79,7 +79,7 @@ def load_parameters(file_dir):
     return output_df
 
 
-def call_directionality_factor(A, theta):
+def call_directionality_factor(a, theta):
     """Calculates the drop in source level as the angle
     increases from on-axis.
 
@@ -94,10 +94,10 @@ def call_directionality_factor(A, theta):
 
         float <=0: The amount of drop in dB which occurs when the call is measured off-axis.
     """
-    if A < 0:
+    if a < 0:
         raise ValueError("A should be >0 ! ")
 
-    call_dirn = A * (np.cos(theta) - 1)
+    call_dirn = a * (np.cos(theta) - 1)
 
     return call_dirn
 
@@ -192,8 +192,3 @@ def read_temporal_masking_fn(dir):
     for key in dict_1.keys()[1:]:
         dict_2[key] = np.float64(dict_1[key].values)
     return dict_2
-
-
-def given_shape_make_agent_bounce(consequtive_shape_points):
-    for i, point in consequtive_shape_points:
-        line = [consequtive_shape_points[i - 1], point]

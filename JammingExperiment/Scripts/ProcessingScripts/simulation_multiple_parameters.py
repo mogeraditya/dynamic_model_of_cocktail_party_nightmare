@@ -41,37 +41,7 @@ def run_one_instance_of_simulation(
         obstacle_locations,
     )
     sim.run()
-    return sim
-
-
-# def store_positions_for_n_iterations(
-#     n_iterations,
-#     dir_of_one_param_file,
-#     simulation_id,
-#     data_storage_dir,
-#     initial_release_point,
-#     obstacle_locations,
-# ):
-#     store_iteration_labels = []
-#     store_iteration_dicts = []
-
-#     for i in range(n_iterations):
-#         iteration_label = f"iteration_number_{i}"
-
-#         sim = run_one_instance_of_simulation(
-#             dir_of_one_param_file,
-#             simulation_id,
-#             data_storage_dir,
-#             initial_release_point,
-#             obstacle_locations,
-#         )
-#         history = sim.history.copy()
-#         focal_bat = 0
-#         parameters_df = sim.parameters_df.copy()
-
-#         _required_dict_subset = reformat_history(
-#             history, focal_bat, parameters_df, iteration_label
-#         )
+    # return sim
 
 
 def parallel_process_with_pool(
