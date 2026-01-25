@@ -73,6 +73,8 @@ class Bat:
         self.any_consistent_sound = "no"
         self.is_bat_reflective_to_sound = str2bool("yes")
 
+        self.list_to_store_sounds = []
+
     def update(self, current_time, sound_objects, temporal_masking_file):
         """Function to update bats with time.
         This function handles movement update of bat each time step.
@@ -159,7 +161,7 @@ class Bat:
         Returns:
             dictionary: dictionary version of the sound object
         """
-        incident_direction = sound.origin - self.position
+        incident_direction = (sound.origin - self.position).normalize()
         sound_type = "direct" if isinstance(sound, DirectSound) else "echo"
 
         dictionary = {
@@ -374,7 +376,8 @@ class Bat:
             else:
                 heard_sounds = self.detections_for_directon_change
 
-            self.cleanup_sounds(current_time, heard_sounds)
+            # self.cleanup_sounds(current_time, heard_sounds)
+            self.list_to_store_sounds.extend(heard_sounds)
 
             self.modulate_speed_call_rate()
 

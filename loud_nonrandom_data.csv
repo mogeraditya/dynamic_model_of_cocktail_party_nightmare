@@ -1,7 +1,3 @@
 ,jammer_resolution,metric,value
-0,5d8c3ee3-1e37-4b80-92e8-6e0d7d855305,collision_rate,0.0368
-1,5d8c3ee3-1e37-4b80-92e8-6e0d7d855305,collision_counts,11.0
-2,5d8c3ee3-1e37-4b80-92e8-6e0d7d855305,collision_rate,0.02588
-3,5d8c3ee3-1e37-4b80-92e8-6e0d7d855305,collision_counts,9.0
-4,5d8c3ee3-1e37-4b80-92e8-6e0d7d855305,collision_rate,0.00252
-5,5d8c3ee3-1e37-4b80-92e8-6e0d7d855305,collision_counts,1.0
+0,6ed43839-7822-4aae-ae70-bc9d911a8601,collision_rate,
+1,6ed43839-7822-4aae-ae70-bc9d911a8601,collision_counts,0.0

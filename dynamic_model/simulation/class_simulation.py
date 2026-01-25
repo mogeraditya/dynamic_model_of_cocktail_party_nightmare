@@ -8,6 +8,7 @@ import uuid
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 
 # from supporting_files.store_history import CompactHistoryManager
 
@@ -38,7 +39,7 @@ class Simulation:
         Obstacle._id_counter = 0
         self.parameters_df = parameters_df
         self.output_dir = output_dir + "/"
-        self.dir_to_store = self.output_dir + "/data_for_plotting/"
+        self.dir_to_store = self.output_dir  # + "/data_for_plotting/"
 
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.dir_to_store, exist_ok=True)
@@ -120,14 +121,18 @@ class Simulation:
             save_time_of_last_iter = current_loop_time
 
             if self.store_history:
-                self.handle_data_storage_for_plotting(self.time_elapsed, False)
-                # self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
+                # self.handle_data_storage_for_plotting(self.time_elapsed, False)
+                self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
         if self.store_history:
-            self.handle_data_storage_for_plotting(self.time_elapsed, True)
-            # self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
+            # self.handle_data_storage_for_plotting(self.time_elapsed, True)
+            self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
 
         # TODO : make score calculations.
-
+        df_hearing_data = pd.DataFrame.from_dict(
+            self.bats[0].list_to_store_sounds, orient="columns"
+        )
+        # print(df_position_data)
+        df_hearing_data.to_csv(self.dir_to_store + "bat0_hearing_data.csv")
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
         if self.store_history:

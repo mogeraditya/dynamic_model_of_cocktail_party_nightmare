@@ -65,7 +65,7 @@ def filter_bat_positions_from_history(all_frames):
 
     store_only_positions = []
     for item in all_frames:
-        store_only_positions.append([[item["bat_positions"]]])
+        store_only_positions.append([item["bat_positions"]])
     return store_only_positions
 
 

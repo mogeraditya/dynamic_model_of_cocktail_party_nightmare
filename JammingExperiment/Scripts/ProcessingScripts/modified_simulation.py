@@ -34,7 +34,7 @@ class Modified_Simulation(Simulation):
         initial_release_point,
         jammer_locations_and_directions,
     ):
-        super().__init__(parameters_df, output_dir, store_history=False)
+        super().__init__(parameters_df, output_dir, store_history=True)
         self.bats = []
 
         num_bats = 1  # len(bat_locations.keys()) %2 # just how the csv is organised
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     params = [3]
     for i, param in enumerate(params):
         for jammer_resolution in jammer_resolutions:
-            OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug12/"
+            OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug13/"
 
             PARAMETER_FILE_DIR = (
                 r"./JammingExperiment/Data/InputData/common_parameters.json"
@@ -122,16 +122,17 @@ if __name__ == "__main__":
                 chosen_start_location,
                 jammer_locations,
             )
+
             sim.run()
             SAVE_ANIMATION = OUTPUT_DIR
-            # visualize(
-            #     OUTPUT_DIR,
-            #     SAVE_ANIMATION,
-            #     sim_identifier,
-            #     resolution=30,
-            #     show_sounds=False,
-            # )
-            # plt.close()
+            visualize(
+                OUTPUT_DIR,
+                SAVE_ANIMATION,
+                sim_identifier,
+                resolution=30,
+                show_sounds=False,
+            )
+            plt.close()
             positions_array = filter_bat_positions_from_history(sim.history)
             subset_of_focal_bat = reformat_history(
                 sim.history, 0, sim.parameters_df, f"iteration_{i}"
