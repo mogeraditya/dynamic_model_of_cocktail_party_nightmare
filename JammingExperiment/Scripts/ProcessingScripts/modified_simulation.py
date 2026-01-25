@@ -92,7 +92,7 @@ if __name__ == "__main__":
     store_value = []
 
     jammer_resolutions = [uuid.uuid4()]
-    params = [3]
+    params = [180]
     for i, param in enumerate(params):
         for jammer_resolution in jammer_resolutions:
             OUTPUT_DIR = f"./JammingExperiment/Data/IntermediateData/debug13/"

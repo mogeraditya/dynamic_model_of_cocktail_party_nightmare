@@ -43,7 +43,7 @@ def stitch_together_history_lists(history_output_dir):
     Returns:
         list: list with all the merged lists from pickle files.
     """
-    history_output_dir = history_output_dir + "/data_for_plotting/"
+    history_output_dir = history_output_dir  # + "/data_for_plotting/"
     list_of_dict_files = glob.glob(history_output_dir + "/history_dump_*.pkl")
     list_of_dict_files = np.sort(list_of_dict_files)
 
@@ -123,6 +123,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
     ax[2].remove()
     ax[1] = fig.add_subplot(132, projection="polar")
     ax[2] = fig.add_subplot(133, projection="polar")
+    print(parameters_df["ARENA_WIDTH"])
     ax[0].set_xlim(0, parameters_df["ARENA_WIDTH"])
     ax[0].set_ylim(0, parameters_df["ARENA_LENGTH"])
     ax[0].set_aspect("equal")

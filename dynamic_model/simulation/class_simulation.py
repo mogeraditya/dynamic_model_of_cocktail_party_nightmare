@@ -132,11 +132,11 @@ class Simulation:
             self.bats[0].list_to_store_sounds, orient="columns"
         )
         # print(df_position_data)
-        df_hearing_data.to_csv(self.dir_to_store + "bat0_hearing_data.csv")
-        print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
-        print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
-        if self.store_history:
-            print("DATA SAVED")
+        df_hearing_data.to_pickle(self.dir_to_store + "bat0_hearing_data.pkl")
+        # print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
+        # print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
+        # if self.store_history:
+        #     print("DATA SAVED")
 
     def convert_necessary_information_into_dict(self):
         dictionary_w_information = {
@@ -350,13 +350,6 @@ class Simulation:
             "type": "direct" if isinstance(sound, DirectSound) else "echo",
             "status": sound.active,
         }
-        if not isinstance(sound, DirectSound):
-            data.update(
-                {
-                    "parent_creation_time": sound.parent_creation_time,
-                    "reflection_count": sound.reflection_count,
-                }
-            )
 
         return data
 

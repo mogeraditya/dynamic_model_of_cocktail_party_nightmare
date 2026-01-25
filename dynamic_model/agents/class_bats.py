@@ -412,7 +412,7 @@ class Bat:
             )[0]
             self.memory_window_sum_matrix = self.ipi_matrix.copy()
 
-        rotation_speed = self.parameters_df["BAT_ROTATION_SPEED"]
+        rotation_speed = np.radians(self.parameters_df["BAT_ROTATION_SPEED"])
         rotation_speed_scaled_by_time_step = (
             rotation_speed * self.parameters_df["TIME_STEP"]
         )

@@ -16,14 +16,14 @@ def convert_matrix_to_one_hot(matrix):
     return one_hot_matrix
 
 
-def check_if_two_lists_are_disjoint(list1, list2):
-    for element in list1:
-        is_element_in_list2 = any(
-            all(item in sublist for item in element) for sublist in list2
-        )
-        if is_element_in_list2:
-            return False
-    return True
+# def check_if_two_lists_are_disjoint(list1, list2):
+#     for element in list1:
+#         is_element_in_list2 = any(
+#             all(item in sublist for item in element) for sublist in list2
+#         )
+#         if is_element_in_list2:
+#             return False
+#     return True
 
 
 def given_matrix_shortlist_response_cells(matrix, threshold_for_activation):
@@ -211,7 +211,7 @@ def find_indices_corresponding_to_hearing_range(
         i if i != len(spatial_grid_theta) else 0
         for i in indices_corresponding_to_hearing_range
     ]
-    # print(f"angles in hearing range {np.degrees(np.array(angles_to_hearing_range))}")
+    print(f"angles in hearing range {np.degrees(np.array(angles_to_hearing_range))}")
     return indices_corresponding_to_hearing_range
 
 
@@ -235,7 +235,7 @@ def check_if_no_sound_in_front_of_bat(
         parameters_df,
         spatial_grid_theta,
         angle_between_reference_axis_and_bat,
-        hearing_range=angular_resolution * 2,
+        hearing_range=np.radians(parameters_df["BAT_FRONTAL_RANGE"]),
     )
 
     sublist_based_on_frontal_range = []
