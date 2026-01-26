@@ -17,8 +17,10 @@
 # export OPENBLAS_NUM_THREADS=1
 # export NUMEXPR_NUM_THREADS=1
 
-conda init bash
+
 module load anaconda/3/2023.03
+
+conda init bash
 conda activate cocktail_3_dynamic_model
 
 # Use srun inside allocations (good Slurm hygiene)
