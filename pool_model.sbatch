@@ -22,7 +22,7 @@ module load anaconda/3/2023.03
 
 conda init bash
 source ~/.bashrc
-conda activate cocktail_3_dynamic_model
+conda activate /u/amoger/cocktail_3_dynamic_model/
 
 # Use srun inside allocations (good Slurm hygiene)
 srun python3 ./JammingExperiment/Scripts/ProcessingScripts/simulation_multiple_parameters.py $SLURM_CPUS_PER_TASK
