@@ -8,7 +8,10 @@ sys.path.append("./dynamic_model/")
 sys.path.append("./JammingExperiment/Scripts/ProcessingScripts/")
 import pandas as pd
 from modified_simulation import Modified_Simulation
+from scores.run_all_score_calculations import take_history_store_scores
 from supporting_files.utilities import load_parameters, make_dir
+
+counter = 0
 
 
 def run_one_instance_of_simulation(
@@ -22,23 +25,37 @@ def run_one_instance_of_simulation(
     Args:
         dir_of_one_param_file (str): directory of one param file
         simulation_id (int): used to track the iteration number of the sim
+
     """
+    # if simulation_id == 0:
+    #     raise ValueError
+    # else:
+    #     counter+=1
     parameter_df = load_parameters(dir_of_one_param_file)
-    output_dir = (
-        data_storage_dir
-        + parameter_df["OUTPUT_DIR_FOR_SIMULATION"]
-        + f"iteration_number_{simulation_id}"
+    store_scores = []
+    for i in range(20):
+        output_dir = (
+            data_storage_dir
+            + parameter_df["OUTPUT_DIR_FOR_SIMULATION"]
+            + f"iteration_number_{simulation_id}{i}"
+        )
+        make_dir(output_dir)
+        # print(output_dir)
+
+        sim = Modified_Simulation(
+            parameter_df,
+            output_dir,
+            initial_release_point,
+        )
+        sim.run()
+        sim.save_history_csv()
+        store_scores.append(take_history_store_scores(sim, f"iteration_number_{i}"))
+
+    df_hearing_data = pd.DataFrame.from_dict(store_scores)
+    df_hearing_data.to_csv(
+        data_storage_dir + parameter_df["OUTPUT_DIR_FOR_SIMULATION"] + "/scores.csv"
     )
-    make_dir(output_dir)
-    print(output_dir)
-    sim = Modified_Simulation(
-        parameter_df,
-        output_dir,
-        initial_release_point,
-    )
-    sim.run()
-    sim.save_history_csv()
-    # return sim
+    return
 
 
 def parallel_process_with_pool(
@@ -95,7 +112,7 @@ if __name__ == "__main__":
     # Directory containing your parameter files
     PARAM_DIR = "./JammingExperiment/Data/InputData/sensitivity_params/"
 
-    N_RUNS = 20  # Number of iterations per parameter set
+    N_RUNS = 1  # Number of iterations per parameter set
     DATA_STORAGE_DIR = (
         r"/media/adityamoger/T7 Shield/test_sensitivity/"  # Base output directory
     )

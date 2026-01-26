@@ -88,8 +88,6 @@ class Bat:
 
         self.update_movement()
         self.emit_sounds(current_time, sound_objects)
-        if self.id == 0 and self.time_since_directon_change == 0:
-            print(current_time)
         self.update_directon(current_time, sound_objects, temporal_masking_file)
 
         # just make sure egocentric is truly egocentric everywhere.

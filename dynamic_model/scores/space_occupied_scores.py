@@ -12,7 +12,9 @@ def space_occupied_score(parameters_df, bat_positions):
     y = np.arange(0, arena_length, 0.5)
 
     track_unique_cells = []
+    # print(bat_positions)
     for bat_position_frame in bat_positions:
+        # print(bat_position_frame)
         grid_x_index = bisect.bisect_left(x, bat_position_frame[0][0])
         grid_y_index = bisect.bisect_left(y, bat_position_frame[0][1])
         grid_cell_identity = str([grid_x_index, grid_y_index])

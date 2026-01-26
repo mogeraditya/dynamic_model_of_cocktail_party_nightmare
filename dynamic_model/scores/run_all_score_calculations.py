@@ -3,6 +3,12 @@ import os
 
 import numpy as np
 import pandas as pd
+from scores.calling_effort_score import calling_effort
+from scores.collision_scores_single_bat import (
+    compute_collision_counts_and_length,
+    compute_collision_rate,
+)
+from scores.space_occupied_scores import space_occupied_score
 
 
 def load_history_dump(folder_path):
@@ -65,7 +71,7 @@ def filter_bat_positions_from_history(all_frames):
 
     store_only_positions = []
     for item in all_frames:
-        store_only_positions.append([item["bat_positions"]])
+        store_only_positions.append(item["bat_positions"])
     return store_only_positions
 
 
@@ -87,3 +93,26 @@ def reformat_history(history, focal_bat, parameter_df, iteration_label):
     # df_position_data = pd.DataFrame.from_dict(subset_of_focal_bat, orient="columns")
     # print(df_position_data)
     return subset_of_focal_bat
+
+
+def take_history_store_scores(sim, sim_iteration_number):
+    focal_bat = sim.bats[0]
+    bat_positions = filter_bat_positions_from_history(sim.history)
+
+    space_occupied = space_occupied_score(sim.parameters_df, bat_positions)
+    collision_counts = compute_collision_counts_and_length(
+        bat_positions, sim.parameters_df
+    )
+    collision_rate = compute_collision_rate(bat_positions, sim.parameters_df)
+    calling_effort_score = calling_effort(focal_bat)
+
+    dict_to_store = {
+        "space_occupied": space_occupied,
+        "collision_counts": collision_counts,
+        "collision_rate": collision_rate,
+        "calling_effort": calling_effort_score,
+        "iteration_label": sim_iteration_number,
+    }
+    dict_to_store.update(sim.parameters_df)
+
+    return dict_to_store

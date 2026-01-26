@@ -105,37 +105,48 @@ class Simulation:
         save_time_of_last_iter = start_timing
 
         for time_step in time_array[1:]:
-            self.time_elapsed = time_step
-            # print(time_step)
-            # print(self.sound_objects)
-            for sound in self.sound_objects:
-                sound.update(self.time_elapsed)
+            try:
+                self.time_elapsed = time_step
+                # print(time_step)
+                # print(self.sound_objects)
+                for sound in self.sound_objects:
+                    sound.update(self.time_elapsed)
 
-            for bat in self.bats:
-                bat.update(self.time_elapsed, self.sound_objects, temporal_masking_file)
+                for bat in self.bats:
+                    bat.update(
+                        self.time_elapsed, self.sound_objects, temporal_masking_file
+                    )
 
-            for jammer in self.jammers:
-                jammer.update(self.time_elapsed, self.sound_objects)
+                for jammer in self.jammers:
+                    jammer.update(self.time_elapsed, self.sound_objects)
 
-            self.handle_reflections(self.time_elapsed)
+                self.handle_reflections(self.time_elapsed)
 
-            self.sound_objects = [
-                s
-                for s in self.sound_objects
-                if s.active and s.current_spl > self.parameters_df["HEARING_THRESHOLD"]
-            ]
+                self.sound_objects = [
+                    s
+                    for s in self.sound_objects
+                    if s.active
+                    and s.current_spl > self.parameters_df["HEARING_THRESHOLD"]
+                ]
 
-            self.history.append(self.convert_necessary_information_into_dict())
-            current_loop_time = datetime.now()
-            list_time_taken_for_each_loop.append(
-                current_loop_time - save_time_of_last_iter
-            )
+                self.history.append(self.convert_necessary_information_into_dict())
+                current_loop_time = datetime.now()
+                list_time_taken_for_each_loop.append(
+                    current_loop_time - save_time_of_last_iter
+                )
 
-            save_time_of_last_iter = current_loop_time
+                save_time_of_last_iter = current_loop_time
 
-            if self.store_history:
-                # self.handle_data_storage_for_plotting(self.time_elapsed, False)
-                self.handle_data_storage_for_plotting_pickle(self.time_elapsed, False)
+                if self.store_history:
+                    # self.handle_data_storage_for_plotting(self.time_elapsed, False)
+                    self.handle_data_storage_for_plotting_pickle(
+                        self.time_elapsed, False
+                    )
+            except BaseException:
+                print("Unexpected error:", sys.exc_info()[0])
+                print(self.parameters_df["OUTPUT_DIR_FOR_SIMULATION"])
+                break
+
         if self.store_history:
             # self.handle_data_storage_for_plotting(self.time_elapsed, True)
             self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
@@ -146,6 +157,7 @@ class Simulation:
         )
         # print(df_position_data)
         df_hearing_data.to_pickle(self.dir_to_store + "bat_hearing_data.pkl")
+        print(self.parameters_df["OUTPUT_DIR_FOR_SIMULATION"])
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
         if self.store_history:
