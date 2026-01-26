@@ -2,7 +2,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1   # only start 1 task via srun because Python multiprocessing starts more tasks internally
 #SBATCH --cpus-per-task=128  
-#SBATCH --time 01:00:00
+#SBATCH --time 24:00:00
 
 #SBATCH -o limchannels_%j.out
 #SBATCH -e limchannels_%j.err
@@ -26,3 +26,4 @@ conda activate /u/amoger/conda-envs/cocktail_3_dynamic_model
 
 # Use srun inside allocations (good Slurm hygiene)
 srun python3 ./JammingExperiment/Scripts/ProcessingScripts/simulation_multiple_parameters.py $SLURM_CPUS_PER_TASK
+
