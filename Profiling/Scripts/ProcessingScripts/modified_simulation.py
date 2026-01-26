@@ -112,18 +112,14 @@ if __name__ == "__main__":
             jammer_locations = None
         else:
             width_array = np.linspace(
-                0.5, PARAMETER_DF["ARENA_WIDTH"][0] - 0.5, num=jammer_resolution
+                0.5, PARAMETER_DF["ARENA_WIDTH"] - 0.5, num=jammer_resolution
             )
             LENGTH_array = np.linspace(
-                0.5, PARAMETER_DF["ARENA_LENGTH"][0] - 0.5, num=jammer_resolution
+                0.5, PARAMETER_DF["ARENA_LENGTH"] - 0.5, num=jammer_resolution
             )
             left_wall = [(0.01, i) for i in LENGTH_array]
-            right_wall = [
-                (PARAMETER_DF["ARENA_WIDTH"][0] - 0.01, i) for i in LENGTH_array
-            ]
-            top_wall = [
-                (i, PARAMETER_DF["ARENA_LENGTH"][0] - 0.01) for i in width_array
-            ]
+            right_wall = [(PARAMETER_DF["ARENA_WIDTH"] - 0.01, i) for i in LENGTH_array]
+            top_wall = [(i, PARAMETER_DF["ARENA_LENGTH"] - 0.01) for i in width_array]
             bottom_wall = [(i, 0.01) for i in width_array]
 
             positions_to_put_objects = np.array(
@@ -138,8 +134,8 @@ if __name__ == "__main__":
         print(bat_locations.keys())
         LOCATION_NUMBER = 0
         chosen_start_location = (
-            PARAMETER_DF["ARENA_WIDTH"][0] / 2,
-            PARAMETER_DF["ARENA_LENGTH"][0] / 2,
+            PARAMETER_DF["ARENA_WIDTH"] / 2,
+            PARAMETER_DF["ARENA_LENGTH"] / 2,
         )
         sim_identifier = uuid.uuid4()
         sim = Modified_Simulation(

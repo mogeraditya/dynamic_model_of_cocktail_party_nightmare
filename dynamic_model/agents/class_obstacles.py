@@ -15,14 +15,14 @@ class Obstacle:
         if position == "random":
             self.position = Vector(
                 random.uniform(
-                    self.parameters_df["OBSTACLE_RADIUS"][0],
-                    self.parameters_df["ARENA_WIDTH"][0]
-                    - self.parameters_df["OBSTACLE_RADIUS"][0],
+                    self.parameters_df["OBSTACLE_RADIUS"],
+                    self.parameters_df["ARENA_WIDTH"]
+                    - self.parameters_df["OBSTACLE_RADIUS"],
                 ),
                 random.uniform(
-                    self.parameters_df["OBSTACLE_RADIUS"][0],
-                    self.parameters_df["ARENA_LENGTH"][0]
-                    - self.parameters_df["OBSTACLE_RADIUS"][0],
+                    self.parameters_df["OBSTACLE_RADIUS"],
+                    self.parameters_df["ARENA_LENGTH"]
+                    - self.parameters_df["OBSTACLE_RADIUS"],
                 ),
             )
         else:

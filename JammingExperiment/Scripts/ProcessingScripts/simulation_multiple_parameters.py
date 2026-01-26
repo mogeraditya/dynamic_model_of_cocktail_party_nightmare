@@ -1,14 +1,17 @@
 import glob
 import multiprocessing
 import os
+import sys
 import time
 
+sys.path.append("./dynamic_model/")
+sys.path.append("./JammingExperiment/Scripts/ProcessingScripts/")
 import pandas as pd
-from supporting_files.utilities import make_dir
+from modified_simulation import Modified_Simulation
+from scores.run_all_score_calculations import take_history_store_scores
+from supporting_files.utilities import load_parameters, make_dir
 
-from ChainExperiment.Scripts.ProcessingScripts.modified_simulation import (
-    Modified_Simulation,
-)
+counter = 0
 
 
 def run_one_instance_of_simulation(
@@ -16,29 +19,41 @@ def run_one_instance_of_simulation(
     simulation_id,
     data_storage_dir,
     initial_release_point,
-    obstacle_locations,
 ):
     """run one instance of the simulation
 
     Args:
         dir_of_one_param_file (str): directory of one param file
         simulation_id (int): used to track the iteration number of the sim
+
     """
-    parameter_df = pd.read_csv(dir_of_one_param_file)
-    output_dir = (
-        data_storage_dir
-        + parameter_df["OUTPUT_DIR_FOR_SIMULATION"][0]
-        + f"iteration_number_{simulation_id}"
+    # if simulation_id == 0:
+    #     raise ValueError
+    # else:
+    #     counter+=1
+    parameter_df = load_parameters(dir_of_one_param_file)
+    store_scores = []
+    for i in range(20):
+        output_dir = (
+            data_storage_dir
+            + parameter_df["OUTPUT_DIR_FOR_SIMULATION"]
+            + f"iteration_number_{simulation_id}{i}"
+        )
+        make_dir(output_dir)
+        sim = Modified_Simulation(
+            parameter_df,
+            output_dir,
+            initial_release_point,
+        )
+        sim.run()
+        sim.save_history_csv()
+        store_scores.append(take_history_store_scores(sim, f"iteration_number_{i}"))
+
+    df_hearing_data = pd.DataFrame.from_dict(store_scores)
+    df_hearing_data.to_csv(
+        data_storage_dir + parameter_df["PARAM_LABEL"] + "_scores.csv"
     )
-    make_dir(output_dir)
-    print(output_dir)
-    sim = Modified_Simulation(
-        parameter_df,
-        output_dir,
-        initial_release_point,
-        obstacle_locations,
-    )
-    sim.run()
+    return
 
 
 def parallel_process_with_pool(
@@ -47,7 +62,6 @@ def parallel_process_with_pool(
     data_storage_dir,
     max_workers,
     initial_release_point,
-    obstacle_locations,
 ):
     """run simulation multiple times for all parameter files
 
@@ -57,7 +71,7 @@ def parallel_process_with_pool(
         max_workers (int, optional): maximum number of cores that need to be used. Defaults to None.
     """
     # Find parameter files
-    param_files = glob.glob(os.path.join(param_dir, "*.csv"))
+    param_files = glob.glob(os.path.join(param_dir, "*.json"))
     param_files = [f for f in param_files if os.path.isfile(f)]
     print(param_files)
 
@@ -75,7 +89,6 @@ def parallel_process_with_pool(
                     iteration,
                     data_storage_dir,
                     initial_release_point,
-                    obstacle_locations,
                 )
             )
 
@@ -95,27 +108,20 @@ def parallel_process_with_pool(
 
 if __name__ == "__main__":
     # Directory containing your parameter files
-    PARAM_DIR = "./behaviour_analysis_for_nvg/parameters/"
+    PARAM_DIR = "./JammingExperiment/Data/InputData/sensitivity_params/"
 
-    N_RUNS = 5  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = (
-        r"/media/adityamoger/T7 Shield/dir_store_snr/"  # Base output directory
-    )
+    N_RUNS = 1  # Number of iterations per parameter set
+    DATA_STORAGE_DIR = r"./sensitivity_analysis/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing
     print("Starting parallel processing...")
-    bat_locations_dir = "./behaviour_analysis_for_nvg/bat_start_positions.csv"
-    obstacle_locations_dir = "./behaviour_analysis_for_nvg/chain_positions.csv"
 
-    bat_locations = pd.read_csv(bat_locations_dir)
-    obstacle_locations = pd.read_csv(obstacle_locations_dir)
-
+    chosen_start_location = (5, 3.5)
     parallel_process_with_pool(
         param_dir=PARAM_DIR,
         n_runs=N_RUNS,
         data_storage_dir=DATA_STORAGE_DIR,
         max_workers=None,
-        initial_release_point=(bat_locations["x"][2], bat_locations["y"][2]),
-        obstacle_locations=obstacle_locations,
+        initial_release_point=chosen_start_location,
     )

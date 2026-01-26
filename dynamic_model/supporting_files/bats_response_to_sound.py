@@ -13,10 +13,10 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     Args:
         detected_sound_objects (list): list containing detected sounds
     """
-    len_cap_memory_window = self.parameters_df["MEMORY_WINDOW_FOR_CONSISTENCY"][0]
+    len_cap_memory_window = self.parameters_df["MEMORY_WINDOW_FOR_CONSISTENCY"]
     number_of_consistent_ipis_for_behaviour = self.parameters_df[
         "NUMBER_OF_CONSISTENT_IPIS_FOR_MOVEMENT"
-    ][0]
+    ]
     grid_for_current_ipi, grid_row_labels, grid_column_labels = (
         convert_detected_sounds_into_grids(
             detected_sound_objects,
@@ -41,22 +41,14 @@ def decide_next_direction_based_on_consistency(self, detected_sound_objects):
     self.memory_window_sum_matrix = sum_grids_in_memory.copy()
     self.ipi_matrix = grids_to_consider_for_direction_change[-1]
 
-    # absence presence implementation ---------------------------------------------------------
-    controller_type = self.parameters_df["CONTROLLER_TYPE"][0]
-    if controller_type == "presence":
-        cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_presence(
-            sum_grids_in_memory,
-            number_of_consistent_ipis_for_behaviour,
-            self.parameters_df,
-            self.direction,
-            self.allocentric_axis_y,
-            self.cell_index_to_respond_to,
-        )
-
-    else:
-        raise ValueError("unsupported controller type")
-    # -------------------------------------------------------------------------------------------
-    print(f"bat call time {self.emit_times[-1]}")
+    cell_index_to_respond_to = given_matrix_find_cell_to_respond_to_presence(
+        sum_grids_in_memory,
+        number_of_consistent_ipis_for_behaviour,
+        self.parameters_df,
+        self.direction,
+        self.allocentric_axis_y,
+        self.cell_index_to_respond_to,
+    )
 
     self.cell_index_to_respond_to = cell_index_to_respond_to
     if np.isnan(cell_index_to_respond_to[0]):
@@ -89,7 +81,7 @@ def decide_next_direction_based_on_loudest_sound(self, detected_sound_objects):
     spl_threshold_for_attractions = self.parameters_df["SPL_THRESHOLD_FOR_ATTRACTION"][
         0
     ]
-    spl_threshold_for_repulsions = self.parameters_df["SPL_THRESHOLD_FOR_REPULSION"][0]
+    spl_threshold_for_repulsions = self.parameters_df["SPL_THRESHOLD_FOR_REPULSION"]
     response_type = "random"
     if len(detected_sound_objects) != 0:
         max_spl = np.max([i["received_spl"] for i in detected_sound_objects])

@@ -273,8 +273,8 @@ def generate_sound_profile(
     Args:
         list_of_sounds (list): all sounds that can potentially mask the focal sound
         focal_sound_object (dict): focal sound
-        time_extent_of_temporal_masking_fn_file (list): first entry is the time before a call to consider
-            second entry is the
+        time_extent_of_temporal_masking_fn_file (list): first entry is the time
+        before a call to consider
 
     Returns:
         list,list: returns the focal sound to masker ratio and

@@ -11,7 +11,7 @@ from supporting_files.vectors import Vector
 
 from dynamic_model.agents.class_bats import Bat
 from dynamic_model.agents.class_sounds import DirectSound
-from dynamic_model.simulation_and_plotting.class_simulation import Simulation
+from dynamic_model.simulation.class_simulation import Simulation
 
 # sys.path.insert(1, ".")
 
@@ -33,7 +33,7 @@ class TestReflections(unittest.TestCase):
 
     def test_echo_generation(self):
         """Test the echo generation"""
-        sound_disk_width = self.parameters_df["SOUND_DISK_WIDTH"][0]
+        sound_disk_width = self.parameters_df["SOUND_DISK_WIDTH"]
         self.bat.speed = 0
         self.bat.position = Vector(0, 0)
         self.simulation.bats = [self.bat]

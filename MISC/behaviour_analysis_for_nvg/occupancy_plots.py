@@ -58,7 +58,7 @@ def stitch_together_history_lists(history_output_dir):
 def given_history_make_list_of_positions(history):
     list_of_bat_positions = []
     for frame in history:
-        bat_position = frame["bat_positions"][0]
+        bat_position = frame["bat_positions"]
         list_of_bat_positions.append(bat_position)
     list_of_bat_positions = np.array(list_of_bat_positions)
     return list_of_bat_positions
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     x = stitch_together_history_lists(OUTPUT_DIR)
     list_of_bat_positions = []
     for frame in x[0]:
-        bat_position = frame["bat_positions"][0]
+        bat_position = frame["bat_positions"]
         list_of_bat_positions.append(bat_position)
     list_of_bat_positions = np.array(list_of_bat_positions)
     plt.scatter(

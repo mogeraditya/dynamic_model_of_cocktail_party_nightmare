@@ -16,14 +16,14 @@ def convert_matrix_to_one_hot(matrix):
     return one_hot_matrix
 
 
-def check_if_two_lists_are_disjoint(list1, list2):
-    for element in list1:
-        is_element_in_list2 = any(
-            all(item in sublist for item in element) for sublist in list2
-        )
-        if is_element_in_list2:
-            return False
-    return True
+# def check_if_two_lists_are_disjoint(list1, list2):
+#     for element in list1:
+#         is_element_in_list2 = any(
+#             all(item in sublist for item in element) for sublist in list2
+#         )
+#         if is_element_in_list2:
+#             return False
+#     return True
 
 
 def given_matrix_shortlist_response_cells(matrix, threshold_for_activation):
@@ -64,10 +64,10 @@ def given_matrix_shortlist_response_cells(matrix, threshold_for_activation):
 
 
 def given_parameters_df_return_grid_matrix_zeros(parameters_df):
-    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
-    call_duration = parameters_df["CALL_DURATION"][0]
-    post_call_sampling_interval = parameters_df["TIME_DELAY_FOR_DIRECTION_CHANGE"][0]
+    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"]
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
+    call_duration = parameters_df["CALL_DURATION"]
+    post_call_sampling_interval = parameters_df["TIME_DELAY_FOR_DIRECTION_CHANGE"]
 
     spatial_grid_r = np.arange(
         call_duration,
@@ -94,9 +94,9 @@ def convert_detected_sounds_into_grids(
         _type_: _description_
     """
 
-    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"][0]
-    convert_grid_to_one_hot = str2bool(parameters_df["CONVERT_GRIDS+TO_ONE_HOT_?"][0])
-    time_step_size = parameters_df["TIME_STEP"][0]
+    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"]
+    convert_grid_to_one_hot = str2bool(parameters_df["CONVERT_GRIDS+TO_ONE_HOT_?"])
+    time_step_size = parameters_df["TIME_STEP"]
     rounding_based_on_time_step = len(str(time_step_size).split(".")[1])
 
     matrix_spatial_grid, spatial_grid_r, spatial_grid_theta = (
@@ -144,14 +144,14 @@ def given_time_and_angle_return_direction(
     bat_direction,
     allocentric_axis_y,
 ):
-    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"][0]
+    spatial_reference_frame = parameters_df["SPATIAL_REFERENCE_FRAME"]
     time_delay_threshold_for_repulsion = parameters_df[
         "TIME_DELAY_THRESHOLD_FOR_REPULSION"
-    ][0]
-    controller_type = parameters_df["CONTROLLER_TYPE"][0]
+    ]
+    controller_type = parameters_df["CONTROLLER_TYPE"]
 
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
-    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"][0]
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
+    radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"]
     noise_in_angle = np.random.uniform(-angular_resolution / 2, angular_resolution / 2)
     angle_of_next_direction = (
         angle_of_activated_cell - angular_resolution / 2 + noise_in_angle
@@ -169,10 +169,10 @@ def given_time_and_angle_return_direction(
             angle_of_next_direction += np.pi
             response_type = "repulsion"
         else:
-            print(f"attraction delay{corrected_time_delay}")
+            # print(f"attraction delay{corrected_time_delay}")
             response_type = "attraction"
     elif controller_type == "absence":
-        print(np.degrees(angle_of_next_direction))
+        # print(np.degrees(angle_of_next_direction))
         response_type = "repulsion"
     else:
         raise ValueError("unsupported controller type")
@@ -193,9 +193,9 @@ def find_indices_corresponding_to_hearing_range(
     angle_between_reference_axis_and_bat,
     hearing_range,
 ):
-    bat_angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
+    bat_angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
 
-    print(hearing_range, angle_between_reference_axis_and_bat)
+    # print(hearing_range, angle_between_reference_axis_and_bat)
     angles_to_hearing_range = np.arange(
         -hearing_range + angle_between_reference_axis_and_bat,
         hearing_range
@@ -211,7 +211,7 @@ def find_indices_corresponding_to_hearing_range(
         i if i != len(spatial_grid_theta) else 0
         for i in indices_corresponding_to_hearing_range
     ]
-    print(f"angles in hearing range {np.degrees(np.array(angles_to_hearing_range))}")
+    # print(f"angles in hearing range {np.degrees(np.array(angles_to_hearing_range))}")
     return indices_corresponding_to_hearing_range
 
 
@@ -228,14 +228,14 @@ def check_if_no_sound_in_front_of_bat(
     matrix_w_only_activations[indices_of_matrix_w_activations] = 1
     consolidated_matrix = np.sum(matrix_w_only_activations, axis=0)
 
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
     spatial_grid_theta = np.arange(-np.pi, np.pi, angular_resolution)
 
     frontal_range_indices = find_indices_corresponding_to_hearing_range(
         parameters_df,
         spatial_grid_theta,
         angle_between_reference_axis_and_bat,
-        hearing_range=angular_resolution * 2,
+        hearing_range=np.radians(parameters_df["BAT_FRONTAL_RANGE"]),
     )
 
     sublist_based_on_frontal_range = []
@@ -251,10 +251,10 @@ def check_if_no_sound_in_front_of_bat(
 def make_sublist_based_on_hearing_range(
     activation_array, angle_between_reference_axis_and_bat, parameters_df
 ):
-    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"][0])
+    angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
     spatial_grid_theta = np.arange(-np.pi, np.pi, angular_resolution)
 
-    hearing_range = np.radians(parameters_df["HEARING_ANGLE_THRESHOLD"][0])
+    hearing_range = np.radians(parameters_df["HEARING_ANGLE_THRESHOLD"])
     hearing_range_indices = find_indices_corresponding_to_hearing_range(
         parameters_df,
         spatial_grid_theta,
@@ -300,7 +300,7 @@ def given_matrix_find_cell_to_respond_to_presence(
         parameters_df,
     )
     if no_consistent_sound_in_front:
-        print()
+        # print()
         return [np.nan, np.nan]
 
     find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index = (
@@ -325,88 +325,3 @@ def given_matrix_find_cell_to_respond_to_presence(
             np.argsort(find_all_thresholds_with_min_row_index)[-1]
         ]
         return output_cell_number
-
-
-# def given_matrix_find_cell_to_respond_to_presence(
-#     matrix, threshold_for_activation, previous_output_cell
-# ):
-#     find_all_elements_with_min_row_index, find_all_thresholds_with_min_row_index = (
-#         given_matrix_shortlist_response_cells(matrix, threshold_for_activation)
-#     )
-
-#     _first_element_for_nan_check = find_all_elements_with_min_row_index[0][0]
-#     if np.isnan(_first_element_for_nan_check):
-#         return [np.nan, np.nan]
-#     else:
-
-#         is_previous_cell_repeated = any(
-#             all(item in sublist for item in previous_output_cell)
-#             for sublist in find_all_elements_with_min_row_index
-#         )
-
-#         if is_previous_cell_repeated:
-#             return previous_output_cell
-
-#         output_cell_number = find_all_elements_with_min_row_index[
-#             np.argsort(find_all_thresholds_with_min_row_index)[-1]
-#         ]
-#         return output_cell_number
-# def given_matrix_find_cell_to_respond_to_absence(
-#     matrix,
-#     number_of_consistent_ipis_for_behaviour,
-#     parameters_df,
-#     bat_direction,
-#     allocentric_axis_y,
-#     previous_output_cell,
-# ):
-#     matrix_w_only_activations = np.zeros(shape=matrix.shape)
-#     indices_of_matrix_w_activations = np.where(
-#         matrix >= number_of_consistent_ipis_for_behaviour
-#     )
-#     matrix_w_only_activations[indices_of_matrix_w_activations] = 1
-
-#     consolidated_matrix = np.sum(matrix_w_only_activations, axis=0)
-
-#     angle_between_reference_axis_and_bat = allocentric_axis_y.angle_between(
-#         bat_direction
-#     )
-
-#     no_consistent_sound_in_front = check_if_no_sound_in_front_of_bat(
-#         consolidated_matrix, angle_between_reference_axis_and_bat, parameters_df
-#     )
-#     if no_consistent_sound_in_front:
-#         print()
-#         return [np.nan, np.nan]
-#     else:
-#         sublist_based_on_hearing_range, hearing_range_indices = (
-#             make_sublist_based_on_hearing_range(
-#                 consolidated_matrix, angle_between_reference_axis_and_bat, parameters_df
-#             )
-#         )
-#         # print(np.where(sublist_based_on_hearing_range <= 0))
-#         indices_of_no_activation = hearing_range_indices[
-#             np.where(sublist_based_on_hearing_range <= 0)[0]
-#         ]
-#         print(consolidated_matrix, angle_between_reference_axis_and_bat)
-#         print(
-#             f"indices_of_no_activation {indices_of_no_activation}, sublist_based_on_hearing_range {sublist_based_on_hearing_range}, hearing_range_indices {hearing_range_indices}"
-#         )
-#         length_of_sublist = len(sublist_based_on_hearing_range)
-#         midpoint_of_sublist = length_of_sublist / 2
-#         left_sum_of_sublist = np.sum(
-#             sublist_based_on_hearing_range[: int(np.ceil(midpoint_of_sublist))]
-#         )
-#         right_sum_of_sublist = np.sum(
-#             sublist_based_on_hearing_range[int(np.floor(midpoint_of_sublist)) :]
-#         )
-#         # if left_sum_of_sublist < right_sum_of_sublist:
-#         #     return [0, hearing_range_indices[0]]
-#         # elif right_sum_of_sublist < left_sum_of_sublist:
-#         #     return [0, hearing_range_indices[-1]]
-#         if False:
-#             return [np.nan, np.nan]
-#         else:
-#             presence_response = given_matrix_find_cell_to_respond_to_presence(
-#                 matrix, number_of_consistent_ipis_for_behaviour, previous_output_cell
-#             )
-#             return presence_response
