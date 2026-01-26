@@ -14,14 +14,11 @@ import pandas as pd
 
 sys.path.append("./dynamic_model/")
 from agents.class_bats import Bat
-from agents.class_jammers import Jammers
 from agents.class_obstacles import Obstacle
 from agents.class_sounds import DirectSound
 from agents.make_walls import make_walls
-from plotting.single_bat_plotter import visualize
 from supporting_files.utilities import (
     creation_time_calculation,
-    load_parameters,
     read_temporal_masking_fn,
 )
 from supporting_files.vectors import Vector
@@ -379,19 +376,19 @@ class Simulation:
         return data
 
 
-if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_12/"
-    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
-    PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
-    sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
-    sim.run()
+# if __name__ == "__main__":
+#     OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_12/"
+#     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
+#     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
+#     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
+#     sim.run()
 
-    unique_id = uuid.uuid4()
-    visualize(
-        output_dir=OUTPUT_DIR,
-        save_animation=False,
-        unique_id=unique_id,
-        resolution=30,
-        show_sounds=False,
-    )
-    print(unique_id)
+#     unique_id = uuid.uuid4()
+#     visualize(
+#         output_dir=OUTPUT_DIR,
+#         save_animation=False,
+#         unique_id=unique_id,
+#         resolution=30,
+#         show_sounds=False,
+#     )
+#     print(unique_id)
