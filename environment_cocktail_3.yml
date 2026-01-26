@@ -1,9 +1,7 @@
 name: cocktail_3_dynamic_model
 channels:
   - conda-forge
-  - defaults
-  - https://repo.anaconda.com/pkgs/main
-  - https://repo.anaconda.com/pkgs/r
+  - nodefaults
 dependencies:
   - _libgcc_mutex=0.1=main
   - _openmp_mutex=5.1=1_gnu
