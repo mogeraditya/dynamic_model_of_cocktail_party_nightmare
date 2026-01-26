@@ -1,5 +1,5 @@
 #!/bin/bash 
-#SBATCH --nodes=1
+#SBATCH --nodes=4
 #SBATCH --ntasks-per-node=1   # only start 1 task via srun because Python multiprocessing starts more tasks internally
 #SBATCH --cpus-per-task=128  
 #SBATCH --time 24:00:00
