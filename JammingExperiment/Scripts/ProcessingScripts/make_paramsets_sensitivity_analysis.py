@@ -75,10 +75,10 @@ array_of_param_labels = [
     # "JAMMER_RESOLUTION",
 ]
 
-list_of_combinations = list(product(*array_of_param_values))[0:10]
+list_of_combinations = list(product(*array_of_param_values))[10:]
 print(len(list(product(*array_of_param_values))))
 
-output_dir_counter = 0
+output_dir_counter = 10
 
 for item in list_of_combinations:
     simulation_parameters["OUTPUT_DIR_FOR_SIMULATION"] = (
