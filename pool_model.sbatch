@@ -1,15 +1,15 @@
-#!/bin/bash -l
-#
-# Python multiprocessing job script for MPCDF Viper. Running the dynamic model for all parameter combinations for sensitivity analysis. 
-#
-#SBATCH -o ./out.%j
-#SBATCH -e ./err.%j
-#SBATCH -D ./
-#SBATCH -J PYTHON_MP_model
-#SBATCH --nodes=1             # request a full node
+#!/bin/bash 
+#SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1   # only start 1 task via srun because Python multiprocessing starts more tasks internally
-#SBATCH --cpus-per-task=128    # assign all the cores to that first task to make room for Python's multiprocessing tasks
-#SBATCH --time=00:10:00
+#SBATCH --cpus-per-task=128  
+#SBATCH --time 01:00:00
+
+#SBATCH -o limchannels_%j.out
+#SBATCH -e limchannels_%j.err
+#SBATCH --job-name=dynamic_model
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=aditya.moger@uni-konstanz.de
+
 
 # Recommended: prevent nested threading inside each worker process
 # export OMP_NUM_THREADS=1
@@ -21,6 +21,7 @@
 module load anaconda/3/2023.03
 
 conda init bash
+source ~/.bashrc
 conda activate cocktail_3_dynamic_model
 
 # Use srun inside allocations (good Slurm hygiene)
