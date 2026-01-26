@@ -20,9 +20,8 @@ def space_occupied_score(parameters_df, bat_positions):
         if grid_cell_identity not in track_unique_cells:
             track_unique_cells.append(grid_cell_identity)
     total_cells = len(x) * len(y)
-    fraction_space_occupied = len(track_unique_cells) / total_cells
 
-    return fraction_space_occupied, len(track_unique_cells)
+    return len(track_unique_cells)
 
 
 # if __name__ == "__main__":

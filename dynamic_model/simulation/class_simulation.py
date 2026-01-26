@@ -91,8 +91,11 @@ class Simulation:
         else:
             raise ValueError("unsupported temporal masking fn")
 
-        time_array = np.arange(
-            0, self.parameters_df["SIM_DURATION"], self.parameters_df["TIME_STEP"]
+        time_array = np.round(
+            np.arange(
+                0, self.parameters_df["SIM_DURATION"], self.parameters_df["TIME_STEP"]
+            ),
+            self.rounding_based_on_time_step,
         )
         # save initial snapshot of the simulation
         self.history.append(self.convert_necessary_information_into_dict())
@@ -103,7 +106,8 @@ class Simulation:
 
         for time_step in time_array[1:]:
             self.time_elapsed = time_step
-
+            # print(time_step)
+            # print(self.sound_objects)
             for sound in self.sound_objects:
                 sound.update(self.time_elapsed)
 
@@ -142,10 +146,10 @@ class Simulation:
         )
         # print(df_position_data)
         df_hearing_data.to_pickle(self.dir_to_store + "bat_hearing_data.pkl")
-        # print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
-        # print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
-        # if self.store_history:
-        #     print("DATA SAVED")
+        print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
+        print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
+        if self.store_history:
+            print("DATA SAVED")
 
     def convert_necessary_information_into_dict(self):
         dictionary_w_information = {
@@ -196,7 +200,7 @@ class Simulation:
                 self.dir_to_store + f"history_dump_{current_time:.3f}.pkl", "wb"
             ) as f:
                 pickle.dump(self.history, f)
-            self.history = []
+            # self.history = []
 
         if is_end_of_code:
             with open(
@@ -364,7 +368,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_11/"
+    OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_12/"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

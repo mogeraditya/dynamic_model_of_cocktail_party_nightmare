@@ -3,10 +3,10 @@ from agents.class_jammers import Jammers
 from supporting_files.vectors import Vector
 
 
-def make_jammers(parameters_df, jammer_resolution, call_rate):
-    arena_width = parameters_df["ARENA_WIDTH"]
-    arena_length = parameters_df["ARENA_LENGTH"]
+def make_jammers(parameters_df):
 
+    jammer_resolution = parameters_df["JAMMER_RESOLUTION"]
+    call_rate = parameters_df["CALL_RATE"]
     width_array = np.arange(
         jammer_resolution,
         parameters_df["ARENA_WIDTH"],

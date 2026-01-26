@@ -88,15 +88,14 @@ class Bat:
 
         self.update_movement()
         self.emit_sounds(current_time, sound_objects)
+        if self.id == 0 and self.time_since_directon_change == 0:
+            print(current_time)
         self.update_directon(current_time, sound_objects, temporal_masking_file)
 
         # just make sure egocentric is truly egocentric everywhere.
         reference_frame = self.parameters_df["SPATIAL_REFERENCE_FRAME"]
         if reference_frame == "egocentric":
             self.allocentric_axis_y = self.direction
-
-        if self.id == 0 and self.time_since_directon_change == 0:
-            print(current_time)
 
     def update_movement(self):
         """Update poisition of Bat when called.
@@ -368,7 +367,7 @@ class Bat:
                 current_time, sound_objects
             )
         )
-
+        # print(self.detections_for_directon_change)
         if (
             self.time_since_directon_change >= direction_change_time_interval
             and len(self.detections_for_directon_change) != 0
@@ -391,6 +390,7 @@ class Bat:
                 heard_sounds = self.detections_for_directon_change
 
             # self.cleanup_sounds(current_time, heard_sounds)
+
             self.list_to_store_sounds.extend(heard_sounds)
 
             self.modulate_speed_call_rate()

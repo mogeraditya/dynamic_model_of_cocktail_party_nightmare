@@ -8,9 +8,7 @@ sys.path.append("./dynamic_model/")
 sys.path.append("./JammingExperiment/Scripts/ProcessingScripts/")
 import pandas as pd
 from modified_simulation import Modified_Simulation
-from supporting_files.utilities import make_dir
-
-from dynamic_model.scores.run_all_score_calculations import reformat_history
+from supporting_files.utilities import load_parameters, make_dir
 
 
 def run_one_instance_of_simulation(
@@ -18,7 +16,6 @@ def run_one_instance_of_simulation(
     simulation_id,
     data_storage_dir,
     initial_release_point,
-    obstacle_locations,
 ):
     """run one instance of the simulation
 
@@ -26,7 +23,7 @@ def run_one_instance_of_simulation(
         dir_of_one_param_file (str): directory of one param file
         simulation_id (int): used to track the iteration number of the sim
     """
-    parameter_df = pd.read_csv(dir_of_one_param_file)
+    parameter_df = load_parameters(dir_of_one_param_file)
     output_dir = (
         data_storage_dir
         + parameter_df["OUTPUT_DIR_FOR_SIMULATION"]
@@ -38,9 +35,9 @@ def run_one_instance_of_simulation(
         parameter_df,
         output_dir,
         initial_release_point,
-        obstacle_locations,
     )
     sim.run()
+    sim.save_history_csv()
     # return sim
 
 
@@ -50,7 +47,6 @@ def parallel_process_with_pool(
     data_storage_dir,
     max_workers,
     initial_release_point,
-    obstacle_locations,
 ):
     """run simulation multiple times for all parameter files
 
@@ -78,7 +74,6 @@ def parallel_process_with_pool(
                     iteration,
                     data_storage_dir,
                     initial_release_point,
-                    obstacle_locations,
                 )
             )
 
@@ -98,27 +93,22 @@ def parallel_process_with_pool(
 
 if __name__ == "__main__":
     # Directory containing your parameter files
-    PARAM_DIR = "./behaviour_analysis_for_nvg/parameters/"
+    PARAM_DIR = "./JammingExperiment/Data/InputData/sensitivity_params/"
 
-    N_RUNS = 5  # Number of iterations per parameter set
+    N_RUNS = 20  # Number of iterations per parameter set
     DATA_STORAGE_DIR = (
-        r"/media/adityamoger/T7 Shield/dir_store_snr/"  # Base output directory
+        r"/media/adityamoger/T7 Shield/test_sensitivity/"  # Base output directory
     )
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing
     print("Starting parallel processing...")
-    bat_locations_dir = "./behaviour_analysis_for_nvg/bat_start_positions.csv"
-    obstacle_locations_dir = "./behaviour_analysis_for_nvg/chain_positions.csv"
 
-    bat_locations = pd.read_csv(bat_locations_dir)
-    obstacle_locations = pd.read_csv(obstacle_locations_dir)
-
+    chosen_start_location = (5, 3.5)
     parallel_process_with_pool(
         param_dir=PARAM_DIR,
         n_runs=N_RUNS,
         data_storage_dir=DATA_STORAGE_DIR,
         max_workers=None,
-        initial_release_point=(bat_locations["x"][2], bat_locations["y"][2]),
-        obstacle_locations=obstacle_locations,
+        initial_release_point=chosen_start_location,
     )
