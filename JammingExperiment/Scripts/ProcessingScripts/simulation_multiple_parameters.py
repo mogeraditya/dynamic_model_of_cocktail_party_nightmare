@@ -40,8 +40,6 @@ def run_one_instance_of_simulation(
             + f"iteration_number_{simulation_id}{i}"
         )
         make_dir(output_dir)
-        # print(output_dir)
-
         sim = Modified_Simulation(
             parameter_df,
             output_dir,
@@ -53,7 +51,7 @@ def run_one_instance_of_simulation(
 
     df_hearing_data = pd.DataFrame.from_dict(store_scores)
     df_hearing_data.to_csv(
-        data_storage_dir + parameter_df["OUTPUT_DIR_FOR_SIMULATION"] + "/scores.csv"
+        data_storage_dir + parameter_df["PARAM_LABEL"] + "_scores.csv"
     )
     return
 
@@ -113,9 +111,7 @@ if __name__ == "__main__":
     PARAM_DIR = "./JammingExperiment/Data/InputData/sensitivity_params/"
 
     N_RUNS = 1  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = (
-        r"/media/adityamoger/T7 Shield/test_sensitivity/"  # Base output directory
-    )
+    DATA_STORAGE_DIR = r"./sensitivity_analysis/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing

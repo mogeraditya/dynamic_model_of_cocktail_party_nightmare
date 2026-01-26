@@ -75,7 +75,7 @@ array_of_param_labels = [
     # "JAMMER_RESOLUTION",
 ]
 
-list_of_combinations = list(product(*array_of_param_values))
+list_of_combinations = list(product(*array_of_param_values))[0:10]
 print(len(list(product(*array_of_param_values))))
 
 output_dir_counter = 0
@@ -94,6 +94,7 @@ for item in list_of_combinations:
         "TIME_DELAY_FOR_DIRECTION_CHANGE"
     ]
     simulation_parameters["BAT_FAST_SPEED"] = simulation_parameters["BAT_SPEED"]
+    simulation_parameters["PARAM_LABEL"] = f"paramset_{output_dir_counter}"
 
     with open(
         dir_to_store + f"/paramset_number_{output_dir_counter}.json",
