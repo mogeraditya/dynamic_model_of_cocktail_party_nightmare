@@ -22,7 +22,7 @@ class Modified_Simulation(Simulation):
         output_dir,
         initial_release_point,
     ):
-        super().__init__(parameters_df, output_dir, store_history=True)
+        super().__init__(parameters_df, output_dir, store_history=False)
         self.bats = []
 
         num_bats = 1  # len(bat_locations.keys()) %2 # just how the csv is organised

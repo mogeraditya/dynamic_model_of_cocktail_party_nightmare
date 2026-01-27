@@ -69,12 +69,12 @@ class Simulation:
         After parsing the parameter file, it runs one instance of the simulation
         for those sets of parameters.
         """
-        with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
-            pickle.dump(self.bats, f)
-        with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
-            pickle.dump(self.obstacles, f)
-        with open(self.dir_to_store + "jammers_initial.pkl", "wb") as f:
-            pickle.dump(self.jammers, f)
+        # with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
+        #     pickle.dump(self.bats, f)
+        # with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
+        #     pickle.dump(self.obstacles, f)
+        # with open(self.dir_to_store + "jammers_initial.pkl", "wb") as f:
+        #     pickle.dump(self.jammers, f)
         temporal_masking_fn_choice = self.parameters_df["TEMPORAL_MASKING_FN_TYPE"]
 
         if temporal_masking_fn_choice == "chopped":
@@ -149,11 +149,11 @@ class Simulation:
             self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
 
         # TODO : make score calculations.
-        df_hearing_data = pd.DataFrame.from_dict(
-            self.bats[0].list_to_store_sounds, orient="columns"
-        )
-        # print(df_position_data)
-        df_hearing_data.to_pickle(self.dir_to_store + "bat_hearing_data.pkl")
+        # df_hearing_data = pd.DataFrame.from_dict(
+        #     self.bats[0].list_to_store_sounds, orient="columns"
+        # )
+        # # print(df_position_data)
+        # df_hearing_data.to_pickle(self.dir_to_store + "bat_hearing_data.pkl")
         print(self.parameters_df["OUTPUT_DIR_FOR_SIMULATION"])
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
