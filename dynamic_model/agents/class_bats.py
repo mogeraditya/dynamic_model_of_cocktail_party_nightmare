@@ -87,7 +87,7 @@ class Bat:
         """
 
         self.update_movement()
-        self.emit_sounds(current_time, sound_objects)
+        # self.emit_sounds(current_time, sound_objects)
         self.update_directon(current_time, sound_objects, temporal_masking_file)
 
         # just make sure egocentric is truly egocentric everywhere.

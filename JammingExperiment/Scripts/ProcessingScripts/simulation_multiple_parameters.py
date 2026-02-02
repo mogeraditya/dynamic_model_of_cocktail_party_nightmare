@@ -33,7 +33,7 @@ def run_one_instance_of_simulation(
     #     counter+=1
     parameter_df = load_parameters(dir_of_one_param_file)
     store_scores = []
-    for i in range(20):
+    for i in range(100):
         output_dir = (
             data_storage_dir
             + parameter_df["OUTPUT_DIR_FOR_SIMULATION"]
