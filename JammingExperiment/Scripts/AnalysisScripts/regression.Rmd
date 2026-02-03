@@ -1,0 +1,107 @@
+# Sensitivity analysis; Regression.
+
+
+```{r, include = FALSE}
+library(tidyverse)
+```
+
+```{r, include = TRUE}
+df_overall <- read.csv("/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/JammingExperiment/Data/AnalysisData/sensitivity_analysis_data_for_R.csv")
+head(df_overall)
+mean(df_overall$"BAT_SPEED")
+```
+
+```{r, include=TRUE}
+
+varying_params <- c(
+    "collision_counts",
+    "BAT_SPEED",
+    "CALL_DURATION",
+    "CALL_RATE_FAST",
+    "HEARING_THRESHOLD",
+    "CALL_DIRECTIONALITY",
+    "TEMPORAL_MASKING_FN_TYPE_ONE_HOT",
+    "TIME_DELAY_FOR_DIRECTION_CHANGE",
+    "BAT_RADIAL_RESOLUTION",
+    "MEMORY_WINDOW_FOR_CONSISTENCY",
+    "BAT_FRONTAL_RANGE")
+
+varying_params
+subset_df_overall <- df_overall[varying_params]
+
+subset_df_overall
+```
+
+
+```{r, include=TRUE}
+multi_regression_model <- lm(collision_counts ~ BAT_SPEED + CALL_DURATION + CALL_RATE_FAST + HEARING_THRESHOLD + 
+CALL_DIRECTIONALITY + TEMPORAL_MASKING_FN_TYPE_ONE_HOT + TIME_DELAY_FOR_DIRECTION_CHANGE + BAT_RADIAL_RESOLUTION + MEMORY_WINDOW_FOR_CONSISTENCY + BAT_FRONTAL_RANGE, data=subset_df_overall)
+
+summary(multi_regression_model)
+```
+
+Center the dataset
+
+```{r, include=TRUE}
+subset_df_overall_centered <-subset_df_overall
+
+for (col_name in varying_params) {
+    if (col_name != "collision_counts") {
+
+        col_mean <- mean(subset_df_overall[[col_name]], na.rm = TRUE)
+        col_sd <- sd(subset_df_overall[[col_name]], na.rm = TRUE)
+        
+        subset_df_overall_centered[[col_name]] <- (subset_df_overall[[col_name]] - 
+                                                    col_mean) / col_sd
+    }
+}
+
+
+multi_regression_model_centered <- lm(collision_counts ~ BAT_SPEED + CALL_DURATION + 
+CALL_RATE_FAST + HEARING_THRESHOLD + 
+    CALL_DIRECTIONALITY + TEMPORAL_MASKING_FN_TYPE_ONE_HOT + 
+    TIME_DELAY_FOR_DIRECTION_CHANGE + BAT_RADIAL_RESOLUTION + 
+    MEMORY_WINDOW_FOR_CONSISTENCY + BAT_FRONTAL_RANGE, 
+    data=subset_df_overall_centered)
+
+summary(multi_regression_model_centered)
+model_residuals <- multi_regression_model_centered$residuals
+hist(model_residuals,
+     main = "Histogram of Residuals",
+     xlab = "Residuals",
+     col = "lightblue",
+     breaks = 20)
+
+qqnorm(model_residuals)
+qqline(model_residuals, col="red")
+anova(multi_regression_model_centered)
+AIC(multi_regression_model_centered)
+AIC(glm)
+```
+
+
+```{r, include=TRUE}
+glm <- glm(collision_counts ~ BAT_SPEED + CALL_DURATION + CALL_RATE_FAST + HEARING_THRESHOLD + 
+    CALL_DIRECTIONALITY + TEMPORAL_MASKING_FN_TYPE_ONE_HOT + TIME_DELAY_FOR_DIRECTION_CHANGE + 
+    BAT_RADIAL_RESOLUTION + MEMORY_WINDOW_FOR_CONSISTENCY + BAT_FRONTAL_RANGE, 
+    data=subset_df_overall, family=quasipoisson)
+summary(glm)
+model_residuals <- glm$residuals
+hist(model_residuals,
+     main = "Histogram of Residuals",
+     xlab = "Residuals",
+     col = "lightblue",
+     breaks = 20)
+```
+
+
+
+```{r, include=TRUE}
+glm_centered <- glm(collision_counts ~ BAT_SPEED + CALL_DURATION + CALL_RATE_FAST + HEARING_THRESHOLD + 
+    CALL_DIRECTIONALITY + TEMPORAL_MASKING_FN_TYPE_ONE_HOT + TIME_DELAY_FOR_DIRECTION_CHANGE + 
+    BAT_RADIAL_RESOLUTION + MEMORY_WINDOW_FOR_CONSISTENCY + BAT_FRONTAL_RANGE, 
+    data=subset_df_overall_centered, family=poisson)
+summary(glm_centered)
+
+```
+
