@@ -17,8 +17,10 @@ from agents.class_bats import Bat
 from agents.class_obstacles import Obstacle
 from agents.class_sounds import DirectSound
 from agents.make_walls import make_walls
+from plotting.single_bat_plotter import visualize
 from supporting_files.utilities import (
     creation_time_calculation,
+    load_parameters,
     read_temporal_masking_fn,
 )
 from supporting_files.vectors import Vector
@@ -69,12 +71,12 @@ class Simulation:
         After parsing the parameter file, it runs one instance of the simulation
         for those sets of parameters.
         """
-        # with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
-        #     pickle.dump(self.bats, f)
-        # with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
-        #     pickle.dump(self.obstacles, f)
-        # with open(self.dir_to_store + "jammers_initial.pkl", "wb") as f:
-        #     pickle.dump(self.jammers, f)
+        with open(self.dir_to_store + "bats_initial.pkl", "wb") as f:
+            pickle.dump(self.bats, f)
+        with open(self.dir_to_store + "obstacles_initial.pkl", "wb") as f:
+            pickle.dump(self.obstacles, f)
+        with open(self.dir_to_store + "jammers_initial.pkl", "wb") as f:
+            pickle.dump(self.jammers, f)
         temporal_masking_fn_choice = self.parameters_df["TEMPORAL_MASKING_FN_TYPE"]
 
         if temporal_masking_fn_choice == "chopped":
@@ -104,8 +106,7 @@ class Simulation:
         for time_step in time_array[1:]:
             try:
                 self.time_elapsed = time_step
-                # print(time_step)
-                # print(self.sound_objects)
+
                 for sound in self.sound_objects:
                     sound.update(self.time_elapsed)
 
@@ -148,12 +149,6 @@ class Simulation:
             # self.handle_data_storage_for_plotting(self.time_elapsed, True)
             self.handle_data_storage_for_plotting_pickle(self.time_elapsed, True)
 
-        # TODO : make score calculations.
-        # df_hearing_data = pd.DataFrame.from_dict(
-        #     self.bats[0].list_to_store_sounds, orient="columns"
-        # )
-        # # print(df_position_data)
-        # df_hearing_data.to_pickle(self.dir_to_store + "bat_hearing_data.pkl")
         print(self.parameters_df["OUTPUT_DIR_FOR_SIMULATION"])
         print(f"total_time_taken_to_store_info: {save_time_of_last_iter-start_timing}")
         print(f"average_time_per_loop {np.mean(list_time_taken_for_each_loop)}")
@@ -170,11 +165,11 @@ class Simulation:
                 (bat.direction.normalize().x, bat.direction.normalize().y)
                 for bat in self.bats
             ],
-            "sound_objects": [
-                self.serialize_sound(s)
-                for s in self.sound_objects
-                if s.active and s.current_spl > self.parameters_df["HEARING_THRESHOLD"]
-            ],
+            # "sound_objects": [
+            #     self.serialize_sound(s)
+            #     for s in self.sound_objects
+            #     if s.active and s.current_spl > self.parameters_df["HEARING_THRESHOLD"]
+            # ],
             "sound_objects_count": len(self.sound_objects),
             "jammer_positions": [
                 (jammer.position.x, jammer.position.y) for jammer in self.jammers
@@ -209,7 +204,7 @@ class Simulation:
                 self.dir_to_store + f"history_dump_{current_time:.3f}.pkl", "wb"
             ) as f:
                 pickle.dump(self.history, f)
-            # self.history = []
+            self.history = []
 
         if is_end_of_code:
             with open(
@@ -376,19 +371,19 @@ class Simulation:
         return data
 
 
-# if __name__ == "__main__":
-#     OUTPUT_DIR = r"./MISC/consistency_of_calls_movement_rule_data/presence_revamp_12/"
-#     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/common_parameters.json"
-#     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
-#     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
-#     sim.run()
+if __name__ == "__main__":
+    OUTPUT_DIR = r"./MISC/testing_groups/100bats_ayo_30sec"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_group.json"
+    PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
+    sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
+    sim.run()
 
-#     unique_id = uuid.uuid4()
-#     visualize(
-#         output_dir=OUTPUT_DIR,
-#         save_animation=False,
-#         unique_id=unique_id,
-#         resolution=30,
-#         show_sounds=False,
-#     )
-#     print(unique_id)
+    unique_id = uuid.uuid4()
+    visualize(
+        output_dir=OUTPUT_DIR,
+        save_animation=True,
+        unique_id=unique_id,
+        resolution=30,
+        show_sounds=False,
+    )
+    print(unique_id)

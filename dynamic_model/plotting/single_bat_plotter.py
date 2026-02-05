@@ -472,7 +472,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
     if save_animation:
         ffwriter = animation.FFMpegWriter(fps=parameters_df["FRAME_RATE"])
         ani.save(
-            save_animation + f"/animation_without_sound_id_{unique_id}.mp4",
+            output_dir + f"/animation_without_sound_id_{unique_id}.mp4",
             writer=ffwriter,
         )
     plt.show()
@@ -483,7 +483,8 @@ if __name__ == "__main__":
     print(os.getcwd())
     OUTPUT_DIR = (
         # r"./chain_experiment/3_of_5_position_0/"
-        "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/MISC/consistency_of_calls_movement_rule_data/presence_revamp_10"
+        # "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/MISC/consistency_of_calls_movement_rule_data/presence_revamp_10"
+        "./MISC/testing_groups/3bats_2"
     )
     SAVE_ANIMATION = False  # OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION, unique_id=0, resolution=30, show_sounds=False)

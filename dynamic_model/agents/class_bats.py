@@ -87,7 +87,9 @@ class Bat:
         """
 
         self.update_movement()
-        # self.emit_sounds(current_time, sound_objects)
+        self.emit_sounds(current_time, sound_objects)
+        if self.id == 0 and self.time_since_directon_change == 0:
+            print(f"bat_0_emit_at_{self.emit_times[-1]}")
         self.update_directon(current_time, sound_objects, temporal_masking_file)
 
         # just make sure egocentric is truly egocentric everywhere.
@@ -144,6 +146,7 @@ class Bat:
             )
             self.emitted_sounds.append(sound)
             self.emit_times.append(current_time)
+            # if self.id != 0:
             sound_objects.append(sound)
 
             # make the bat stop executing its previous movement
@@ -227,15 +230,20 @@ class Bat:
             # sound.update(current_time)
 
             is_sound_active = sound.active
+            # TODO: REMEMBER THAT SELF ECHO IS BEING REMOVED
+
             is_sound_self_call = sound.emitter_id == self.id and isinstance(
                 sound, DirectSound
             )
+            # is_sound_self_echo = sound.emitter_id == self.id
+
             is_sound_reflected_from_self = sound.reflected_from == f"bat_{self.id}"
 
             if (
                 not is_sound_active
                 or is_sound_self_call
                 or is_sound_reflected_from_self
+                # or is_sound_self_echo
             ):
                 continue
 
@@ -263,34 +271,34 @@ class Bat:
                 )
         return array_of_sound_detections
 
-    # def cleanup_sounds(self, current_time, heard_sounds):
-    #     """Stores the detections into a .npy file.
-    #     After a fixed amount of time the detection list is stored
-    #     into local memory and this is cleared from RAM.
+    def cleanup_sounds(self, current_time, heard_sounds):
+        """Stores the detections into a .npy file.
+        After a fixed amount of time the detection list is stored
+        into local memory and this is cleared from RAM.
 
-    #     Args:
-    #         current_time (float): Time, in seconds, for which the simualtion has been running.
-    #     """
-    #     # Keep only recent detections
-    #     # clean up activates after every some steps to clear memory from RAM and store it on drive
-    #     store_hearing = str2bool(self.parameters_df["STORE_HEARING"])
+        Args:
+            current_time (float): Time, in seconds, for which the simualtion has been running.
+        """
+        # Keep only recent detections
+        # clean up activates after every some steps to clear memory from RAM and store it on drive
+        store_hearing = str2bool(self.parameters_df["STORE_HEARING"])
 
-    #     if store_hearing and self.output_dir is not None:
-    #         dir_to_store = self.output_dir + "/" + str(self.id)
-    #         make_dir(dir_to_store)
-    #         current_time_str = f"{current_time:.4f}".zfill(9)
-    #         np.save(
-    #             dir_to_store
-    #             + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time_str}.npy",
-    #             heard_sounds,
-    #         )
-    #         np.save(
-    #             dir_to_store
-    #             + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time_str}.npy",
-    #             self.emitted_sounds,
-    #         )
-    #     self.emitted_sounds = []
-    #     self.ipi_matrix_timeseries = []
+        if store_hearing and self.output_dir is not None:
+            dir_to_store = self.output_dir + "/" + str(self.id)
+            make_dir(dir_to_store)
+            current_time_str = f"{current_time:.4f}".zfill(9)
+            np.save(
+                dir_to_store
+                + f"/bat_{self.id}_received_sounds_snapshot_at_time_{current_time_str}.npy",
+                heard_sounds,
+            )
+            np.save(
+                dir_to_store
+                + f"/bat_{self.id}_emitted_sounds_snapshot_at_time_{current_time_str}.npy",
+                self.emitted_sounds,
+            )
+        self.emitted_sounds = []
+        self.ipi_matrix_timeseries = []
 
     # inelligent movement
     def generate_random_direction(self):
@@ -387,7 +395,7 @@ class Bat:
             else:
                 heard_sounds = self.detections_for_directon_change
 
-            # self.cleanup_sounds(current_time, heard_sounds)
+            self.cleanup_sounds(current_time, heard_sounds)
 
             self.list_to_store_sounds.extend(heard_sounds)
 
