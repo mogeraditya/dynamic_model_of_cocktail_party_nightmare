@@ -200,9 +200,8 @@ class Simulation:
         history_array_size_limit = self.parameters_df["CLEANUP_PLOT_DATA"]
 
         if len(self.history) > history_array_size_limit or is_end_of_code:
-            with open(
-                self.dir_to_store + f"history_dump_{current_time:.3f}.pkl", "wb"
-            ) as f:
+            time_stamp = f"{current_time:.4f}".zfill(9)
+            with open(self.dir_to_store + f"history_dump_{time_stamp}.pkl", "wb") as f:
                 pickle.dump(self.history, f)
             self.history = []
 
@@ -372,7 +371,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/testing_groups/100bats_ayo_30sec"
+    OUTPUT_DIR = r"./MISC/testing_groups/10_bats_test_small_size_null"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_group.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

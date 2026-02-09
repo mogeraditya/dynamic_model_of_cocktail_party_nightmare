@@ -87,7 +87,7 @@ class Bat:
         """
 
         self.update_movement()
-        self.emit_sounds(current_time, sound_objects)
+        # self.emit_sounds(current_time, sound_objects)
         if self.id == 0 and self.time_since_directon_change == 0:
             print(f"bat_0_emit_at_{self.emit_times[-1]}")
         self.update_directon(current_time, sound_objects, temporal_masking_file)
@@ -227,15 +227,12 @@ class Bat:
         if is_bat_calling:
             return array_of_sound_detections
         for sound in sound_objects:
-            # sound.update(current_time)
 
             is_sound_active = sound.active
-            # TODO: REMEMBER THAT SELF ECHO IS BEING REMOVED
 
             is_sound_self_call = sound.emitter_id == self.id and isinstance(
                 sound, DirectSound
             )
-            # is_sound_self_echo = sound.emitter_id == self.id
 
             is_sound_reflected_from_self = sound.reflected_from == f"bat_{self.id}"
 
@@ -243,7 +240,6 @@ class Bat:
                 not is_sound_active
                 or is_sound_self_call
                 or is_sound_reflected_from_self
-                # or is_sound_self_echo
             ):
                 continue
 

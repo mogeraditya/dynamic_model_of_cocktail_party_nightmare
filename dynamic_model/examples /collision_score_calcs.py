@@ -2,6 +2,9 @@ import glob
 import pickle
 import sys
 
+import matplotlib.pyplot as plt
+import scipy as scp
+
 sys.path.append("./dynamic_model/")
 import numpy as np
 from scores.collision_scores import (
@@ -11,7 +14,7 @@ from scores.collision_scores import (
 from scores.run_all_score_calculations import filter_bat_positions_from_history
 from supporting_files.utilities import load_history_dump, load_parameters
 
-history_output_dir = "./MISC/testing_groups/3bats_5_noself_echo"
+history_output_dir = "./MISC/testing_groups/10_bats_test_small_size_null/"
 
 list_of_dict_files = glob.glob(history_output_dir + "/history_dump_*.pkl")
 list_of_dict_files = np.sort(list_of_dict_files)
@@ -51,3 +54,35 @@ print(f"number of bats : {len(bat_positions[0])}")
 print(f"time duration : {times[sorting_indices[-1]]}")
 print(f"collision rate : {collision_rate}")
 print(f"collsion counts : {collision_counts}")
+
+time_ranges_to_check_saturation = np.arange(
+    1000, len(list_containing_data_from_all_pickle_files), 1000
+)
+store_collision_counts = []
+for x in time_ranges_to_check_saturation:
+    _subset_history = list_containing_data_from_all_pickle_files[x:]
+    _bat_positions = filter_bat_positions_from_history(_subset_history)
+    collision_counts = compute_collision_counts_and_length(_bat_positions, parameter_df)
+    store_collision_counts.append(collision_counts)
+
+plt.plot(time_ranges_to_check_saturation, store_collision_counts)
+plt.title("complementary cumulative plot of collision counts")
+plt.ylabel("collision counts")
+plt.xlabel("time x after which position data is considered")
+plt.show()
+
+store_median_distances = []
+for position_frame in bat_positions:
+    distance_matrix = scp.spatial.distance_matrix(position_frame, position_frame)
+    store_distances = []
+
+    for i in range(distance_matrix.shape[0]):
+        for j in range(distance_matrix.shape[0]):
+            if i < j:
+                store_distances.append(distance_matrix[i, j])
+
+    store_median_distances.append(np.min(store_distances))
+
+plt.plot(store_median_distances)
+plt.title("median interbat distance with time")
+plt.show()

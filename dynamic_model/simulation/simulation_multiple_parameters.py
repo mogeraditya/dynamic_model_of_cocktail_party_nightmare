@@ -1,31 +1,40 @@
 import glob
 import multiprocessing
 import os
+import sys
 import time
 
-import pandas as pd
+sys.path.append("./dynamic_model/")
 from simulation.class_simulation import Simulation
-from supporting_files.utilities import make_dir
+from supporting_files.utilities import load_parameters, make_dir
 
 
 def run_one_instance_of_simulation(
-    dir_of_one_param_file, simulation_id, data_storage_dir
+    dir_of_one_param_file,
+    simulation_id,
+    data_storage_dir,
 ):
     """run one instance of the simulation
 
     Args:
         dir_of_one_param_file (str): directory of one param file
         simulation_id (int): used to track the iteration number of the sim
+
     """
-    parameter_df = pd.read_csv(dir_of_one_param_file)
+
+    parameter_df = load_parameters(dir_of_one_param_file)
+
     output_dir = (
         data_storage_dir
         + parameter_df["OUTPUT_DIR_FOR_SIMULATION"]
         + f"iteration_number_{simulation_id}"
     )
     make_dir(output_dir)
-    print(output_dir)
-    sim = Simulation(parameter_df, output_dir)
+    sim = Simulation(
+        parameter_df,
+        output_dir,
+        store_history=True,
+    )
     sim.run()
 
 
@@ -68,10 +77,10 @@ def parallel_process_with_pool(param_dir, n_runs, data_storage_dir, max_workers=
 
 if __name__ == "__main__":
     # Directory containing your parameter files
-    PARAM_DIR = "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/dynamic_model/paramsets/effect_of_lot_of_shit/store_paramsets/"
+    PARAM_DIR = "./dynamic_model/paramsets/effect_of_group_size/"
 
-    N_RUNS = 30  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = r"/media/adityamoger/T7 Shield/SCYPHY_FINAL_DATA_second_interation_slower_speed/"  # Base output directory
+    N_RUNS = 20  # Number of iterations per parameter set
+    DATA_STORAGE_DIR = r"./group_experiment/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing
