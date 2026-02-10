@@ -12,11 +12,11 @@
 
 
 # Recommended: prevent nested threading inside each worker process
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
 # export OMP_NUM_THREADS=1
-# export MKL_NUM_THREADS=1
-# export OPENBLAS_NUM_THREADS=1
-# export NUMEXPR_NUM_THREADS=1
-
 
 module load anaconda/3/2023.03
 

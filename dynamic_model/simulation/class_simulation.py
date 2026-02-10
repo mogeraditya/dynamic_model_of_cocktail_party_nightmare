@@ -19,9 +19,8 @@ from agents.class_sounds import DirectSound
 from agents.make_walls import make_walls
 
 # from plotting.single_bat_plotter import visualize
-from supporting_files.utilities import (
+from supporting_files.utilities import (  # load_parameters,
     creation_time_calculation,
-    load_parameters,
     read_temporal_masking_fn,
 )
 from supporting_files.vectors import Vector
@@ -372,7 +371,7 @@ class Simulation:
 
 
 # if __name__ == "__main__":
-#     OUTPUT_DIR = r"./MISC/testing_groups/10_bats_test_small_size_null"
+#     OUTPUT_DIR = r"./MISC/testing_groups/um"
 #     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_group.json"
 #     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
 #     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)

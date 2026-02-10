@@ -391,7 +391,7 @@ class Bat:
             else:
                 heard_sounds = self.detections_for_directon_change
 
-            self.cleanup_sounds(current_time, heard_sounds)
+            # self.cleanup_sounds(current_time, heard_sounds)
 
             self.list_to_store_sounds.extend(heard_sounds)
 
