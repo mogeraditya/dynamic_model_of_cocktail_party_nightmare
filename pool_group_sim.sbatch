@@ -4,8 +4,8 @@
 #SBATCH --cpus-per-task=128  
 #SBATCH --time 24:00:00
 
-#SBATCH -o limchannels_%j.out
-#SBATCH -e limchannels_%j.err
+#SBATCH -o group_experiment_%j.out
+#SBATCH -e group_experiment_%j.err
 #SBATCH --job-name=dynamic_model
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=aditya.moger@uni-konstanz.de

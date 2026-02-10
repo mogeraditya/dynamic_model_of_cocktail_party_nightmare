@@ -3,7 +3,7 @@
 #SBATCH --ntasks-per-node=1   # only start 1 task via srun because Python multiprocessing starts more tasks internally
 #SBATCH --cpus-per-task=128  
 #SBATCH --time 24:00:00
-
+#SBATCH --mem 10T
 #SBATCH -o limchannels_%j.out
 #SBATCH -e limchannels_%j.err
 #SBATCH --job-name=dynamic_model
@@ -29,3 +29,4 @@ srun python3 ./JammingExperiment/Scripts/ProcessingScripts/simulation_multiple_p
 
 # rsync -av -e 'ssh -J amoger@gate1.mpcdf.mpg.de' amoger@viper.mpcdf.mpg.de:/u/amoger/dynamic_model_of_cocktail_party_nightmare/sensitivity_analysis /home/adityamoger/Documents/csv_storage --include="*/" --include="*.csv" --exclude="*"
 # rsync -av -e 'ssh -J amoger@gate1.mpcdf.mpg.de' amoger@viper.mpcdf.mpg.de:/u/amoger/dynamic_model_of_cocktail_party_nightmare/ /home/adityamoger/Documents/out_err_file_storage --include="*/" --include="*.out" --include="*.err" --exclude="*"
+# rsync -av -e 'ssh -J amoger@gate1.mpcdf.mpg.de' amoger@viper.mpcdf.mpg.de:/u/amoger/dynamic_model_of_cocktail_party_nightmare/group_experiment /home/adityamoger/Documents/data_storage_group_experiment --include="*/"
