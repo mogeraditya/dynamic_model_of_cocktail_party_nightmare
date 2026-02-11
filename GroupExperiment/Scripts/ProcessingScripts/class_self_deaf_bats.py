@@ -5,7 +5,7 @@ from agents.class_sounds import DirectSound
 from supporting_files.utilities import call_directionality_factor
 
 
-class SelfDeafBat(Bat):
+class CannotHearSelfEchoBat(Bat):
     def __init__(self, parameters_df, output_dir):
         super().__init__(parameters_df, output_dir)
 
@@ -13,7 +13,7 @@ class SelfDeafBat(Bat):
         self, current_time, sound_objects
     ):
         """given sounds generate list of sounds that a bat can hear
-        HERE THE BAT IS DEAF TO SELF ECHO
+        HERE THE BAT CANNOT HEAR SELF ECHO
 
         Args:
             current_time (float): Time, in seconds, for which the simualtion has been running.
