@@ -87,7 +87,7 @@ class Bat:
         """
 
         self.update_movement()
-        self.emit_sounds(current_time, sound_objects)
+        # self.emit_sounds(current_time, sound_objects)
         if self.id == 0 and self.time_since_directon_change == 0:
             print(f"bat_0_emit_at_{self.emit_times[-1]}")
         self.update_directon(current_time, sound_objects, temporal_masking_file)
