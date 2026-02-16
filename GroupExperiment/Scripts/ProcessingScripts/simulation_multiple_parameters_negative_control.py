@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # Directory containing your parameter files
     PARAM_DIR = "./dynamic_model/paramsets/effect_of_group_size/"
 
-    N_RUNS = 5  # Number of iterations per parameter set
+    N_RUNS = 10  # Number of iterations per parameter set
     DATA_STORAGE_DIR = (
         r"./group_experiment_negative_control_1/"  # Base output directory
     )

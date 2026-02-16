@@ -142,7 +142,9 @@ class Simulation:
                     )
             except BaseException:
                 print("Unexpected error:", sys.exc_info()[0])
-                print(self.parameters_df["OUTPUT_DIR_FOR_SIMULATION"])
+                print(
+                    f"error in file {self.parameters_df["OUTPUT_DIR_FOR_SIMULATION"]}"
+                )
                 break
 
         if self.store_history:
