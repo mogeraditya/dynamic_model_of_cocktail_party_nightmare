@@ -69,6 +69,7 @@ plt.plot(time_ranges_to_check_saturation, store_collision_counts)
 plt.title("complementary cumulative plot of collision counts")
 plt.ylabel("collision counts")
 plt.xlabel("time x after which position data is considered")
+plt.legend()
 plt.show()
 
 store_median_distances = []
