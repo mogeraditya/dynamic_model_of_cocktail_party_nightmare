@@ -14,7 +14,7 @@ dir_to_store = r"./dynamic_model/paramsets/effect_of_group_size/"
 make_dir(dir_to_store)
 
 
-group_sizes = [5, 10, 30, 50, 75, 100, 200]
+group_sizes = [5, 10, 30, 50, 75, 100]
 
 df_arena_size = pd.read_csv("./dynamic_model/paramsets/arena_sizes_with_group_size.csv")
 

@@ -80,7 +80,7 @@ if __name__ == "__main__":
     PARAM_DIR = "./dynamic_model/paramsets/effect_of_group_size/"
 
     N_RUNS = 20  # Number of iterations per parameter set
-    DATA_STORAGE_DIR = r"./group_experiment_null_1/"  # Base output directory
+    DATA_STORAGE_DIR = r"./group_experiment_non_null_2_3/"  # Base output directory
     # MAX_WORKERS = 4  # Limit number of parallel processes
 
     # Run parallel processing

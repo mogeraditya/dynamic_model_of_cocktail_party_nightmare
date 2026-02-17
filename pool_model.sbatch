@@ -30,3 +30,6 @@ srun python3 ./JammingExperiment/Scripts/ProcessingScripts/simulation_multiple_p
 # rsync -av -e 'ssh -J amoger@gate1.mpcdf.mpg.de' amoger@viper.mpcdf.mpg.de:/u/amoger/dynamic_model_of_cocktail_party_nightmare/sensitivity_analysis /home/adityamoger/Documents/csv_storage --include="*/" --include="*.csv" --exclude="*"
 # rsync -av -e 'ssh -J amoger@gate1.mpcdf.mpg.de' amoger@viper.mpcdf.mpg.de:/u/amoger/dynamic_model_of_cocktail_party_nightmare/ /home/adityamoger/Documents/out_err_file_storage --include="*/" --include="*.out" --include="*.err" --exclude="*"
 # rsync -av -e 'ssh -J amoger@gate1.mpcdf.mpg.de' amoger@viper.mpcdf.mpg.de:/u/amoger/dynamic_model_of_cocktail_party_nightmare/ /home/adityamoger/Documents/data_storage_group_experiment_out_err_files --include="*/" --include="*.out" --include="*.err" --exclude="*"
+# # 
+# rsync -av -e 'ssh -J amoger@gate1.mpcdf.mpg.de' amoger@viper.mpcdf.mpg.de:/u/amoger/dynamic_model_of_cocktail_party_nightmare/group_experiment_positive_control_1 /home/adityamoger/Documents/data_storage_group_experiment_positive_control_1 --include="*/"
+# rsync -av -e 'ssh -J amoger@gate1.mpcdf.mpg.de' amoger@viper.mpcdf.mpg.de:/u/amoger/dynamic_model_of_cocktail_party_nightmare/group_experiment_non_null_1 /home/adityamoger/Documents/data_storage_group_experiment_non_null_1 --include="*/"
