@@ -100,3 +100,5 @@ dict_1, dict_2 = read_data_per_simulation(
 
 # dir = r"/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/test_storage_multiple_echoes/*"
 # print(glob.glob(dir))
+
+# berry was heeeeere
