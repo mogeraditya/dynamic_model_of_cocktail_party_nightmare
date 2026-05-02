@@ -17,10 +17,10 @@ from agents.class_bats import Bat
 from agents.class_obstacles import Obstacle
 from agents.class_sounds import DirectSound
 from agents.make_walls import make_walls
-
-# from plotting.single_bat_plotter import visualize
-from supporting_files.utilities import (  # load_parameters,
+from plotting.single_bat_plotter import visualize
+from supporting_files.utilities import (
     creation_time_calculation,
+    load_parameters,
     read_temporal_masking_fn,
 )
 from supporting_files.vectors import Vector
@@ -158,6 +158,13 @@ class Simulation:
             print("DATA SAVED")
 
     def convert_necessary_information_into_dict(self):
+        """Handles information storage of simulation.
+        Every iteration a subset of the simulation data
+        needs to be stored, for later processing.
+
+        Returns:
+            dictionary : dictionary containing current simulation data
+        """
         dictionary_w_information = {
             "time": np.round(self.time_elapsed, self.rounding_based_on_time_step),
             "bat_ipi_counters": [len(bat.emit_times) for bat in self.bats],
@@ -372,19 +379,19 @@ class Simulation:
         return data
 
 
-# if __name__ == "__main__":
-#     OUTPUT_DIR = r"./MISC/testing_groups/um"
-#     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_group.json"
-#     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
-#     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
-#     sim.run()
+if __name__ == "__main__":
+    OUTPUT_DIR = r"./MISC/testing_groups/um"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_group.json"
+    PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
+    sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
+    sim.run()
 
-#     unique_id = uuid.uuid4()
-#     visualize(
-#         output_dir=OUTPUT_DIR,
-#         save_animation=True,
-#         unique_id=unique_id,
-#         resolution=30,
-#         show_sounds=False,
-#     )
-#     print(unique_id)
+    unique_id = uuid.uuid4()
+    visualize(
+        output_dir=OUTPUT_DIR,
+        save_animation=True,
+        unique_id=unique_id,
+        resolution=30,
+        show_sounds=False,
+    )
+    print(unique_id)
