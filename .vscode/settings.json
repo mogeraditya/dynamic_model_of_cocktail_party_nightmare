@@ -7,5 +7,11 @@
     },
   },
   "pylint.args": ["--disable=C0115", "--disable=E0401", "--disable=C0413"],
-  "isort.args":["--profile", "black"],
+  "isort.args": [
+    "--profile",
+    "black"
+  ],
+  "python-envs.defaultEnvManager": "ms-python.python:conda",
+  "python-envs.defaultPackageManager": "ms-python.python:conda",
+  "r.lsp.promptToInstall": false,
 }

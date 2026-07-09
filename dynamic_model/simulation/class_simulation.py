@@ -380,8 +380,8 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/testing_single/thesis_video"
-    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_single.json"
+    OUTPUT_DIR = r"./MISC/testing_groups/um_glup"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_group.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()

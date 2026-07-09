@@ -266,7 +266,9 @@ class TestBatObject(unittest.TestCase):
         self.bat.emitted_sounds = [{"time": 1.0, "data": "test"}]
         self.bat.time_since_last_cleanup = 0
 
-        self.bat.cleanup_sounds(current_time)
+        self.bat.cleanup_sounds(
+            current_time=current_time, heard_sounds=self.bat.received_sounds
+        )
 
         # check that lists were cleared
         self.assertTrue(len(self.bat.received_sounds) == 0)
