@@ -31,7 +31,21 @@ from supporting_files.utilities import load_parameters
 
 plt.style.use("dark_background")
 sys.path.append("./dynamic_model")
-plt.rcParams["animation.ffmpeg_path"] = "/usr/bin/ffmpeg"
+plt.rcParams["animation.ffmpeg_path"] = (
+    r"C:\Users\adity\AppData\Local\Microsoft\WinGet\Links\ffmpeg.exe"
+)
+# plt.rcParams["axes.grid"] = True
+# plt.rcParams["grid.color"] = "black"
+# plt.rcParams["grid.linestyle"] = "--"
+# plt.rcParams["grid.linewidth"] = 0.8
+# plt.rcParams["axes.labelcolor"] = "black"
+# plt.rcParams["axes.titlesize"] = 12
+# plt.rcParams["axes.labelsize"] = 10
+# plt.rcParams["xtick.color"] = "black"
+# plt.rcParams["ytick.color"] = "black"
+# plt.rcParams["xtick.labelsize"] = 10
+# plt.rcParams["ytick.labelsize"] = 10
+# plt.rcParams["text.color"] = "black"
 
 
 def stitch_together_history_lists(history_output_dir):
@@ -186,7 +200,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
         (trajectory_line,) = ax[0].plot(
             [],
             [],
-            color=cm(i / num_colors),
+            color="blue",  # cm(i / num_colors),
             linestyle="--",
             alpha=1,
             linewidth=1.5,
@@ -197,7 +211,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
         bat_circle = Circle(
             (bat.position.x, bat.position.y),
             bat.radius,
-            color=cm(i / num_colors),
+            color="blue",  # cm(i / num_colors),
             label=f"Bat {bat.id}",
         )
         ax[0].add_patch(bat_circle)
@@ -211,7 +225,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
             0,
             0,  # Initial direction (0, 0)
             width=0.3,  # adjust arrow width as needed here
-            color=cm(i / num_colors),
+            color="blue",  # cm(i / num_colors),
             alpha=0.8,
         )
 
@@ -222,7 +236,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
             0,  # Initial direction (0, 0)
             width=0.3,  # adjust arrow width as needed here
             color="white",
-            ec=cm(i / num_colors),
+            ec="blue",  # cm(i / num_colors),
             alpha=0.8,
         )
 
@@ -447,6 +461,8 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
                     ax[0].add_patch(wedge)
                     sound_artists.append(wedge)
 
+        plt.savefig(output_dir + f"/frames/frame_{i}.svg", transparent=True)
+
         return (
             bat_markers
             + direction_arrows
@@ -484,7 +500,7 @@ if __name__ == "__main__":
     OUTPUT_DIR = (
         # r"./chain_experiment/3_of_5_position_0/"
         # "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/MISC/consistency_of_calls_movement_rule_data/presence_revamp_10"
-        "./MISC/testing_groups/3bats_2"
+        r"./MISC/testing_single/thesis_video_sensitivity/"
     )
-    SAVE_ANIMATION = False  # OUTPUT_DIR
+    SAVE_ANIMATION = OUTPUT_DIR
     visualize(OUTPUT_DIR, SAVE_ANIMATION, unique_id=0, resolution=30, show_sounds=False)

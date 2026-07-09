@@ -47,7 +47,7 @@ class Simulation:
             Bat(self.parameters_df, self.output_dir)
             for _ in range(int(self.parameters_df["NUM_BATS"]))
         ]
-
+        self.bats[0].allocentric_axis_y = Vector(0, 1)
         obstacle_position = "random"
         obstacle_radius = self.parameters_df["OBSTACLE_RADIUS"]
         self.obstacles = [
@@ -380,8 +380,8 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/testing_groups/um"
-    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_group.json"
+    OUTPUT_DIR = r"./MISC/testing_single/thesis_video"
+    PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_single.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
     sim.run()
