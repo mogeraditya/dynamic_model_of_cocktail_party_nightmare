@@ -24,45 +24,6 @@ def convert_matrix_to_one_hot(matrix):
 #         if is_element_in_list2:
 #             return False
 #     return True
-
-
-def given_matrix_shortlist_response_cells(matrix, threshold_for_activation):
-    num_rows, num_columns = matrix.shape
-    short_list_of_cells = []
-    short_listed_thresholds = []
-    for i in range(num_rows):
-        for j in range(num_columns):
-            if matrix[i, j] >= threshold_for_activation:
-                short_list_of_cells.append([i, j])
-                short_listed_thresholds.append(matrix[i, j])
-
-    short_list_of_cells = np.array(short_list_of_cells)
-    short_listed_thresholds = np.array(short_listed_thresholds)
-
-    find_all_elements_with_min_row_index = []
-    find_all_thresholds_with_min_row_index = []
-
-    if len(short_list_of_cells) == 0:
-        find_all_thresholds_with_min_row_index.append([np.nan, np.nan])
-        find_all_elements_with_min_row_index.append([np.nan, np.nan])
-    else:
-
-        np.random.shuffle(short_list_of_cells)
-        minimum_row_index = np.min(short_list_of_cells[:, 0])
-
-        for i, matrix_index in enumerate(short_list_of_cells):
-            if matrix_index[0] == minimum_row_index:
-                find_all_elements_with_min_row_index.append(matrix_index)
-                find_all_thresholds_with_min_row_index.append(
-                    short_listed_thresholds[i]
-                )
-
-    return (
-        np.array(find_all_elements_with_min_row_index),
-        find_all_thresholds_with_min_row_index,
-    )
-
-
 def given_parameters_df_return_grid_matrix_zeros(parameters_df):
     radial_resolution = parameters_df["BAT_RADIAL_RESOLUTION"]
     angular_resolution = np.radians(parameters_df["BAT_ANGULAR_RESOLUTION"])
@@ -130,11 +91,49 @@ def convert_detected_sounds_into_grids(
             grid_column_index = 0
 
         store_grid[grid_row_index, grid_column_index] += 1
+
     if convert_grid_to_one_hot:
         store_grid = convert_matrix_to_one_hot(store_grid).copy()
     else:
         store_grid = store_grid / np.max(store_grid)
     return store_grid, spatial_grid_r, spatial_grid_theta
+
+
+def given_matrix_shortlist_response_cells(matrix, threshold_for_activation):
+    num_rows, num_columns = matrix.shape
+    short_list_of_cells = []
+    short_listed_thresholds = []
+    for i in range(num_rows):
+        for j in range(num_columns):
+            if matrix[i, j] >= threshold_for_activation:
+                short_list_of_cells.append([i, j])
+                short_listed_thresholds.append(matrix[i, j])
+
+    short_list_of_cells = np.array(short_list_of_cells)
+    short_listed_thresholds = np.array(short_listed_thresholds)
+
+    find_all_elements_with_min_row_index = []
+    find_all_thresholds_with_min_row_index = []
+
+    if len(short_list_of_cells) == 0:
+        find_all_thresholds_with_min_row_index.append([np.nan, np.nan])
+        find_all_elements_with_min_row_index.append([np.nan, np.nan])
+    else:
+
+        np.random.shuffle(short_list_of_cells)
+        minimum_row_index = np.min(short_list_of_cells[:, 0])
+
+        for i, matrix_index in enumerate(short_list_of_cells):
+            if matrix_index[0] == minimum_row_index:
+                find_all_elements_with_min_row_index.append(matrix_index)
+                find_all_thresholds_with_min_row_index.append(
+                    short_listed_thresholds[i]
+                )
+
+    return (
+        np.array(find_all_elements_with_min_row_index),
+        find_all_thresholds_with_min_row_index,
+    )
 
 
 def given_time_and_angle_return_direction(

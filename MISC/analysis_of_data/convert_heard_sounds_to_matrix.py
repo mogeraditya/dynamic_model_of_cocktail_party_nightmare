@@ -61,7 +61,7 @@ def generate_matrix_array(directory, focal_bat, parameters_df):
 
     output_dir = directory + f"/{focal_bat}/"
     received_sounds_sorted_by_time, time_of_call_emissions = (
-        read_data_per_simulation_per_bat(output_dir, "ipi_matrix")
+        read_data_per_simulation_per_bat(output_dir, "ipi_matrix_for_consistency")
     )
     # print(received_sounds_sorted_by_time)
     if len(received_sounds_sorted_by_time) == 0:

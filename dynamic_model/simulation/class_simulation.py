@@ -17,7 +17,7 @@ from agents.class_bats import Bat
 from agents.class_obstacles import Obstacle
 from agents.class_sounds import DirectSound
 from agents.make_walls import make_walls
-from plotting.single_bat_plotter import visualize
+from plotting.sim_plotter_single_bat_acoustic_field import visualize
 from supporting_files.utilities import (
     creation_time_calculation,
     load_parameters,
@@ -196,8 +196,13 @@ class Simulation:
                 (bat.next_direction.x, bat.next_direction.y) for bat in self.bats
             ],
             "response_type": [bat.response_type for bat in self.bats],
-            "bat_ipi_matrix": [bat.ipi_matrix for bat in self.bats],
+            "bat_ipi_matrix_for_consistency": [
+                bat.ipi_matrix_for_consistency for bat in self.bats
+            ],
             "bat_sum_matrix": [bat.memory_window_sum_matrix for bat in self.bats],
+            "bat_ipi_matrix_for_sensory_volume": [
+                bat.ipi_matrix_for_sensory_volume for bat in self.bats
+            ],
         }
         return dictionary_w_information
 
@@ -380,7 +385,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = r"./MISC/testing_groups/um_glup"
+    OUTPUT_DIR = r"./MISC/sensory_volume_trials/5_bats_7"
     PARAMETER_FILE_DIR = r"./dynamic_model/paramsets/test_group.json"
     PARAMETER_DF = load_parameters(PARAMETER_FILE_DIR)
     sim = Simulation(PARAMETER_DF, OUTPUT_DIR)
@@ -393,5 +398,6 @@ if __name__ == "__main__":
         unique_id=unique_id,
         resolution=30,
         show_sounds=False,
+        focal_bat=0,
     )
     print(unique_id)

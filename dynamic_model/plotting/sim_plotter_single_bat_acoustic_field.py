@@ -27,6 +27,9 @@ from snr_implementation import parse_sounds, serialize_sound_info
 from supporting_files.supporting_functions_for_consistency import (
     given_parameters_df_return_grid_matrix_zeros,
 )
+from supporting_files.supporting_functions_for_loudest_sound import (
+    generate_empty_matrix,
+)
 from supporting_files.utilities import load_parameters
 
 plt.style.use("dark_background")
@@ -106,6 +109,48 @@ def plot_grid_matrix_into_radial_time_series(
     return im
 
 
+def increase_sensory_volume_resolution_for_plotting(
+    sensory_volume_matrix, spatial_grid_theta, resolution
+):
+    # print(sensory_volume_matrix)
+    sensory_volume_array = sensory_volume_matrix
+    # print(sensory_volume_array)
+    theta_space = spatial_grid_theta[1] - spatial_grid_theta[0]
+    theta_for_increased_resolution = theta_space / resolution
+
+    spatial_grid_theta_finer = np.arange(
+        -np.pi, np.pi - theta_for_increased_resolution, theta_for_increased_resolution
+    )
+    sensory_volume_array_finer = np.zeros(shape=(len(spatial_grid_theta_finer)))
+
+    for i, theta in enumerate(spatial_grid_theta_finer):
+        index_in_old_data_array = i // resolution
+        # print(index_in_old_data_array, i, spatial_grid_theta_finer[i])
+        sensory_volume_array_finer[i] = sensory_volume_array[index_in_old_data_array]
+
+    return sensory_volume_array_finer, spatial_grid_theta_finer
+
+
+def plot_sensory_volume(sensory_volume_array, spatial_grid_theta, fig_and_ax):
+    fig, axs = fig_and_ax
+
+    # spatial_grid_theta_shifted = spatial_grid_theta + theta_space / 2
+
+    line = axs.plot(
+        spatial_grid_theta,
+        sensory_volume_array,
+        color="yellow",
+        linewidth=2,
+        label="Sound Intensity (dB)",
+    )
+    fill = axs.fill(spatial_grid_theta, sensory_volume_array, alpha=0.3, color="yellow")
+
+    axs.set_thetagrids(range(0, 360, int(360 / 12)))
+    axs.set_theta_zero_location("N")
+    axs.set_rlim(0, 130)
+    return line, fill
+
+
 def setup_visualization(parameters_df, bats, obstacles, jammers):
     """Sets up the figure for animation.
 
@@ -115,19 +160,24 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
         obstacles (list): obstacles objects that the simualtion was intiated with
 
     Returns:
-        list: contains ax[0]es, figure, markers and artists to build the animation on.
+        list: contains ax[0,1]es, figure, markers and artists to build the animation on.
     """
 
-    fig, ax = plt.subplots(figsize=(20, 10), nrows=1, ncols=3)
-    ax[1].remove()
-    ax[2].remove()
-    ax[1] = fig.add_subplot(132, projection="polar")
-    ax[2] = fig.add_subplot(133, projection="polar")
+    fig, ax = plt.subplots(figsize=(16, 9), nrows=2, ncols=3)
+    ax[0, 0].remove()
+    ax[0, 2].remove()
+    ax[1, 0].remove()
+    ax[1, 1].remove()
+    ax[1, 2].remove()
+    ax[1, 0] = fig.add_subplot(234, projection="polar")
+    ax[1, 1] = fig.add_subplot(235, projection="polar")
+    ax[1, 2] = fig.add_subplot(236, projection="polar")
+
     print(parameters_df["ARENA_WIDTH"])
-    ax[0].set_xlim(0, parameters_df["ARENA_WIDTH"])
-    ax[0].set_ylim(0, parameters_df["ARENA_LENGTH"])
-    ax[0].set_aspect("equal")
-    ax[0].set_title("Bat Echolocation with Direct Calls and Echoes")
+    ax[0, 1].set_xlim(0, parameters_df["ARENA_WIDTH"])
+    ax[0, 1].set_ylim(0, parameters_df["ARENA_LENGTH"])
+    ax[0, 1].set_aspect("equal")
+    ax[0, 1].set_title("Bat Echolocation with Direct Calls and Echoes")
 
     boundary = Rectangle(
         (0, 0),
@@ -137,7 +187,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
         linestyle="--",
         color="gray",
     )
-    ax[0].add_patch(boundary)
+    ax[0, 1].add_patch(boundary)
 
     obstacle_patches = []
     for obstacle in obstacles:
@@ -147,7 +197,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
             color="red",
             alpha=0.5,
         )
-        ax[0].add_patch(obs_circle)
+        ax[0, 1].add_patch(obs_circle)
         obstacle_patches.append(obs_circle)
 
     jammer_patches = []
@@ -167,8 +217,8 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
             color="red",
             alpha=0.5,
         )
-        ax[0].add_patch(jam_circle)
-        ax[0].add_patch(direction_arrow)
+        ax[0, 1].add_patch(jam_circle)
+        ax[0, 1].add_patch(direction_arrow)
         jammer_patches.append(jam_circle)
 
     bat_markers = []
@@ -183,7 +233,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
     for i, bat in enumerate(bats):
 
         # trajectory line place holders
-        (trajectory_line,) = ax[0].plot(
+        (trajectory_line,) = ax[0, 1].plot(
             [],
             [],
             color=cm(i / num_colors),
@@ -200,7 +250,7 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
             color=cm(i / num_colors),
             label=f"Bat {bat.id}",
         )
-        ax[0].add_patch(bat_circle)
+        ax[0, 1].add_patch(bat_circle)
 
         bat_markers.append(bat_circle)
 
@@ -226,9 +276,9 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
             alpha=0.8,
         )
 
-        ax[0].add_patch(direction_arrow)
+        ax[0, 1].add_patch(direction_arrow)
         direction_arrows.append(direction_arrow)
-        ax[0].add_patch(next_direction_arrow)
+        ax[0, 1].add_patch(next_direction_arrow)
         next_direction_arrows.append(next_direction_arrow)
 
     return [
@@ -243,7 +293,9 @@ def setup_visualization(parameters_df, bats, obstacles, jammers):
     ]
 
 
-def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
+def visualize(
+    output_dir, save_animation, unique_id, resolution, show_sounds, focal_bat
+):
     """Saves animation as an mp4 file and then also plays it.
 
     Args:
@@ -267,7 +319,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
 
     trajectory_history = [[] for _ in range(len(bat_markers))]
 
-    focal_bat = 0
+    # focal_bat = 0
     grid_data_time_series = [
         frame["bat_ipi_matrix_for_consistency"] for frame in history
     ]
@@ -275,6 +327,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
     grid_data_time_series_sum = [frame["bat_sum_matrix"] for frame in history]
     rows, columns = given_parameters_df_return_grid_matrix_zeros(parameters_df)[1:3]
     spatial_grid_r = rows
+    spatial_grid_theta = columns
 
     new_angular_resolution = convert_matrix_for_plotting_nicer(
         grid_data_time_series[0], rows, columns, 10, focal_bat
@@ -296,17 +349,33 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
         -np.pi + new_angular_resolution / 2, np.pi, new_angular_resolution
     )
 
-    ax[1].set_title("sound activations in each ipi")
-    ax[2].set_title("responses in 5 ipi")
+    # inserting code for sensory volume
 
-    ax[1].tick_params("y", rotation=30)
-    ax[2].tick_params("y", rotation=30)
+    sensory_volume_data_time_series = [
+        frame["bat_ipi_matrix_for_sensory_volume"][focal_bat] for frame in history
+    ]
+    spatial_grid_theta_finer = increase_sensory_volume_resolution_for_plotting(
+        sensory_volume_data_time_series[0], spatial_grid_theta, 10
+    )[1]
+    # print(sensory_volume_data_time_series)
+    sensory_volume_data_time_series = [
+        increase_sensory_volume_resolution_for_plotting(i, spatial_grid_theta, 10)[0]
+        for i in sensory_volume_data_time_series
+    ]
+
+    ax[1, 0].set_title("sound activations in each ipi")
+    ax[1, 1].set_title("responses in 5 ipi")
+    ax[1, 2].set_title("sensory_volume")
+
+    ax[1, 0].tick_params("y", rotation=30)
+    ax[1, 1].tick_params("y", rotation=30)
+    ax[1, 2].tick_params("y", rotation=30)
 
     im0 = plot_grid_matrix_into_radial_time_series(
         new_grid_data_time_series[0, 0],
         spatial_grid_r,
         new_spatial_grid_theta,
-        fig_and_ax=(fig, ax[1]),
+        fig_and_ax=(fig, ax[1, 0]),
         cmin=0,
         cmax=1,
     )
@@ -314,9 +383,15 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
         new_grid_data_time_series_sum[0, 0],
         spatial_grid_r,
         new_spatial_grid_theta,
-        fig_and_ax=(fig, ax[2]),
+        fig_and_ax=(fig, ax[1, 1]),
         cmin=0,
         cmax=5,
+    )
+    # print(sensory_volume_data_time_series[0])
+    im2, fill = plot_sensory_volume(
+        sensory_volume_data_time_series[0],
+        spatial_grid_theta_finer,
+        fig_and_ax=(fig, ax[1, 2]),
     )
 
     ipi_counter_plot = plt.figtext(
@@ -376,7 +451,8 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
                     x=x, y=y, dx=dx * scale, dy=dy * scale
                 )
                 next_direction_arrows[j].set(fc=fcolor)
-            trajectory_history[j].append((x, y))
+            if j == focal_bat:
+                trajectory_history[j].append((x, y))
 
             # Keep only the last 400 positions
             if len(trajectory_history[j]) > 100:
@@ -395,7 +471,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
 
         sound_artists.clear()
         detection_artists.clear()
-        ax[0].set_title(f"time step: {frame["time"]:.5f}")
+        ax[0, 1].set_title(f"time step: {frame["time"]:.5f}")
 
         ipi_counter_plot.set_text(
             f"interpulse interval number : {frame["bat_ipi_counters"][focal_bat]}"
@@ -404,6 +480,15 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
 
         im0.set_array(new_grid_data_time_series[i, 0].T)
         im1.set_array(new_grid_data_time_series_sum[i, 0].T)
+        # print(sensory_volume_data_time_series[i])
+        # print(f"i frame number ig {i}")
+        im2[0].set_data(spatial_grid_theta_finer, sensory_volume_data_time_series[i])
+        fill[0].set_xy(
+            np.column_stack(
+                [spatial_grid_theta_finer, sensory_volume_data_time_series[i]]
+            )
+        )
+
         if show_sounds:
             for sound in frame["sound_objects"]:
                 if not sound["status"]:
@@ -446,7 +531,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
                         linestyle=linestyle,
                         hatch=hatching_of_disk,
                     )
-                    ax[0].add_patch(wedge)
+                    ax[0, 1].add_patch(wedge)
                     sound_artists.append(wedge)
 
         return (
@@ -467,7 +552,7 @@ def visualize(output_dir, save_animation, unique_id, resolution, show_sounds):
         interval=parameters_df["FRAME_RATE"] * 0.00001,
     )
     print(len(history), len(grid_data_time_series))
-    handles, labels = ax[0].get_legend_handles_labels()
+    handles, labels = ax[0, 1].get_legend_handles_labels()
     print(labels)
 
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), handles=handles)
@@ -486,7 +571,14 @@ if __name__ == "__main__":
     OUTPUT_DIR = (
         # r"./chain_experiment/3_of_5_position_0/"
         # "/home/adityamoger/Documents/GitHub/dynamic_model_of_cocktail_party_nightmare/MISC/consistency_of_calls_movement_rule_data/presence_revamp_10"
-        "./MISC/testing_groups/3bats_2"
+        r"./MISC/sensory_volume_trials/20_bats_3"
     )
-    SAVE_ANIMATION = False  # OUTPUT_DIR
-    visualize(OUTPUT_DIR, SAVE_ANIMATION, unique_id=0, resolution=30, show_sounds=False)
+    SAVE_ANIMATION = OUTPUT_DIR
+    visualize(
+        OUTPUT_DIR,
+        SAVE_ANIMATION,
+        unique_id=0,
+        resolution=30,
+        show_sounds=False,
+        focal_bat=0,
+    )
